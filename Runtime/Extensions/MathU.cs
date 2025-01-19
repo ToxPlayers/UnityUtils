@@ -244,7 +244,12 @@ static public class MathU
     [MethodImpl(INLINED)]
     static public void SetZero(this ref Vector3 v) { v.x = 0f; v.y = 0f; v.z = 0f; }
     [MethodImpl(INLINED)]
-    static public bool IsZero(this ref Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f; 
+    static public bool IsZero(this ref Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f;
+    [MethodImpl(INLINED)]
+    static public void SetZero(this ref Vector2 v) { v.x = 0f; v.y = 0f; } 
+    [MethodImpl(INLINED)]
+    static public bool IsZero(this ref Vector2 v) => v.x == 0f && v.y == 0f; 
+
     [MethodImpl(INLINED)]
     static public bool IsNanOrInifinity(this Vector3 v)
         => float.IsNaN(v.x) || float.IsInfinity(v.x)
