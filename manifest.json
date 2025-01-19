@@ -1,0 +1,5 @@
+{
+    "dependencies": {
+        "com.codewriter.triinspector": "https://github.com/codewriter-packages/Tri-Inspector.git"
+    }
+}
