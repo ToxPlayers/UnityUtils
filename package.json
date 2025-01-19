@@ -6,5 +6,6 @@
   "unity": "2020.3",
   "author": "Tox (https://github.com/ToxPlayers/UnityUtils)",
   "homepage": "https://github.com/ToxPlayers/UnityUtils",
- 
+  "dependencies": { 
+  }
 }
