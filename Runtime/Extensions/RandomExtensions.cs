@@ -91,6 +91,16 @@ public static class RandomExtension
         return list[GetRandomIndex(list)];
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T PopRandom<T>(this IList<T> list)
+    {
+        if (list == null || list.Count == 0)
+            throw new Exception("list is empty or null");
+        var rndIndex = GetRandomIndex(list);
+        var item = list[rndIndex];
+        list.RemoveAt(rndIndex);
+        return item;
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetRandomIndex<T>(this IList<T> list)
     {
         return UnityEngine.Random.Range(0, list.Count - 1);

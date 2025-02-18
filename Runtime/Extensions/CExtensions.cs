@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic; 
 using System.Runtime.CompilerServices; 
 using System.Collections;
+using System.Text;
+using System.Text.RegularExpressions;
 
 static public class CExtensions
 {
@@ -10,8 +12,37 @@ static public class CExtensions
 	#region BitFlags
 
 	[MethodImpl(INLINE)]
-	public static uint UncheckedUINT(this int v) => unchecked((uint)v);
-
+	static public uint UncheckedUINT(this int v) => unchecked((uint)v); 
+	
+	static readonly HashSet<char> _nicefyChars = new HashSet<char> { ' ', '_', };
+	static public string Nicefy(string name)
+	{
+		StringBuilder str = new StringBuilder();
+		bool _prevIsNumber = false;
+	    for (int i = 0; i < name.Length; i++)
+	    {
+		    var character = name[i];
+		    var curIsNumber = Char.IsNumber(character);
+		    if (character is ' ' or '_' || (curIsNumber && !_prevIsNumber) )
+		    {
+			    str.Append(" ");
+			    Char.islo
+		    }
+		    _prevIsNumber = 
+		    str.Append(_nicefyChars)
+	    }
+	    
+        name = name.Replace(" ", "");
+        name = name.Replace("-", "");
+        name = name.Replace(".", "");
+        name = name.Replace("(", "");
+        name = name.Replace(")", "");
+        name = name.Replace("/", "");
+        while (name.Contains("  "))
+	        name = name.Replace("  ", " ");
+        return name.TrimEnd(" ");
+    }
+    
     [MethodImpl(INLINE)]
     public static int UncheckedINT(this uint v) => unchecked((int)v);
     [MethodImpl(INLINE)] 
