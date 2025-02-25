@@ -1,3 +1,14 @@
+using UnityEngine;
+using System;
+using System.Collections;
+
+
+
+#if UNITY_EDITOR
+using System.Reflection;
+using UnityEditor;
+using System.Linq;
+#endif
 public class SubclassPicker : PropertyAttribute { }
 
 #if UNITY_EDITOR
