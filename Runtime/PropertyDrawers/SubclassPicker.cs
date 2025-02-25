@@ -19,12 +19,7 @@ public class SubclassPickerDrawer : PropertyDrawer
     {
         return EditorGUI.GetPropertyHeight(property);
     }
-
-    IEnumerable GetClasses(Type baseType)
-    {
-        return Assembly.GetAssembly(baseType).GetTypes().Where(t => t.IsClass && !t.IsAbstract && baseType.IsAssignableFrom(t));
-    }
-
+     
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         Type t = fieldInfo.FieldType;
@@ -46,13 +41,15 @@ public class SubclassPickerDrawer : PropertyDrawer
             });
 
             // inherited types
-            foreach (Type type in GetClasses(t))
+            var types = TypeCache.GetTypesDerivedFrom(t);
+            foreach (Type type in types)
             {
-                menu.AddItem(new GUIContent(type.Name), typeName == type.Name, () =>
-                {
-                    property.managedReferenceValue = type.GetConstructor(Type.EmptyTypes).Invoke(null);
-                    property.serializedObject.ApplyModifiedProperties();
-                });
+                if(!type.IsAbstract)
+                    menu.AddItem(new GUIContent(type.Name), typeName == type.Name, () =>
+                    {
+                        property.managedReferenceValue = type.GetConstructor(Type.EmptyTypes).Invoke(null);
+                        property.serializedObject.ApplyModifiedProperties();
+                    });
             }
             menu.ShowAsContext();
         }
