@@ -47,7 +47,19 @@ static public class UnityExtensions
         result.SetPixels(rpixels, 0);
         result.Apply();
         return result;
-    } 
+    }
+    [MethodImpl(INLINE)]
+    static public float EularX(this Transform tf) => tf.eulerAngles.x;
+    [MethodImpl(INLINE)]
+    static public float EularY(this Transform tf) => tf.eulerAngles.y;
+    [MethodImpl(INLINE)]
+    static public float EularZ(this Transform tf) => tf.eulerAngles.z;
+    [MethodImpl(INLINE)]
+    static public float PosX(this Transform tf) => tf.position.x;
+    [MethodImpl(INLINE)]
+    static public float PosY(this Transform tf) => tf.position.y;
+    [MethodImpl(INLINE)]
+    static public float PosZ(this Transform tf) => tf.position.z;
     [MethodImpl(INLINE)]
     static public Transform AddChild(this Component comp, string name = "GameObject")
     {
@@ -190,7 +202,7 @@ static public class UnityExtensions
     static public Vector3 DirectionTo(this Vector3 start, Vector3 end)
     {
         return (end - start).normalized;
-    }
+    } 
     [MethodImpl(INLINE)]
     static public Quaternion DirectionToAsRotation(this Vector3 start, Vector3 end)
     {
