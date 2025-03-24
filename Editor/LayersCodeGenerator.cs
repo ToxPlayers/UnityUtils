@@ -1,15 +1,37 @@
 #if UNITY_EDITOR 
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
 [InitializeOnLoad]
-static public class LayersCodeGenerator  
-{ 
-    static private string LayersFileName = @"Layers.cs";
+static public class LayersCodeGenerator
+{
+    static LayersCodeGenerator () { }
+    static private readonly string LayersFileName = @"Layers.cs";
+
+    static readonly string NameReplacer = "<name>";
+    static readonly string ValueReplacer = "<value>";
+    static readonly string ClassTemplate =
+@"static public class Layers
+{
+    static public int Combine(params int[] masks)
+    {
+        var mask = 0;
+        foreach (var m in masks)
+            mask |= m;
+        return mask;
+    }
+}
+";
+    static readonly string LayerIndexTemplate =
+$@"    
+    public const int {NameReplacer} = {ValueReplacer};
+    public const int {NameReplacer}Mask = 1 << {ValueReplacer};
+";
+
 
     [MenuItem("Tools/Generate Layers Constants")]
     private static void Generate()
@@ -36,27 +58,27 @@ static public class LayersCodeGenerator
     static string GetFilePath()
     {
         var assets = AssetDatabase.FindAssets("t:script Layers");
-        foreach(var asset in assets)
+        foreach (var asset in assets)
         {
-            var path = AssetDatabase.GUIDToAssetPath(asset); 
-            if ( Path.GetFileName(path) == "Layers.cs")
+            var path = AssetDatabase.GUIDToAssetPath(asset);
+            if (Path.GetFileName(path) == LayersFileName)
                 return path;
         }
-        return null;
+        return Application.dataPath + $"/{LayersFileName}";
     }
 
 
     static string GenerateCode()
-    { 
+    {
         var fieldsCode = "";
         List<string> layersAdded = new List<string>();
         for (int i = 0; i < 32; i++)
         {
-           var layerName = InternalEditorUtility.GetLayerName(i); 
-           if( ! string.IsNullOrEmpty(layerName) )
-           {
+            var layerName = InternalEditorUtility.GetLayerName(i);
+            if (!string.IsNullOrEmpty(layerName))
+            {
                 layerName = layerName.Replace(" ", "_");
-                if(layersAdded.Contains(layerName) )
+                if (layersAdded.Contains(layerName))
                 {
                     Debug.LogError($"Multiple layers with the same name. ({layerName})");
                     continue;
@@ -66,25 +88,11 @@ static public class LayersCodeGenerator
                 var layerCode = LayerIndexTemplate
                  .Replace(NameReplacer, layerName).Replace(ValueReplacer, i.ToString());
                 fieldsCode += layerCode;
-           }
-        }
-
+            }
+        } 
         var index = ClassTemplate.IndexOf("}");
         return ClassTemplate.Insert(index, fieldsCode);
-    }
+    } 
 
-    static string NameReplacer = "<name>";
-    static string ValueReplacer = "<value>";
-    static string ClassTemplate =
-@"static public class Layers
-{}
-";
-    static string LayerIndexTemplate =
-$@"    
-    public const int {NameReplacer} = {ValueReplacer};
-    public const int {NameReplacer}Mask = 1 << {ValueReplacer};
-";
-
-     
 }
 #endif
