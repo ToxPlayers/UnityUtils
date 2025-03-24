@@ -33,9 +33,8 @@ $@"
         {
             filePath = Application.dataPath + $"/{LayersFileName}";
             File.WriteAllText(filePath, "");
-        }
-
-        var content = File.ReadAllText(filePath);
+        } 
+        var content = File.Exists(filePath) ? File.ReadAllText(filePath) : null;
         var genContent = GenerateCode();
         if (content != genContent)
         {
