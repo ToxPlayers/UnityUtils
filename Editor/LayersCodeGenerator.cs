@@ -16,15 +16,7 @@ static public class LayersCodeGenerator
     static readonly string ValueReplacer = "<value>";
     static readonly string ClassTemplate =
 @"static public class Layers
-{
-    static public int Combine(params int[] masks)
-    {
-        var mask = 0;
-        foreach (var m in masks)
-            mask |= m;
-        return mask;
-    }
-}
+{}
 ";
     static readonly string LayerIndexTemplate =
 $@"    
