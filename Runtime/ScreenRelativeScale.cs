@@ -23,12 +23,12 @@ public class ScreenRelativeScale : MonoBehaviour
     public bool LookAtCam;
     public float ScreenConformExtentsOffset;
     private void OnEnable()
-    {  
-        Camera.onPreCull += Rescale;
+    {
+        RenderPipelineManager.beginCameraRendering += Rescale;
     }
     private void OnDisable()
     {
-        Camera.onPreCull -= Rescale; 
+        RenderPipelineManager.beginCameraRendering -= Rescale;
     }
 
 #if UNITY_EDITOR
@@ -42,7 +42,7 @@ public class ScreenRelativeScale : MonoBehaviour
     }
 #endif
 
-    void Rescale(Camera cam)
+    void Rescale(ScriptableRenderContext _, Camera cam)
     {
 #if UNITY_EDITOR
         if (Application.isPlaying && IsEditorCamera(cam))
@@ -71,8 +71,6 @@ public class ScreenRelativeScale : MonoBehaviour
         scale = Mathf.Clamp( scale , _minScaling, _maxScaling);
         var size = Vector3.one * scale;
         transform.localScale = size;
-
-        Physics.SyncTransforms();
     }
 
 }
