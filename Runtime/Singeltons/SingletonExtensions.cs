@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Reflection;
 using System.Linq;
+using NUnit.Framework;
 static public class SingletonExtensions
 {
 #if UNITY_EDITOR
@@ -20,7 +21,7 @@ static public class SingletonExtensions
             {
                 var prop = singType.BaseType?.GetRuntimeProperty("Instance");
                 if (prop == null)
-                    log += LogUtil.Color(singType + " Doesnt have instance prop", Color.red);
+                    log += singType + " Doesnt have instance prop";
                 else
                 {
                     log += "Removed Singleton For " + singType + '\n';
@@ -32,51 +33,71 @@ static public class SingletonExtensions
         }  
         Debug.Log($"Removed {removedCount} singletons\n{log}");  
     }
-
+    /*
     [UnityEditor.MenuItem("Tools/Singletons/Force All Singeltons Instances")]
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void ForceAllBeforeSceneLoad() => ForceAll(); 
+    */
+
 #endif
+
     public static void ForceAll()
     {
         string log = ""; 
-        int forcedInstancesCount = 0;
-        string logWarnings = "";
         var singTypes = CExtensions.GetDerivingTypes(typeof(SingletonMono<>));
         var propertyFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
-        try
-        { 
-
-            var colorLog = new Color(0, 0.6f, 0); 
-			foreach (Type type in singTypes)
-            { 
-                var hasInstance = (bool)type.GetProperty("HasInstance" , propertyFlags).GetValue(null, null);
-                 
+        List<Type> instanceForced = new();
+        List<Type> alreadyHasInstance = new();
+        List<Type> notFound = new();
+        List<Type> errorTypes = new();
+		foreach (Type type in singTypes)
+        {
+           
+            try
+            {
+                var hasInstance = (bool)type.GetProperty(nameof(SingletonMono<MonoBehaviour>.HasInstance), propertyFlags).GetValue(null, null);
                 if (hasInstance)
                 {
-                    log += $"{type.Name} allready has instance";
+                    alreadyHasInstance.Add(type);
+                    log += $"{type.Name} \n";
                     continue;
                 }
-				var singObj = UnityEngine.Object.FindFirstObjectByType(type);
+                var method = type.GetMethod(nameof(SingletonMono<MonoBehaviour>.FindAndForceInstanceAtRootGOs));
+                var singObj = (UnityEngine.Object) method.Invoke(null, null); 
                 if (singObj)
                 {
-                    type.GetMethod("ForceInstance").Invoke(singObj, null); 
-                    forcedInstancesCount++;
-                    log += LogUtil.Color("\n"+ type.Name +".cs", colorLog);
+                    type.GetMethod(nameof(SingletonMono<MonoBehaviour>.ForceInstance)).Invoke(singObj, null);
+                    instanceForced.Add(type);
                 }
                 else
-                    logWarnings += "Singelton Object not found for " + LogUtil.Color(type.Name, colorLog) + ".cs" +"\n";
-            }  
-        } 
-        catch (Exception ex) { Debug.LogException(ex); }
-        finally
-        {
-            log = $"Forced {forcedInstancesCount}/{singTypes.Count()} instances:\n{log} \n";
-            log += LogUtil.Color(logWarnings, Color.yellow);
-			Debug.Log(log); 
-		} 
+                    notFound.Add(type);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                errorTypes.Add(type);
+            }
+        }
+
+        AddStringifyList("Forced instances:", instanceForced, ref log);
+        AddStringifyList("Allready has instance:", alreadyHasInstance, ref log);
+        AddStringifyList("Singelton not found:", notFound, ref log);
+        AddStringifyList("Errors:",notFound, ref log);
+
+        log = $"Forced {instanceForced.Count}/{singTypes.Count()}\n{log}\n";
+		Debug.Log(log); 
     }
-     
+    
+    static string GetColoredStringName(Type t) => LogUtil.Color(t.Name + ".cs", new Color(0, 0.6f, 0));
+    static void AddStringifyList(string header, List<Type> types, ref string log)
+    {
+        if (types.Count > 0)
+            log += header + '\n';
+
+        foreach (var nf in types)
+            log += GetColoredStringName(nf) + '\n';
+    }
+
     static bool IsSubclassOfGeneric(Type type, Type baseType)
     {
         if (type == null || baseType == null || type == baseType)
