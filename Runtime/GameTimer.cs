@@ -37,7 +37,7 @@ public struct GameBoolTimer
 
 [Serializable]
 public struct GameTimer
-{
+{ 
     public enum TimerType { Scaled, Unscaled, Realtime }
     public TimerType timerType;
     public float MaxTime;
@@ -63,7 +63,16 @@ public struct GameTimer
             TimerType.Unscaled => Time.unscaledTime,
             _ => Time.time
         };
-    } 
+    }
+    static public float GetDelta(GameTimer.TimerType type)
+    {
+        return type switch
+        {
+            TimerType.Realtime => Time.unscaledDeltaTime,
+            TimerType.Unscaled => Time.unscaledDeltaTime,
+            _ => Time.deltaTime
+        };
+    }
     [ShowInInspector, HideInEditMode] public float TimeRunning => TimeSinceStartup - TimeStarted;
     public float TimeLeft => TimeRunning - MaxTime;
     [ShowInInspector, HideInEditMode] public float NormalizedTime

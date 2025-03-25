@@ -13,22 +13,24 @@ public class ScreenRelativeScale : MonoBehaviour
     };
 
     static public float GlobalScaling = 0.7f;
-    public const float MinScaling = 0.1f;
-    public const float MaxScaling = 2f;
     public float Scaling = 1f;
-    public float _minScaling = 0f;
-    public float _maxScaling = float.MaxValue;
+    public float MinScaling = 0f;
+    public float MaxScaling = 10_000;
+      
     public bool ConformToScreenUsingParent;
     public float ConformZExtent;
     public bool LookAtCam;
     public float ScreenConformExtentsOffset;
+    float _targetAnimationAlpha = -1f;
+
     private void OnEnable()
     {
-        RenderPipelineManager.beginCameraRendering += Rescale;
+        RenderPipelineManager.beginCameraRendering += UpdateIcon;
     }
     private void OnDisable()
     {
-        RenderPipelineManager.beginCameraRendering -= Rescale;
+        RenderPipelineManager.beginCameraRendering -= UpdateIcon;
+        StopAllCoroutines();
     }
 
 #if UNITY_EDITOR
@@ -42,12 +44,13 @@ public class ScreenRelativeScale : MonoBehaviour
     }
 #endif
 
-    void Rescale(ScriptableRenderContext _, Camera cam)
+    void UpdateIcon(ScriptableRenderContext _, Camera cam)
     {
 #if UNITY_EDITOR
-        if (Application.isPlaying && IsEditorCamera(cam))
-            return; 
-#endif
+        bool isEditorCam = IsEditorCamera(cam);
+        if (Application.isPlaying && isEditorCam)
+            return;
+#endif 
         if (ConformToScreenUsingParent)
         {
             transform.localPosition = new Vector3();
@@ -67,10 +70,12 @@ public class ScreenRelativeScale : MonoBehaviour
         if (LookAtCam)
             transform.LookAt(cam.transform);
 
-        var scale = Vector3.Distance(cam.transform.position, transform.position) * Scaling / 15f * GlobalScaling;
-        scale = Mathf.Clamp( scale , _minScaling, _maxScaling);
+        var distance = Vector3.Distance(cam.transform.position, transform.position);
+        var scale = distance * Scaling / 15f * GlobalScaling;
+        scale = Mathf.Clamp( scale , MinScaling, MaxScaling);
         var size = Vector3.one * scale;
         transform.localScale = size;
     }
+
 
 }
