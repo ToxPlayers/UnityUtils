@@ -33,12 +33,9 @@ static public class SingletonExtensions
         }  
         Debug.Log($"Removed {removedCount} singletons\n{log}");  
     }
-    /*
+    /*[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]*/
     [UnityEditor.MenuItem("Tools/Singletons/Force All Singeltons Instances")]
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    static void ForceAllBeforeSceneLoad() => ForceAll(); 
-    */
-
+    static void ForceAllBeforeSceneLoad() => ForceAll();
 #endif
 
     public static void ForceAll()
@@ -62,7 +59,7 @@ static public class SingletonExtensions
                     log += $"{type.Name} \n";
                     continue;
                 }
-                var method = type.GetMethod(nameof(SingletonMono<MonoBehaviour>.FindAndForceInstanceAtRootGOs));
+                var method = type.GetMethod(nameof(SingletonMono<MonoBehaviour>.FindAndForceInstanceAtRootGOs), propertyFlags);
                 var singObj = (UnityEngine.Object) method.Invoke(null, null); 
                 if (singObj)
                 {
@@ -82,15 +79,16 @@ static public class SingletonExtensions
         AddStringifyList("Forced instances:", instanceForced, ref log);
         AddStringifyList("Allready has instance:", alreadyHasInstance, ref log);
         AddStringifyList("Singelton not found:", notFound, ref log);
-        AddStringifyList("Errors:",notFound, ref log);
+        AddStringifyList( LogUtil.ColorRed("Errors:"),errorTypes, ref log);
 
-        log = $"Forced {instanceForced.Count}/{singTypes.Count()}\n{log}\n";
+        log = $"Forced {instanceForced.Count}/{singTypes.Count()} instances:\n{log}\n";
 		Debug.Log(log); 
     }
     
-    static string GetColoredStringName(Type t) => LogUtil.Color(t.Name + ".cs", new Color(0, 0.6f, 0));
+    static string GetColoredStringName(Type t) => LogUtil.Color(t.Name, new Color(0, 0.6f, 0)) + ".cs";
     static void AddStringifyList(string header, List<Type> types, ref string log)
     {
+        log += '\n';
         if (types.Count > 0)
             log += header + '\n';
 
