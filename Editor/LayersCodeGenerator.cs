@@ -16,7 +16,12 @@ static public class LayersCodeGenerator
     static readonly string ValueReplacer = "<value>";
     static readonly string ClassTemplate =
 @"static public class Layers
-{}
+{
+    public bool ContainsLayer(int mask, int layer)
+    {
+        return ( mask & (1 << layer)) != 0;
+    }
+}
 ";
     static readonly string LayerIndexTemplate =
 $@"    
