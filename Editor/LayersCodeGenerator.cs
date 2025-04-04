@@ -12,21 +12,22 @@ static public class LayersCodeGenerator
     static LayersCodeGenerator () { }
     static private readonly string LayersFileName = @"Layers.cs";
 
-    static readonly string NameReplacer = "<name>";
-    static readonly string ValueReplacer = "<value>";
+    static readonly string NameReplacer = "<%name%>";
+    static readonly string ValueReplacer = "<%value%>";
     static readonly string ClassTemplate =
 @"static public class Layers
 {
-    public bool ContainsLayer(int mask, int layer)
+    static public bool ContainsLayer(int mask, int layer)
     {
         return ( mask & (1 << layer)) != 0;
     }
 }
 ";
     static readonly string LayerIndexTemplate =
-$@"    
+$@" 
     public const int {NameReplacer} = {ValueReplacer};
     public const int {NameReplacer}Mask = 1 << {ValueReplacer};
+
 ";
 
 
@@ -86,7 +87,7 @@ $@"
                 fieldsCode += layerCode;
             }
         } 
-        var index = ClassTemplate.IndexOf("}");
+        var index = ClassTemplate.Length - 3;
         return ClassTemplate.Insert(index, fieldsCode);
     } 
 
