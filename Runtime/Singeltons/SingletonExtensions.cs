@@ -41,7 +41,10 @@ static public class SingletonExtensions
     public static void ForceAll()
     {
         string log = ""; 
-        var singTypes = CExtensions.GetDerivingTypes(typeof(SingletonMono<>));
+        var singTypes = CExtensions.GetDerivingTypes(typeof(SingletonMono<>)); 
+        if(singTypes.Count() == 0)
+            return;
+            
         var propertyFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy;
         List<Type> instanceForced = new();
         List<Type> alreadyHasInstance = new();
