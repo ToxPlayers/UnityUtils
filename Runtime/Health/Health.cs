@@ -12,7 +12,8 @@ public class Health : MonoBehaviour
 	public bool IsDead => !IsAlive;
 	public UnityEvent<float> OnHPChange, OnDamage, OnHeal;
 	public UnityEvent OnRevive, OnDeath;
-	private void OnEnable()
+
+	protected virtual void OnEnable()
 	{
 		if (MaxHP <= 0f)
 			Debug.LogError("Max hp is zero", this);
@@ -21,7 +22,7 @@ public class Health : MonoBehaviour
 		Heal(MaxHP);
 	}
 
-	public void Damage(float dmg)
+    public virtual void Damage(float dmg)
 	{
 		if (IsDead)
 			return;
@@ -44,7 +45,7 @@ public class Health : MonoBehaviour
 		OnDeath?.Invoke();
 	}
 
-	public void Heal(float heal)
+    public virtual void Heal(float heal)
 	{
 		if(heal < 0)
 		{

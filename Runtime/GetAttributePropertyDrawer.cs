@@ -1,4 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+
+
 #if UNITY_EDITOR
 using UnityEditor; 
 #endif
@@ -32,7 +36,7 @@ namespace UnityEngine
         const float BoxMargin = 5;
 
         public abstract Component FindComponentAction(GameObject go, Type type);
-
+        
         static public string SetColor(string str, Color color)
         {
             return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{str}</color>";
@@ -103,18 +107,19 @@ namespace UnityEngine
             GUI.DrawTexture(iconRect, isError ? ErrorIcon : WarnIcon, ScaleMode.ScaleToFit);
         }
 
-        bool _msgShown;
+        bool _msgShown; 
+
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
             _msgShown = false;
-            _msgRectHeight = 0;
+            _msgRectHeight = 0; 
             if (ShouldntFindComp(property, out string error, out GameObject ownerGo))
             {
                 if (error != null)
                     DrawMsgBox(rect, property, error, true);
                 DrawDefault(rect, property, label);
                 return;
-            }
+            }  
 
             bool isPropertyValueNull = property.objectReferenceValue == null;
             if (isPropertyValueNull)
@@ -128,9 +133,12 @@ namespace UnityEngine
                     warnMsg += SetColor(fieldInfo.FieldType.Name, ClassColor);
                     DrawMsgBox(rect, property, warnMsg, false);
                 }
-            }
+            } 
+            
             if(property.serializedObject.hasModifiedProperties)
                 property.serializedObject.ApplyModifiedProperties();
+             
+
             EditorGUI.PropertyField(rect, property, label, true);
         }
 
@@ -145,9 +153,9 @@ namespace UnityEngine
     public class GetAttributeDrawer : GetAttributePropertyDrawerBase
     {
         public override Component FindComponentAction(GameObject go, Type type)
-        {
+        { 
             return go.GetComponent(type);
-        }
+        } 
     }
 
     [CustomPropertyDrawer(typeof(GetChildAttribute))]

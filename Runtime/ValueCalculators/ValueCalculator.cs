@@ -14,7 +14,7 @@ abstract public class ValueCalculator<T> where T : struct
     {
         get
         { 
-            var val = new T();
+            var val = BaseValue;
             foreach (var mod in _modifiers)
                 mod.Modify(ref val);
             return val;
