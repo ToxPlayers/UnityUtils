@@ -2,7 +2,7 @@
 using TriInspector;
 using UnityEngine.Events;
  
-public interface IDamageReciever { public void Damage(float dmg) { } }
+public interface IDamageReciever { public void Damage(float dmg); }
 
 public interface IHealth : IDamageReciever 
 { 
