@@ -2,24 +2,34 @@
 using TriInspector;
 using UnityEngine.Events;
  
-public class Health : MonoBehaviour
+public interface IDamageReciever { public void Damage(float dmg) { } }
+
+public interface IHealth : IDamageReciever 
+{ 
+	public float MaxHP { get; }
+	public float HPValue { get; }
+	public float HPNormalized => HPValue / MaxHP;
+}
+
+public class Health : MonoBehaviour, IDamageReciever, IHealth
 {    
-	[SerializeField, Min(1f)] public float MaxHP = 100f;
+	[SerializeField, Min(1f)] float _maxHP = 100f;
 	[ShowInInspector, ReadOnly, HideInEditMode] float _health;
-	public float HPValueNormalized => _health / MaxHP;
-	public float HPValue => _health;
+    public float MaxHP => _maxHP;
+    public float HPValue => _health;
 	public bool IsAlive => _health > 0;
 	public bool IsDead => !IsAlive;
-	public UnityEvent<float> OnHPChange, OnDamage, OnHeal;
+
+    public UnityEvent<float> OnHPChange, OnDamage, OnHeal;
 	public UnityEvent OnRevive, OnDeath;
 
 	protected virtual void OnEnable()
 	{
-		if (MaxHP <= 0f)
+		if (_maxHP <= 0f)
 			Debug.LogError("Max hp is zero", this);
 
 		_health = 0;
-		Heal(MaxHP);
+		Heal(_maxHP);
 	}
 
     public virtual void Damage(float dmg)
@@ -56,7 +66,7 @@ public class Health : MonoBehaviour
 		var wasDead = IsDead;
 
 		_health += heal;
-		_health = Mathf.Min(_health, MaxHP);
+		_health = Mathf.Min(_health, _maxHP);
 
 		if (wasDead && ! IsDead)
 			OnRevive?.Invoke();
