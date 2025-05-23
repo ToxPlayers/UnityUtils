@@ -219,6 +219,8 @@ static public class UnityExtensions
     [MethodImpl(INLINE)]
     static public float Distance(this Vector3 from, Vector3 to) => Vector3.Distance(from, to);
     [MethodImpl(INLINE)]
+    static public float Distance(this Vector2 from, Vector2 to) => Vector2.Distance(from, to);
+    [MethodImpl(INLINE)]
     static public float Distance(this Transform tf, Transform target)
     => Vector3.Distance(tf.position, target.position);
     [MethodImpl(INLINE)]
