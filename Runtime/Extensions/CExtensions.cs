@@ -50,7 +50,7 @@ static public class CExtensions
     }
 
     #endregion
-
+	
     [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, char until) => input.Substring(input.LastIndexOf(until) + 1); 
 	[MethodImpl(INLINE)] static public string TrimEndUntil(this string input, string until) => input.Substring(input.LastIndexOf(until) + 1);
 	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , char until) => input.Substring(input.IndexOf(until) + 1); 
@@ -196,5 +196,8 @@ static public class CExtensions
             node = nxtNode;
         }
     }
-
+    static public int EnumCount<T>()
+    {
+        return Enum.GetValues(typeof(T)).Length; 
+    }
 }
