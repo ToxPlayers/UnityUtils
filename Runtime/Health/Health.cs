@@ -20,7 +20,7 @@ public class Health : MonoBehaviour, IDamageReciever, IHealth
 	public bool IsAlive => _health > 0;
 	public bool IsDead => !IsAlive;
 
-    public UnityEvent<float> OnHPChange, OnDamage, OnHeal;
+    public UnityEvent<float> OnHPChange, OnMaxHPChange, OnDamage, OnHeal;
 	public UnityEvent OnRevive, OnDeath;
 
 	protected virtual void OnEnable()
@@ -32,6 +32,14 @@ public class Health : MonoBehaviour, IDamageReciever, IHealth
 		Heal(_maxHP);
 	}
 
+	
+    public virtual void SetMaxHP(float maxHp)
+	{
+		_maxHP = Mathf.Max(0, maxHp);
+		OnHPChange.Invoke(_health);
+		OnMaxHPChange.Invoke(_maxHP);
+	}
+	
     public virtual void Damage(float dmg)
 	{
 		if (IsDead)
