@@ -196,8 +196,9 @@ static public class CExtensions
             node = nxtNode;
         }
     }
-    static public int EnumCount<T>()
+    static public int EnumCount<T>() => EnumCount(typeof(T));  
+    static public int EnumCount(Type enumType)
     {
-        return Enum.GetValues(typeof(T)).Length; 
+        return Enum.GetValues(enumType).Length;
     }
 }
