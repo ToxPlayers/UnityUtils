@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 public class ValueProcessor<T> : ISerializationCallbackReceiver
 {
-    [ShowInInspector, ReadOnly, PropertyOrder(20)] protected List<IModifier<T>> _modifiers = new();
+    [SerializeReference, ReadOnly, PropertyOrder(20)] protected List<IModifier<T>> _modifiers = new();
     [SerializeField, HideInInspector] public UnityEvent<IModifier<T>> OnRegisterMod = new(), OnUnregisterMod = new(); 
     public void RegisterModifier(IModifier<T> mod)
     {
@@ -18,7 +18,7 @@ public class ValueProcessor<T> : ISerializationCallbackReceiver
         _modifiers.Remove(mod);
         OnUnregisterMod.Invoke(mod);
     }
-
+     
     void ISerializationCallbackReceiver.OnBeforeSerialize()
     {
         OnRegisterMod ??= new();
@@ -35,9 +35,17 @@ public class ValueProcessor<T> : ISerializationCallbackReceiver
         {
             var baseVal = BaseValue;
 
-            foreach (var mod in _modifiers)
-                if (mod.IsBaseValue)
-                    mod.Modify(ref baseVal);
+            for (int i = 0; i < _modifiers.Count; i++)
+            {
+                if (_modifiers[i] == null)
+                {
+                    _modifiers.RemoveAt(i);
+                    i--;
+                }
+                else if (_modifiers[i].IsBaseValue)
+                    _modifiers[i].Modify(ref baseVal);
+            }
+             
 
             foreach (var mod in _modifiers)
                 if(!mod.IsBaseValue)
