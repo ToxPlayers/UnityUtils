@@ -109,17 +109,14 @@ public struct GameTimer
 
     public GameTimer(TimerType timerType, float maxTime)
     {
-		Init(timerType, maxTime); 
-    }
-	public GameTimer(float maxTime)
-    {
-		Init(TimerType.Scaled, maxTime);
-    }
-	void Init(TimerType timerType, float maxTime)
-	{
 		this.timerType = timerType;
         MaxTime = maxTime;
         TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(this.timerType) : 0f; 
-	}
-	
+    }
+	public GameTimer(float maxTime)
+    {
+		this.timerType = TimerType.Scaled;
+        MaxTime = maxTime;
+        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(this.timerType) : 0f; 
+    } 
 }
