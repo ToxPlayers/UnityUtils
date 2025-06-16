@@ -35,20 +35,12 @@ public class ValueProcessor<T> : ISerializationCallbackReceiver
         {
             var baseVal = BaseValue;
 
-            for (int i = 0; i < _modifiers.Count; i++)
-            {
-                if (_modifiers[i] == null)
-                {
-                    _modifiers.RemoveAt(i);
-                    i--;
-                }
-                else if (_modifiers[i].IsBaseValue)
-                    _modifiers[i].Modify(ref baseVal);
-            }
-             
+            foreach (var mod in _modifiers)
+                if (mod != null && mod.IsBaseValue)
+                    mod.Modify(ref baseVal);
 
             foreach (var mod in _modifiers)
-                if(!mod.IsBaseValue)
+                if(mod != null && !mod.IsBaseValue)
                     mod.Modify(ref baseVal);
 
             return baseVal;
