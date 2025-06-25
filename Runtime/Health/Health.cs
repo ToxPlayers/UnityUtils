@@ -7,8 +7,8 @@ public interface IDamageReciever { public void Damage(float dmg); }
 public interface IHealth : IDamageReciever 
 { 
 	public float MaxHP { get; }
-	public float HPValue { get; }
-	public float HPNormalized => HPValue / MaxHP;
+	public float HPValue { get; } 
+	public float HPNormalized { get; }
 }
 
 public class Health : MonoBehaviour, IDamageReciever, IHealth
@@ -19,6 +19,8 @@ public class Health : MonoBehaviour, IDamageReciever, IHealth
     public float HPValue => _health;
 	public bool IsAlive => _health > 0;
 	public bool IsDead => !IsAlive;
+	[ShowInInspector, Range(0f,1f)]
+	public float HPNormalized => HPValue / MaxHP;
 
     public UnityEvent<float> OnHPChange, OnMaxHPChange, OnDamage, OnHeal;
 	public UnityEvent OnRevive, OnDeath;

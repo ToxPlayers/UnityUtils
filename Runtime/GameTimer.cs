@@ -85,9 +85,9 @@ public struct GameTimer
         }
     }
 
-    public void Restart()
+    public void Restart(float timeOffset = 0f)
     {
-        TimeStarted = TimeSinceStartup; 
+        TimeStarted = TimeSinceStartup + timeOffset; 
     }
     public void RestartWithTimeOverOffset()
     {
