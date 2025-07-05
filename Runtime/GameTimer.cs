@@ -84,7 +84,6 @@ public struct GameTimer
             return Mathf.Clamp01(TimeRunning / MaxTime);
         }
     }
-
     public void Restart(float timeOffset = 0f)
     {
         TimeStarted = TimeSinceStartup + timeOffset; 
