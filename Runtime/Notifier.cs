@@ -27,16 +27,20 @@ public class Notifier<T>
     {
         _prevValue = _value;
         _value = value;
-        foreach (var txt in _txtBinds)
+		foreach (var txt in _txtBinds)
             txt.text = _value.ToString();
         InvokeChanged();
-    }
+    } 
     public void InvokeChanged()
     {
         _onChange.Invoke(_prevValue, _value);
     }
     public T PreviousValue => _prevValue;
-    public void Bind(TMP_Text txt) => _txtBinds.Add(txt);
+    public void Bind(TMP_Text txt)
+	{
+		_txtBinds.Add(txt);
+		txt.text = _value.ToString();
+	}
     public void Unbind(TMP_Text txt) => _txtBinds.Remove(txt);
     public void Sub(UnityAction<T, T> action, bool callNow = true)
     {
