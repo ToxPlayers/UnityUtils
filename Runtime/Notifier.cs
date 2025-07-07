@@ -4,14 +4,29 @@ using UnityEngine.Events;
 using System;
 using System.Collections.Generic;
 using TMPro;
-
+ 
 [Serializable, HideMonoScript, InlineProperty]
 public class Notifier<T>
 {
+    public class ReadonlyNotifier
+    {
+        Notifier<T> _notifier;
+        public ReadonlyNotifier(Notifier<T> notifier)
+        { _notifier = notifier; }
+        public T Value => _notifier.Value;
+        public T PreviousValue => _notifier.PreviousValue;
+        public void Bind(TMP_Text txt) => _notifier.Bind(txt);
+        public void Unbind(TMP_Text txt) => _notifier.Unbind(txt);
+        public void Sub(UnityAction<T, T> action, bool callNow = true) => _notifier.Sub(action, callNow);
+        public void SubToggle(UnityAction<T, T> action, bool sub) => _notifier.SubToggle(action, sub);
+        public void Unsub(UnityAction<T, T> action) => _notifier.Sub(action);
+    }
+
     [NonSerialized] T _prevValue;
     [SerializeField, HideInInspector] T _value;
     [NonSerialized] UnityEvent<T, T> _onChange = new();
     [SerializeField] List<TMP_Text> _txtBinds = new();
+    public ReadonlyNotifier Readonly => new(this);
     [ShowInInspector, HideLabel, PropertyOrder(-10)]
     public T Value
     {
