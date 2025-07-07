@@ -446,7 +446,8 @@ static public class MathU
 	public static Vector2Int XZRoundToInt(this Vector3 vv) => new Vector2Int( Mathf.RoundToInt( vv.x) , Mathf.RoundToInt(vv.z));
 	[MethodImpl(INLINED)]
 	public static Vector2Int XZInt(this Vector3Int vv) => new Vector2Int(vv.x, vv.z); 
-
+	[MethodImpl(INLINED)]
+	public static Vector3 XZToXYZInt(this Vector2 v2) => new Vector3Int( Mathf.RoundToInt(v2.x), 0,  Mathf.RoundToInt(v2.y));
     [MethodImpl(INLINED)]
     public static Vector2 XZ(this Vector3 vv) => new Vector2(vv.x, vv.z);
 	[MethodImpl(INLINED)]
