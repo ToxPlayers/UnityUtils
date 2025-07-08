@@ -4,7 +4,7 @@ using UnityEngine.Events;
 using System;
 using System.Collections.Generic;
 using TMPro;
- 
+
 [Serializable, HideMonoScript, InlineProperty]
 public class Notifier<T>
 {
@@ -28,6 +28,8 @@ public class Notifier<T>
     [NonSerialized] UnityEvent<T, T> _onChange = new();
     [SerializeField] List<TMP_Text> _txtBinds = new();
     public ReadOnly Readonly => new(this);
+    public T PreviousValue => _prevValue;
+
     [ShowInInspector, HideLabel, PropertyOrder(-10)]
     public T Value
     {
@@ -38,6 +40,11 @@ public class Notifier<T>
                 return;
             ForceValueChange(value);
         }
+    }
+    public Notifier() => ForceValueChange(_value);
+    public Notifier(T value)
+    {
+        ForceValueChange(_value);
     }
     public void ForceValueChange(T value)
     {
@@ -51,7 +58,6 @@ public class Notifier<T>
     {
         _onChange.Invoke(_prevValue, _value);
     }
-    public T PreviousValue => _prevValue;
     public void Bind(TMP_Text txt)
 	{
 		_txtBinds.Add(txt);
