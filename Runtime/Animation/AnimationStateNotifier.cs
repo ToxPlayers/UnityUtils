@@ -9,49 +9,65 @@ namespace AnimationCalls
         static public readonly int StatesCount = CExtensions.EnumCount<TState>();
         public UnityEvent<TState> OnEnter, OnExit;
         [SerializeField, Get] Animator _anim;
-        AwaitableCompletionSource _awaitStateExit = new();
+        AwaitableCompletionSource _awaitStateExit, _awaitStateEnter = new();
         Dictionary<TState, UnityEvent> OnStateEnter  = new() 
             , OnStateExit = new();
+        Dictionary<TState, AwaitableCompletionSource> StatesEnterAwaitable = new(),
+            StatesExitAwaitable = new();
+
         public Awaitable AwaitStateExit => _awaitStateExit.Awaitable;
+        public Awaitable AwaitStateEnter => _awaitStateEnter.Awaitable;
         public TState State { get; private set; }
         public float NormalizedStateTime => _anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        UnityEvent GetEvent(Dictionary<TState, UnityEvent> dic, TState state)
+        T GetValue<T>(Dictionary<TState, T> dic, TState state) where T : new()
         {
-            if (!dic.TryGetValue(state, out UnityEvent e))
+            if (!dic.TryGetValue(state, out T e))
             {
-                e = new UnityEvent();
+                e = new T();
                 dic.Add(state, e);
             }
             return e;
         }
-        public void HookOnStateEnter(TState state, UnityAction action) => GetEvent( OnStateEnter ,state).AddListener(action); 
-        public void UnhookOnStateEnter(TState state, UnityAction action) => GetEvent(OnStateEnter, state).RemoveListener(action);
-        public void HookOnStateExit(TState state, UnityAction action) => GetEvent(OnStateExit, state).AddListener(action); 
-        public void UnhookOnStateExit(TState state, UnityAction action) => GetEvent(OnStateExit, state).RemoveListener(action);
+        public void HookOnStateEnter(TState state, UnityAction action) => GetValue( OnStateEnter ,state).AddListener(action); 
+        public void UnhookOnStateEnter(TState state, UnityAction action) => GetValue(OnStateEnter, state).RemoveListener(action);
+        public void HookOnStateExit(TState state, UnityAction action) => GetValue(OnStateExit, state).AddListener(action); 
+        public void UnhookOnStateExit(TState state, UnityAction action) => GetValue(OnStateExit, state).RemoveListener(action);
+
+        public Awaitable GetEnterAwaitable(TState state) => GetValue(StatesEnterAwaitable, state).Awaitable;
+        public Awaitable GetExitAwaitable(TState state) => GetValue(StatesExitAwaitable, state).Awaitable;
 
         public void InvokeTimedEvent(string sEvent)
         {
             if (Enum.TryParse( sEvent , out TState state) )
-                GetEvent(OnStateEnter, state).Invoke();
+                GetValue(OnStateEnter, state).Invoke();
             else
                 Debug.LogError("Couldnt parse " + sEvent + " as an enum of " + nameof(TState));
         }
 
+        void InvokeAwaitable(TState state, bool enter)
+        {
+            var awaitable = enter ? _awaitStateEnter : _awaitStateExit;
+            awaitable.SetResult();
+            awaitable.Reset();
+            var stateAwait = GetValue(enter ? StatesEnterAwaitable : StatesExitAwaitable, state);
+            stateAwait.SetResult();
+            stateAwait.Reset();
+        }
+
         public void NotifyStateEnter(TState state)
         {
-            Debug.Log($"{gameObject.name} {State}->{state}");
             State = state;
             OnEnter.Invoke(state);
-            GetEvent(OnStateEnter, state).Invoke();
+            GetValue(OnStateEnter, state).Invoke();
+            InvokeAwaitable(state, true);
         } 
          
         public void NotifyStateExit(TState state)
         {
             OnExit.Invoke(state);
-            GetEvent(OnStateExit, state).Invoke();
-            _awaitStateExit.SetResult();
-            _awaitStateExit.Reset();
-        } 
+            GetValue(OnStateExit, state).Invoke(); 
+            InvokeAwaitable(state, false);
+        }
     }
 
 }
