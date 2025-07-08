@@ -49,9 +49,9 @@ namespace AnimationCalls
             var awaitable = enter ? _awaitStateEnter : _awaitStateExit;
             awaitable.SetResult();
             awaitable.Reset();
-            var stateAwait = GetValue(enter ? StatesEnterAwaitable : StatesExitAwaitable, state);
-            stateAwait.SetResult();
-            stateAwait.Reset();
+            awaitable = GetValue(enter ? StatesEnterAwaitable : StatesExitAwaitable, state);
+            awaitable.SetResult();
+            awaitable.Reset();
         }
 
         public void NotifyStateEnter(TState state)
