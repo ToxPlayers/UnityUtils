@@ -416,7 +416,7 @@ static public class MathU
     }
 	static public void AngleTo(this Quaternion rot, Quaternion target, out Vector3 angle, out Vector3 axis)
 	{
-		Quaternion rotation = Quaternion.Inverse(rot) * target);
+		Quaternion rotation = Quaternion.Inverse(rot) * target;
 		rotation.ToAngleAxis(out angle, out axis);
 	}
 	static public Quaternion Between(this Quaternion rot, Quaternion subtract)
