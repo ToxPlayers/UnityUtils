@@ -414,6 +414,12 @@ static public class MathU
         v.y = (sin * tx) + (cos * ty);
         return v;
     }
+	
+	static public Quaternion Between(this Quaternion rot, this Quaternion subtract)
+	{
+		return Quaternion.Inverse(subtract) * rot;
+	}
+	
     static public Rect GetNearestRect(Vector2 posXZ, float cellSize, Vector2 cellCenter)
     {
         var rightDist = Mathf.Abs(posXZ.x - cellCenter.x);

@@ -33,13 +33,16 @@ public class Notifier<T>
     [ShowInInspector, HideLabel, PropertyOrder(-10)]
     public T Value
     {
-        get => _value;
-        set
-        {
-            if (_value.Equals(value))
-                return;
-            ForceValueChange(value);
-        }
+        get => _value; 
+		set
+		{
+			if (_value == null && value == null)
+				return;
+
+			if (_value != null && _value.Equals(value))
+				return;
+			ForceValueChange(value);
+		} 
     }
     public Notifier() => ForceValueChange(_value);
     public Notifier(T value)

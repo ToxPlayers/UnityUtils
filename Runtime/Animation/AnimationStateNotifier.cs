@@ -9,7 +9,7 @@ namespace AnimationCalls
         static public readonly int StatesCount = CExtensions.EnumCount<TState>();
         public UnityEvent<TState> OnEnter, OnExit;
         [SerializeField, Get] Animator _anim;
-        AwaitableCompletionSource _awaitStateExit, _awaitStateEnter = new();
+        readonly AwaitableCompletionSource _awaitStateExit = new(), _awaitStateEnter = new();
         Dictionary<TState, UnityEvent> OnStateEnter  = new() 
             , OnStateExit = new();
         Dictionary<TState, AwaitableCompletionSource> StatesEnterAwaitable = new(),
