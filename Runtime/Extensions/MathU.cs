@@ -415,7 +415,7 @@ static public class MathU
         return v;
     }
 	
-	static public Quaternion Between(this Quaternion rot, this Quaternion subtract)
+	static public Quaternion Between(this Quaternion rot, Quaternion subtract)
 	{
 		return Quaternion.Inverse(subtract) * rot;
 	}
