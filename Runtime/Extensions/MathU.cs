@@ -414,7 +414,11 @@ static public class MathU
         v.y = (sin * tx) + (cos * ty);
         return v;
     }
-	
+	static public void AngleTo(this Quaternion rot, Quaternion target, out Vector3 angle, out Vector3 axis)
+	{
+		Quaternion rotation = Quaternion.Inverse(rot) * target);
+		rotation.ToAngleAxis(out angle, out axis);
+	}
 	static public Quaternion Between(this Quaternion rot, Quaternion subtract)
 	{
 		return Quaternion.Inverse(subtract) * rot;
