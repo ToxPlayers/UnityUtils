@@ -48,6 +48,7 @@ public class Notifier<T>
 			ForceValueChange(value);
 		} 
     } 
+	public Notifier() {}
     public Notifier(T value)
     {
         ForceValueChange(value);
