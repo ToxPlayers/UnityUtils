@@ -1,5 +1,14 @@
 ﻿using UnityEngine;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
 using TriInspector;
+#endif
+#if ODIN_INSPECTOR
+using HideInEdit = Sirenix.OdinInspector.HideInEditorModeAttribute;
+#else 
+using HideInEdit = TriInspector.HideInEditModeAttribute;
+#endif
 using UnityEngine.Events;
  
 public interface IDamageReciever { public void Damage(float dmg); }
@@ -14,7 +23,7 @@ public interface IHealth : IDamageReciever
 public class Health : MonoBehaviour, IDamageReciever, IHealth
 {    
 	[SerializeField, Min(1f)] float _maxHP = 100f;
-	[ShowInInspector, ReadOnly, HideInEditMode] float _health;
+	[ShowInInspector, ReadOnly, HideInEdit] float _health;
     public float MaxHP => _maxHP;
     public float HPValue => _health;
 	public bool IsAlive => _health > 0;

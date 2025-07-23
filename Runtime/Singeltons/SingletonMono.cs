@@ -1,5 +1,9 @@
 using UnityEngine;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
 using TriInspector;
+#endif
 
 abstract public class SingletonMono<T> : MonoBehaviour  where T : MonoBehaviour
 {

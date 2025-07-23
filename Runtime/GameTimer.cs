@@ -1,8 +1,17 @@
 using System;
 using System.Threading;
 using UnityEngine;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
 using TriInspector;
-using System.Threading.Tasks;
+#endif
+
+#if ODIN_INSPECTOR
+using HideInEdit = Sirenix.OdinInspector.HideInEditorModeAttribute;
+#else 
+using HideInEdit = TriInspector.HideInEditModeAttribute;
+#endif
 
 [Serializable]
 public struct GameBoolTimer
@@ -73,9 +82,10 @@ public struct GameTimer
             _ => Time.deltaTime
         };
     }
-    [ShowInInspector, HideInEditMode] public float TimeRunning => TimeSinceStartup - TimeStarted;
+
+    [ShowInInspector, HideInEdit] public float TimeRunning => TimeSinceStartup - TimeStarted;
     public float TimeLeft => TimeRunning - MaxTime;
-    [ShowInInspector, HideInEditMode] public float NormalizedTime
+    [ShowInInspector, HideInEdit] public float NormalizedTime
     {
         get
         {

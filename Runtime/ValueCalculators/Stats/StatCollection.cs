@@ -1,7 +1,11 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#else
 using TriInspector;
+#endif
 using UnityEditor;
 using UnityEngine.Events;
 
@@ -20,7 +24,13 @@ public class FloatStatCollection<T> : ISerializationCallbackReceiver where T : s
         }
     }
 
-    [SerializeField, TableList(AlwaysExpanded = true, HideAddButton = true, HideRemoveButton = true)] 
+    [SerializeField, TableList(AlwaysExpanded = true,
+#if ODIN_INSPECTOR
+        IsReadOnly = true
+#else 
+HideAddButton = true, HideRemoveButton = true
+#endif
+        )] 
     StatValue[] _stats;
     public FloatStatCollection() => _stats = new StatValue[CExtensions.EnumCount<T>()];
     public FloatProcessor GetStatProcessor(T stat) => _stats[Convert.ToInt32(stat)].Processor;
