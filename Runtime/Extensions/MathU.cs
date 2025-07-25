@@ -413,18 +413,7 @@ static public class MathU
         v.x = (cos * tx) - (sin * ty);
         v.y = (sin * tx) + (cos * ty);
         return v;
-    }
-	static public void MoveRelativeToChild(this Transform parent, Transform child, Transform target)
-	{
-		MoveRelativeToChild(parent, child, target.position, target.rotation);
-	}
-	static public void MoveRelativeToChild(this Transform parent, Transform child, Vector3 targetPos, Quaternion targetRot)
-	{
-		var deltaPos = targetPos - child.position;
-		parent.position += deltaPos;
-		child.rotation.AngleTo(targetRot, out var angle, out var axis);
-		parent.RotateAround(child.position, axis, angle);
-	}
+    } 
 	static public void AngleTo(this Quaternion rot, Quaternion target, out float angle, out Vector3 axis)
 	{
 		Quaternion rotation = Quaternion.Inverse(rot) * target;

@@ -26,8 +26,8 @@ public class Notifier<T>
 
     [NonSerialized] T _prevValue;
     [SerializeField, HideInInspector] T _value;
-    [SerializeField, HideInEditorMode] UnityEvent<T, T> _onChange = new();
-    [SerializeField, HideInEditorMode] UnityEvent<T> _onChangeSingle = new();
+    [NonSerialized] UnityEvent<T, T> _onChange = new();
+    [NonSerialized] UnityEvent<T> _onChangeSingle = new();
     public ReadOnly Readonly => new(this);
     public T PreviousValue => _prevValue;
     public int EstimatedListenerCount { get; private set; }

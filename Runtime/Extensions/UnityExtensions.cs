@@ -60,6 +60,17 @@ static public class UnityExtensions
     static public float PosY(this Transform tf) => tf.position.y;
     [MethodImpl(INLINE)]
     static public float PosZ(this Transform tf) => tf.position.z;
+	static public void MoveRelativeToChild(this Transform parent, Transform child, Transform target)
+	{
+		var childOriginParent = child.parent;
+		var parentOriginParent = parent.parent;
+		child.SetParent(null, true);
+		parent.SetParent(child, true);
+		target.GetPositionAndRotation(out var pos, out var rot);
+		child.transform.SetPositionAndRotation(pos,rot);
+		parent.SetParent(parentOriginParent, true);
+		child.SetParent(childOriginParent, true);
+	} 
     [MethodImpl(INLINE)]
     static public Transform AddChild(this Component comp, string name = "GameObject")
     {
