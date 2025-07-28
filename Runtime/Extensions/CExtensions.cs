@@ -137,7 +137,7 @@ static public class CExtensions
 		return false;
 	}
 	[MethodImpl(INLINE)]
-    static public int RollIndex(int index, int length)
+    static public int RollIndex(this int index, int length)
 	{
 		if (index >= length)
 			index = 0;
@@ -146,7 +146,7 @@ static public class CExtensions
 		return index;
 	}
 	[MethodImpl(INLINE)]
-    static public T RollIndex<T>(IList<T> arr, int index) => arr[RollIndex(index, arr.Count)];
+    static public T RollIndex<T>(this IList<T> arr, int index) => arr[RollIndex(index, arr.Count)];
 	[MethodImpl(INLINE)] public static List<T> ToList<T>(this IEnumerable<T> enumerator) => new List<T>(enumerator); 
 	[MethodImpl(INLINE)] static public IEnumerable<Type> GetDerivingTypes(this Type baseType , bool exludeAbstract = true)
 	{ 
