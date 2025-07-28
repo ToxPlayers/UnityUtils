@@ -9,7 +9,7 @@ abstract public class SingletonMono<T> : MonoBehaviour  where T : MonoBehaviour
 {
     private static T _instance = null;
     public static bool HasInstance => _instance; 
-    public static Transform Transform => _instance ? _instance.transform : null;
+    public static Transform TF => _instance ? _instance.transform : null;
     public static T Instance
     { 
         private set
