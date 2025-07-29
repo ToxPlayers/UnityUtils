@@ -23,16 +23,18 @@ public interface IHealth : IDamageReciever
 public class Health : MonoBehaviour, IDamageReciever, IHealth
 {    
 	[SerializeField, Min(1f)] float _maxHP = 100f;
-	[ShowInInspector, ReadOnly, HideInEdit] float _health;
+    [ShowInInspector, Range(0f, 1f), PropertyOrder(-200)]
+    public float HPNormalized => HPValue / MaxHP;
+    [ShowInInspector, ReadOnly, HideInEdit] float _health;
     public float MaxHP => _maxHP;
     public float HPValue => _health;
 	public bool IsAlive => _health > 0;
 	public bool IsDead => !IsAlive;
-	[ShowInInspector, Range(0f,1f)]
-	public float HPNormalized => HPValue / MaxHP;
 
+	[FoldoutGroup("Events"), PropertyOrder(20)]
     public UnityEvent<float> OnHPChange, OnMaxHPChange, OnDamage, OnHeal;
-	public UnityEvent OnRevive, OnDeath;
+    [FoldoutGroup("Events")]
+    public UnityEvent OnRevive, OnDeath;
 
 	protected virtual void OnEnable()
 	{
