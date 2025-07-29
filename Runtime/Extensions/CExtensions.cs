@@ -141,7 +141,7 @@ static public class CExtensions
 	{
 		if (index >= length)
 			index = 0;
-		else if (length < 0)
+		else if (index < 0)
 			index = length - 1;
 		return index;
 	}
