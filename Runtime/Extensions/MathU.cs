@@ -1,14 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using System.Text.RegularExpressions;
-using Random = System.Random;
-using System.Linq;
+using System.Linq; 
 using System.Runtime.CompilerServices;
-using Object = UnityEngine.Object;
-using Unity.Mathematics;
+using System.Text.RegularExpressions;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
+using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = System.Random;
 
 static public class MathU
 {
@@ -159,26 +159,26 @@ static public class MathU
     }
 
     [MethodImpl(INLINED)]
-    public static bool IsValidMinMax(Vector2Int MinMax, float value)
+    public static bool IsValidMinMax(in Vector2Int MinMax, float value)
     {
         return value >= MinMax.x && value <= MinMax.y;
     }
 
 
     [MethodImpl(INLINED)]
-    public static bool ValidMinMax(Vector2Int MinMax, int value)
+    public static bool ValidMinMax(in Vector2Int MinMax, int value)
     {
         return value >= MinMax.x && value <= MinMax.y;
     }
 
     [MethodImpl(INLINED)]
-    public static bool IsValidMinMax(Vector2 MinMax, float value)
+    public static bool IsValidMinMax(in Vector2 MinMax, float value)
 	{ 
         return value >= MinMax.x &&  value <= MinMax.y;
 	}
 
     [MethodImpl(INLINED)]
-    static public Vector3 ToV3(this Color color)
+    static public Vector3 ToV3(this in Color color)
         => new Vector3()
         {
             x = color.r,
@@ -187,32 +187,36 @@ static public class MathU
         };
 
     [MethodImpl(INLINED)]
-    static public float getVFromHSV(this Color color)
+    static public float GetV(this in Color color)
     {
         Color.RGBToHSV(color, out _, out _, out float v);
         return v;
     }
     [MethodImpl(INLINED)]
-    static public float getS(this Color color)
+    static public float GetS(this in Color color)
     {
         Color.RGBToHSV(color, out _, out float s, out _);
         return s;
     }
     [MethodImpl(INLINED)]
-    static public float getH(this Color color)
+    static public float GetH(this in Color color)
     {
         Color.RGBToHSV(color, out float h, out _, out _);
         return h;
     }
     [MethodImpl(INLINED)]
-    static public Color OppositeColor(this Color color)
+    static public Color OppositeColor(this in Color color)
     { 
         return new Color(1-color.r, 1-color.g, 1-color.b, color.a); 
     }
     [MethodImpl(INLINED)] 
-    static public Vector2 ToFloat(this Vector2Int vec2Int) => new Vector2(vec2Int.x, vec2Int.y);
+    static public Vector2 ToFloat(this in Vector2Int vec2Int) => new Vector2(vec2Int.x, vec2Int.y);
+    [MethodImpl(INLINED)]
+    static public Vector3Int RoundToInt(this in Vector3 v3) 
+        => new Vector3Int(){ x = Mathf.RoundToInt(v3.x), y = Mathf.RoundToInt(v3.y), z = Mathf.RoundToInt(v3.z) };
     [MethodImpl(INLINED)] 
-    static public Vector2Int RoundToInt(this Vector2 vec2) => new Vector2Int() { x = Mathf.RoundToInt(vec2.x), y = Mathf.RoundToInt(vec2.y) };
+    static public Vector2Int RoundToInt(this in Vector2 v2) 
+        => new Vector2Int () { x = Mathf.RoundToInt(v2.x), y = Mathf.RoundToInt(v2.y) };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Cross(this Vector2 v1, Vector2 v2)
@@ -221,17 +225,17 @@ static public class MathU
                - v1.y * v2.x;
     }
     [MethodImpl(INLINED)]
-    static public Vector2Int Round(this Vector2 v)
+    static public Vector2Int Round(this in Vector2 v)
         => new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
     [MethodImpl(INLINED)]
-    static public void AddOrSet<Key, Val>(this Dictionary<Key, Val> dic, Key key, Val value)
+    static public void AddOrSet<Key, Val>(this Dictionary<Key, Val> dic, in Key key, in Val value)
 	{
         if (dic.ContainsKey(key))
             dic[key] = value;
         else dic.Add(key, value);
 	} 
     [MethodImpl(INLINED)]
-    static public Val TryGetOrAddDefault<Key, Val>(this Dictionary<Key, Val> dic, Key key, Val defaultVal)
+    static public Val TryGetOrAddDefault<Key, Val>(this Dictionary<Key, Val> dic, in Key key, in Val defaultVal)
     {
         if (dic.TryGetValue(key, out var value))
             return value;
@@ -251,17 +255,17 @@ static public class MathU
     static public bool IsZero(this ref Vector2 v) => v.x == 0f && v.y == 0f; 
 
     [MethodImpl(INLINED)]
-    static public bool IsNanOrInifinity(this Vector3 v)
+    static public bool IsNanOrInifinity(this in Vector3 v)
         => float.IsNaN(v.x) || float.IsInfinity(v.x)
         || float.IsNaN(v.y) || float.IsInfinity(v.y)
         || float.IsNaN(v.z) || float.IsInfinity(v.z);
     [MethodImpl(INLINED)]
-    static public bool IsNanOrInifinity(this Vector2 v)
+    static public bool IsNanOrInifinity(this in Vector2 v)
         => float.IsNaN(v.x) || float.IsInfinity(v.x)
         || float.IsNaN(v.y) || float.IsInfinity(v.y);
 
     [BurstCompile]
-    public static float Remap(this float val, float fromMin, float fromMax, float toMin, float toMax)
+    public static float Remap(this in float val, in float fromMin, float fromMax, in float toMin, in float toMax)
     {
         if (fromMax - fromMin == 0)
             fromMax = 0.0000001f;
@@ -270,14 +274,14 @@ static public class MathU
 
 
     [BurstCompile]
-    public static float Remap(this int val, float fromMin, float fromMax, float toMin, float toMax)
+    public static float Remap(this int val, in float fromMin, float fromMax, in float toMin, in float toMax)
     {
         if (fromMax - fromMin == 0)
             fromMax = 0.0000001f;
         return (toMax - toMin) * (val - fromMin) / (fromMax - fromMin) + toMin;
     }
     [MethodImpl(INLINED), BurstCompile]
-    public static float RemapTo01(this float val, float fromMin, float fromMax)
+    public static float RemapTo01(this in float val, in float fromMin, float fromMax)
     {
         if (fromMax - fromMin == 0)
             fromMax = 0.000001f;
@@ -313,7 +317,7 @@ static public class MathU
     => CopyToFloat3(from, to, 0, to.Length);
     [BurstCompile]
     static public void CopyToFloat3(this NativeArray<float2> from, NativeArray<float3> to, int startIndex, int count)
-    {
+    { 
         for (int i = 0; i < count; i++)
         {
             var f2 = from[i];
@@ -322,7 +326,7 @@ static public class MathU
     }
 
     [BurstCompile] 
-    static public float3 GetTriangleNormal(float3 A, float3 B, float3 C)
+    static public float3 GetTriangleNormal(in float3 A, in float3 B, in float3 C)
     {
         var AB = B - A;
         var AC = C - A;
@@ -336,7 +340,7 @@ static public class MathU
     }
 
     [BurstCompile]
-    static public float3 GetQuadNormal(float3 A, float3 B, float3 C, float3 D, out float angle)
+    static public float3 GetQuadNormal(in float3 A, in float3 B, in float3 C, in float3 D, out float angle)
     {
         var normalA = math.cross(C, A);
         var normalB = math.cross(D, B);
@@ -345,11 +349,11 @@ static public class MathU
     }
 
     [BurstCompile]
-    public static float Angle(float3 from, float3 to)
+    public static float Angle(in float3 from, in float3 to)
     {
         return math.degrees(math.acos(math.dot(math.normalize(from), math.normalize(to))));
     }
-    public static void InCenter(float2 p1, float2 p2, float2 p3, out float2 inCenter, out float inRadius)
+    public static void InCenter(in float2 p1, in float2 p2, in float2 p3, out float2 inCenter, out float inRadius)
     {
         var a = math.distance(p1, p2);
         var b = math.distance(p2, p3);
@@ -368,13 +372,13 @@ static public class MathU
 
 
 
-    static public Color ToColor(this Vector3 v) => new Color(v.x, v.y, v.z);
+    static public Color ToColor(this in Vector3 v) => new Color(v.x, v.y, v.z);
     [MethodImpl(INLINED)]
-    static public bool Approximately(Vector2 v1, Vector2 v2)
+    static public bool Approximately(in Vector2 v1, in Vector2 v2)
    => Mathf.Approximately(v1.x, v2.x) && Mathf.Approximately(v1.y, v2.y);
 
     [MethodImpl(INLINED)] 
-    static public Vector2 ClampValues(this Vector2 toClamp, float maxX, float maxY)
+    static public Vector2 ClampValues(this in Vector2 toClamp, float maxX, float maxY)
     => new Vector2
         (
            Mathf.Clamp(toClamp.x, 0, maxX),
@@ -382,7 +386,7 @@ static public class MathU
         ); 
     [MethodImpl(INLINED)]
      
-    static public Vector2 ClampMinValues(this Vector2 toClamp, Vector2 minClamp)
+    static public Vector2 ClampMinValues(this in Vector2 toClamp, in Vector2 minClamp)
        => new Vector2()
        {
            x = Mathf.Clamp(toClamp.x, minClamp.x, float.MaxValue),
@@ -396,7 +400,7 @@ static public class MathU
         };
     static public Vector3 ClampMinValues(this  Vector3 toClamp, Vector3 minClamp)
         => ClampV3(toClamp, minClamp, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue));
-    static public Vector3 ClampV3(this Vector3 toClamp, Vector3 minClamp, Vector3 maxClamp)
+    static public Vector3 ClampV3(this in Vector3 toClamp, Vector3 minClamp, Vector3 maxClamp)
     => new Vector3()
     {
         x = Mathf.Clamp(toClamp.x, minClamp.x, maxClamp.x),
@@ -414,12 +418,12 @@ static public class MathU
         v.y = (sin * tx) + (cos * ty);
         return v;
     } 
-	static public void AngleTo(this Quaternion rot, Quaternion target, out float angle, out Vector3 axis)
+	static public void AngleTo(this in Quaternion rot, in Quaternion target, out float angle, out Vector3 axis)
 	{
 		Quaternion rotation = Quaternion.Inverse(rot) * target;
 		rotation.ToAngleAxis(out angle, out axis);
 	}
-	static public Quaternion Between(this Quaternion rot, Quaternion subtract)
+	static public Quaternion Between(this in Quaternion rot, in Quaternion subtract)
 	{
 		return Quaternion.Inverse(subtract) * rot;
 	}
@@ -449,34 +453,34 @@ static public class MathU
     static public Vector2 BottomCenter(this Rect rect) => rect.center + new Vector2(0, -rect.size.y / 2f);
 
     [MethodImpl(INLINED)]
-    public static Vector2 Abs(this Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
+    public static Vector2 Abs(this in Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
 	[MethodImpl(INLINED)]
-	public static Vector2 XZ(this Vector3Int vv) => new Vector2(vv.x, vv.z);
+	public static Vector2 XZ(this in Vector3Int vv) => new Vector2(vv.x, vv.z);
 	[MethodImpl(INLINED)]
-	public static Vector2Int XZRoundToInt(this Vector3 vv) => new Vector2Int( Mathf.RoundToInt( vv.x) , Mathf.RoundToInt(vv.z));
+	public static Vector2Int XZRoundToInt(this in Vector3 vv) => new Vector2Int( Mathf.RoundToInt( vv.x) , Mathf.RoundToInt(vv.z));
 	[MethodImpl(INLINED)]
-	public static Vector2Int XZInt(this Vector3Int vv) => new Vector2Int(vv.x, vv.z); 
+	public static Vector2Int XZInt(this in Vector3Int vv) => new Vector2Int(vv.x, vv.z); 
 	[MethodImpl(INLINED)]
-	public static Vector3Int XZToXYZInt(this Vector2 v2) => new Vector3Int( Mathf.RoundToInt(v2.x), 0,  Mathf.RoundToInt(v2.y));
+	public static Vector3Int XZToXYZInt(this in Vector2 v2) => new Vector3Int( Mathf.RoundToInt(v2.x), 0,  Mathf.RoundToInt(v2.y));
 	[MethodImpl(INLINED)]
-	public static Vector3Int XZToXYZInt(this Vector2 v2, int y) => new Vector3Int( Mathf.RoundToInt(v2.x), y,  Mathf.RoundToInt(v2.y));
+	public static Vector3Int XZToXYZInt(this in Vector2 v2, int y) => new Vector3Int( Mathf.RoundToInt(v2.x), y,  Mathf.RoundToInt(v2.y));
     [MethodImpl(INLINED)]
-    public static Vector2 XZ(this Vector3 vv) => new Vector2(vv.x, vv.z);
+    public static Vector2 XZ(this in Vector3 vv) => new Vector2(vv.x, vv.z);
 	[MethodImpl(INLINED)]
-	public static Vector3 XZToXYZ(this Vector2 v2) => new Vector3(v2.x, 0, v2.y);
+	public static Vector3 XZToXYZ(this in Vector2 v2) => new Vector3(v2.x, 0, v2.y);
 
 	[MethodImpl(INLINED)]
-    public static Vector3Int XZToXYZInt(this Vector2Int v2) => new Vector3Int(v2.x, 0, v2.y);
+    public static Vector3Int XZToXYZInt(this in Vector2Int v2) => new Vector3Int(v2.x, 0, v2.y);
 	[MethodImpl(INLINED)] 
-	public static Vector3 XZToXYZ(this Vector2Int v2) => new Vector3(v2.x, 0, v2.y);
+	public static Vector3 XZToXYZ(this in Vector2Int v2) => new Vector3(v2.x, 0, v2.y);
 	[MethodImpl(INLINED)]
-    public static Vector3 XZToXYZ(this Vector2 v2, float Y) => new Vector3(v2.x, Y, v2.y); 
+    public static Vector3 XZToXYZ(this in Vector2 v2, float Y) => new Vector3(v2.x, Y, v2.y); 
     [MethodImpl(INLINED)]
-    public static string Vector2Hash(this Vector2 hash) => $"{hash.x},{hash.y}";
+    public static string Vector2Hash(this in Vector2 hash) => $"{hash.x},{hash.y}";
     [MethodImpl(INLINED)] 
-    public static Vector3 ToV3(this Vector2 v2) => new Vector3(v2.x,v2.y,0);
+    public static Vector3 ToV3(this in Vector2 v2) => new Vector3(v2.x,v2.y,0);
     [MethodImpl(INLINED)]
-    static public Vector3 Abs(this Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.x), z = Mathf.Abs(v.x) };
+    static public Vector3 Abs(this in Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.x), z = Mathf.Abs(v.x) };
 
 
 
@@ -488,7 +492,7 @@ static public class MathU
 
    
 
-    public static Vector2 NearestEdge(Rect rect, Vector2 point)
+    public static Vector2 NearestEdge(this in Rect rect, in Vector2 point)
     {
         Vector2 nearestEdgePoint = new Vector2();
 
@@ -526,7 +530,7 @@ static public class MathU
     }
 
     [MethodImpl(INLINED)]
-    public static Vector2 GetCellCenter(float posX, float posZ, float cellSize)
+    public static Vector2 GetCellCenter(in float posX, in float posZ, in float cellSize)
     {
         return new Vector2()
         {
@@ -535,7 +539,7 @@ static public class MathU
         };
     }
     [MethodImpl(INLINED)]
-    public static float2 GetCellCenter(float2 pos, float cellSize)
+    public static float2 GetCellCenter(in float2 pos, in float cellSize)
     {
         return new float2()
         {
@@ -544,7 +548,7 @@ static public class MathU
         };
     }
     [MethodImpl(INLINED)]
-    public static Vector2 GetCellCenter(Vector2 pos, float cellSize)
+    public static Vector2 GetCellCenter(in Vector2 pos, in float cellSize)
     {
         return new Vector2()
         {
@@ -553,7 +557,7 @@ static public class MathU
         };
     }
     [MethodImpl(INLINED)]
-    public static Vector2 GetCellCenter(Vector2 pos, int cellSize)
+    public static Vector2 GetCellCenter(in Vector2 pos, in int cellSize)
     {
         return new Vector2()
         {
@@ -563,7 +567,7 @@ static public class MathU
     } 
 
     [MethodImpl(INLINED)]
-    public static Vector2 GetCellMin(Vector2 pos, int cellSizeSqr)
+    public static Vector2 GetCellMin(in Vector2 pos, in int cellSizeSqr)
     {
         return new Vector2()
         {
@@ -573,7 +577,7 @@ static public class MathU
     } 
 
     [MethodImpl(INLINED)]
-    public static Vector2 GetCellMax(Vector2 pos, int cellSizeSqr)
+    public static Vector2 GetCellMax(in Vector2 pos, in int cellSizeSqr)
     {
         return new Vector2()
         {
@@ -582,38 +586,40 @@ static public class MathU
         };
     }
     [MethodImpl(INLINED)]
-    public static float GetCellCenter(float pos, float cellSize)
+    public static float GetCellCenter(in float pos, in float cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize;
     }
 
     [MethodImpl(INLINED)]
-    public static float GetCellCenter(float pos, int cellSize)
+    public static float GetCellCenter(in float pos, in int cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize;
     }
     [MethodImpl(INLINED)]
-    public static int GetCellCenterInt(int pos, int cellSize)
+    public static int GetCellCenterInt(in int pos, in int cellSize)
     {
         return pos / cellSize * cellSize;
     }
     [MethodImpl(INLINED)]
-    public static float GetCellMax(float pos, int cellSize)
+    public static float GetCellMax(in float pos, in int cellSize)
     {
         return  Mathf.Round(pos / cellSize) * cellSize + cellSize /2f;
     } 
 
     [MethodImpl(INLINED)]
-    public static float GetCellMin(float pos, int cellSize)
+    public static float GetCellMin(in float pos, in int cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize - cellSize / 2f;
     }
      
     [MethodImpl(INLINED)]
-    public static string V3Str(this Vector3 v3) => $"{v3.x},{v3.y},{v3.z}";
+    public static string V3Str(this in Vector3 v3) => $"{v3.x},{v3.y},{v3.z}";
     [MethodImpl(INLINED)]
-    public static string XZStr(this Vector3 v3) => $"{v3.x},{v3.z}";
-    public static Vector2 XY(this Vector3 v3) => new Vector2(v3.x, v3.y);
+    public static string V2Str(this in Vector2 v2) => $"{v2.x},{v2.y}";
+    [MethodImpl(INLINED)]
+    public static string XZStr(this in Vector3 v3) => $"{v3.x},{v3.z}";
+    public static Vector2 XY(this in Vector3 v3) => new Vector2(v3.x, v3.y);
     public static List<Vector2> ToXZ(this List<Vector3> list)
     {
         var v2 = new List<Vector2>();
@@ -722,14 +728,14 @@ static public class MathU
     static public Matrix4x4 MatrixOne { get => MatOne; }
 
     [MethodImpl(INLINED)]
-    static public bool isInsideRect(Vector2 bottomLeft, Vector2 topRight, Vector2 point)
+    static public bool isInsideRect(in Vector2 bottomLeft, in Vector2 topRight, in Vector2 point)
     {
         return point.x >= bottomLeft.x && point.x <= topRight.x
                     && point.y >= bottomLeft.y && point.y <= topRight.y;
     }
 
     [MethodImpl(INLINED)]
-    static public bool isInsideCircle(Vector2 pos, Vector2 circleCenter, float radius)
+    static public bool isInsideCircle(in Vector2 pos, in Vector2 circleCenter, float radius)
     {
         var dx = Mathf.Abs(pos.x - circleCenter.x);
         var dy = Mathf.Abs(pos.y - circleCenter.y);
@@ -867,7 +873,7 @@ static public class MathU
         return tmpArr;
     }
     
-    static public Rect[] SubdivideFromTop(this Rect rect , float[] ySizes , bool byPrecentage)
+    static public Rect[] SubdivideFromTop(this in Rect rect , float[] ySizes , bool byPrecentage)
     {
         var rects = new Rect[ySizes.Length];
         var currentPos = rect.position;
@@ -882,12 +888,12 @@ static public class MathU
         return rects;
     }
 
-    public static Rect ScaleSizeBy(this Rect rect, float scale)
+    public static Rect ScaleSizeBy(this in Rect rect, float scale)
     {
         return rect.ScaleSizeBy(scale, rect.center);
     }
 
-    public static Rect ScaleSizeBy(this Rect rect, float scale, Vector2 pivotPoint)
+    public static Rect ScaleSizeBy(this in Rect rect, float scale, Vector2 pivotPoint)
     {
         Rect result = rect;
         result.x -= pivotPoint.x;
@@ -900,11 +906,11 @@ static public class MathU
         result.y += pivotPoint.y;
         return result;
     }
-    public static Rect ScaleSizeBy(this Rect rect, Vector2 scale)
+    public static Rect ScaleSizeBy(this in Rect rect, in Vector2 scale)
     {
         return rect.ScaleSizeBy(scale, rect.center);
     }
-    public static Rect ScaleSizeBy(this Rect rect, Vector2 scale, Vector2 pivotPoint)
+    public static Rect ScaleSizeBy(this in Rect rect, in Vector2 scale, in Vector2 pivotPoint)
     {
         Rect result = rect;
         result.x -= pivotPoint.x;
@@ -920,9 +926,9 @@ static public class MathU
 
     public static Color RandomColor()
     {
-        var r = _pureRandom.NextFloat(0, 1f);
-        var g = _pureRandom.NextFloat(0, 1f);
-        var b = _pureRandom.NextFloat(0, 1f);
+        var r = PureRandom; 
+        var g = PureRandom;
+        var b = PureRandom;
         return  new(r, g, b);   
     }
 
