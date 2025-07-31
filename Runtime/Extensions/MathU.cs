@@ -214,6 +214,10 @@ static public class MathU
     [MethodImpl(INLINED)]
     static public Vector3Int RoundToInt(this in Vector3 v3) 
         => new Vector3Int(){ x = Mathf.RoundToInt(v3.x), y = Mathf.RoundToInt(v3.y), z = Mathf.RoundToInt(v3.z) };
+    [MethodImpl(INLINED)]
+	static public Vector3Int CeilToInt(this in Vector3 v3) => new(Mathf.CeilToInt(v3.x), Mathf.CeilToInt(v3.y), Mathf.CeilToInt(v3.z));
+    [MethodImpl(INLINED)]
+	static public Vector3Int FloorToInt(this in Vector3 v3) => new(Mathf.FloorToInt(v3.x), Mathf.FloorToInt(v3.y), Mathf.FloorToInt(v3.z));
     [MethodImpl(INLINED)] 
     static public Vector2Int RoundToInt(this in Vector2 v2) 
         => new Vector2Int () { x = Mathf.RoundToInt(v2.x), y = Mathf.RoundToInt(v2.y) };
