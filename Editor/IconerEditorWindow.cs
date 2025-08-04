@@ -338,6 +338,12 @@ public class IconerEditorWindow : OdinMenuEditorWindow
                 EditorSceneManager.ClosePreviewScene(_scene);
                 _isSceneOpen = false;
             }
+            if (_cam)
+            {
+                _cam.forceIntoRenderTexture = false;
+                _cam.targetTexture = null;
+                _cam.SafeDestroy();
+            }
             if (CamTex)
                 CamTex.Release();
         }
