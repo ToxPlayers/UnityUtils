@@ -60,7 +60,18 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         }
         this.DrawMenuSearchBar = true; 
         tree.Selection.SupportsMultiSelect = true;
+        tree.Selection.SelectionChanged += Selection_SelectionChanged;
         return tree;
+    }
+
+    private void Selection_SelectionChanged(SelectionChangedType obj)
+    {
+        _cachedSelection.Clear();
+        foreach (var sel in MenuTree.Selection)
+        {
+            if (sel.Value is IconerScene iconer)
+                _cachedSelection.Add(iconer); 
+        } 
     }
 
     [Serializable] public class CamSettingsScriptable : ScriptableObject
@@ -68,8 +79,8 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         [HideLabel, HideReferenceObjectPicker] public CamSettings Settings;
     }
     [Serializable] public class CamSettings
-    {
-        public Vector2Int TextureResoulation = new(512,512);
+    { 
+        [OnValueChanged(nameof(ValidateRes))] public Vector2Int TextureResoulation = new(512,512);
         public float Distance = 3f;
         public Vector3 OrbitalRotation = new(17f, 45f,0), 
             FrameOffset;
@@ -78,8 +89,19 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         public bool OutputToSameFolder = true;
         [FolderPath, HideIf(nameof(OutputToSameFolder))] 
         public string OutputFolder;
-
         [NonSerialized] public int UpdatedSettingsCount;
+        [Range(0.1f, 2f)] public float PreviewSize = 0.5f;
+
+
+        const int MAX_RES = 2048;
+        public bool ValidateRes(Vector2Int res)
+        {
+            var isValid = res.x <= MAX_RES && res.y <= MAX_RES;
+            TextureResoulation.x = Mathf.Clamp(res.x, 24, MAX_RES);
+            TextureResoulation.y = Mathf.Clamp(res.y, 24, MAX_RES);
+            return isValid;
+        }
+
     }
 
     CamSettingsScriptable _camSettings;
@@ -115,20 +137,7 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         EditorPrefs.SetString(settings_key, json);
     }
 
-    IEnumerable<IconerScene> SelectedIconers
-    {
-        get
-        {
-            foreach (var sel in MenuTree.Selection)
-            {
-                if (sel.Value is IconerScene iconer)
-                {
-                    yield return iconer;
-                }
-            }
-        }
-    }
-
+    List<IconerScene> _cachedSelection = new(); 
     void DrawSettings()
     {
         SirenixEditorGUI.BeginIndentedHorizontal();
@@ -141,6 +150,7 @@ public class IconerEditorWindow : OdinMenuEditorWindow
             _camSettingsEditor.Draw();
             if (EditorGUI.EndChangeCheck())
             {
+                _camSettings.Settings.ValidateRes(_camSettings.Settings.TextureResoulation);
                 SaveCamSettings();
                 settings.UpdatedSettingsCount++;
             }
@@ -157,9 +167,14 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         if (_generationAwaits.Count > 0)
         {
             var countAwaitsOver = 0;
-            foreach (var await in _generationAwaits)
-                if (await.IsCompleted)
+            for (int i = 0; i < _generationAwaits.Count;)
+            {
+                if (_generationAwaits[i].IsCompleted)
+                {
+                    _generationAwaits.RemoveAt(i);
                     countAwaitsOver++;
+                } else i++;
+            }
             SirenixEditorFields.ProgressBarField("Generating...", countAwaitsOver, 0, _generationAwaits.Count); 
             return;
         } 
@@ -167,31 +182,44 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         ValidateCamSettings();
         DrawSettings();
 
-        var selection = MenuTree.Selection; 
         SirenixEditorGUI.BeginBox("Output");
         var generate = SirenixEditorGUI.Button("Generate Icon", ButtonSizes.Medium);
-        List<Awaitable> awaits = new();
-        foreach (var iconer in SelectedIconers)
+
+        var settings = _camSettings.Settings;
+        int colCount = (int)Math.Ceiling(Math.Sqrt(_cachedSelection.Count));
+        
+        GUILayout.BeginHorizontal();
+        for (int i = 0; i < _cachedSelection.Count; i++)
         {
-            iconer.RenderWithCamSettings(_camSettings.Settings);
-            var res = EditorGUILayout.GetControlRect(GUILayout.Width(iconer.CamTex.width), GUILayout.Height(iconer.CamTex.height));
+            if (i % colCount == 0)
+            {
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+            }
+            var iconer = _cachedSelection[i];
+            iconer.RenderWithCamSettings(settings);
+            SirenixEditorGUI.BeginBox(iconer.GetFileName(settings));
+            var width = GUILayout.Width(Mathf.RoundToInt(iconer.CamTex.width * settings.PreviewSize));
+            var height = GUILayout.Height(Mathf.RoundToInt(iconer.CamTex.height * settings.PreviewSize));
+            var res = EditorGUILayout.GetControlRect(width, height);
             SirenixEditorFields.PreviewObjectField(res, iconer.CamTex, false, false, false, false);
-             
             if (generate)
-                awaits.Add(iconer.Generate(_camSettings.Settings));
+                _generationAwaits.Add(iconer.Generate(settings));
+            SirenixEditorGUI.EndBox();
         }
+        GUILayout.EndHorizontal();
         SirenixEditorGUI.EndBox(); 
     }
 
-    protected override void OnDestroy()
+    protected override void OnDisable()
     {
-        foreach(var item in MenuTree.MenuItems)
+        foreach (var item in MenuTree.MenuItems)
         {
             if (item.Value is IconerScene iconer)
                 iconer.Dispose();
         }
         _camSettingsEditor.Dispose();
-        base.OnDestroy();
+        base.OnDisable();
     }
 
     public class DrawableIconerTable
@@ -224,19 +252,21 @@ public class IconerEditorWindow : OdinMenuEditorWindow
                     _scene = EditorSceneManager.NewPreviewScene();
                     PrefabUtility.LoadPrefabContentsIntoPreviewScene(_prefabPath, _scene);
 
-                    CamTex = new RenderTexture(settings.TextureResoulation.x, settings.TextureResoulation.y, 1);
                     _camParent = new GameObject();
                     _cam = new GameObject().AddComponent<Camera>();
                     _cam.cameraType = CameraType.Preview;
                     _cam.clearFlags = CameraClearFlags.SolidColor;
                     _cam.forceIntoRenderTexture = true;
-                    _cam.targetTexture = CamTex;
                     _cam.backgroundColor = new(0, 0, 0, 0);
                     _cam.transform.parent = _camParent.transform;
                     _cam.scene = _scene;
                     SceneManager.MoveGameObjectToScene(_camParent, _scene); 
                 }
                 _lastSettingsId = settings.UpdatedSettingsCount;
+                if(CamTex == null || !CamTex.IsCreated() ||
+                    settings.TextureResoulation.x != CamTex.width || settings.TextureResoulation.y != CamTex.height)
+                    CamTex = new RenderTexture(settings.TextureResoulation.x, settings.TextureResoulation.y, 1);
+                _cam.targetTexture = CamTex;
                 _cam.transform.localPosition = Vector3.forward * -settings.Distance;
                 _camParent.transform.localEulerAngles = settings.OrbitalRotation;
                 _camParent.transform.localPosition = settings.FrameOffset; 
@@ -253,12 +283,16 @@ public class IconerEditorWindow : OdinMenuEditorWindow
             }     
         }
 
+        internal string GetFileName(CamSettings settings)
+        {
+            var prefabName = Path.GetFileNameWithoutExtension(_prefabPath);
+            return settings.OutputFileRegex.Replace("$", prefabName);
+        }
         string GetOutputPath(CamSettings settings)
         {
             var folder = settings.OutputToSameFolder ?
                 Path.GetDirectoryName(_prefabPath) : settings.OutputFolder;
-            var prefabName = Path.GetFileNameWithoutExtension(_prefabPath);
-            var fileName = settings.OutputFileRegex.Replace("$", prefabName);
+            var fileName = GetFileName(settings);
             fileName += ".png";
             var fullFilePath = Path.Join(folder, fileName);
             return fullFilePath; 
@@ -303,6 +337,7 @@ public class IconerEditorWindow : OdinMenuEditorWindow
             if (CamTex)
                 CamTex.Release();
         }
+
     }
 }
 #endif
