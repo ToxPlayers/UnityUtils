@@ -53,27 +53,30 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         foreach(var item in tree.MenuItems)
         {
             if (item.Value == null)
-            {
-                item.IsSelectable = false;
                 item.AddIcon(SdfIconType.Folder);
-            }
         }
         this.DrawMenuSearchBar = true; 
         tree.Selection.SupportsMultiSelect = true;
         tree.Selection.SelectionChanged += Selection_SelectionChanged;
         return tree;
-    }
+    } 
 
     private void Selection_SelectionChanged(SelectionChangedType obj)
-    {
+    { 
         _cachedSelection.Clear();
-        foreach (var sel in MenuTree.Selection)
+
+        if(MenuTree.Selection.Count == 1 && MenuTree.Selection[0].Value == null)
+        {
+            foreach(var child in MenuTree.Selection[0].GetChildMenuItemsRecursive(false))
+                if (child.Value is IconerScene iconer)
+                    _cachedSelection.Add(iconer);
+        }
+        else foreach (var sel in MenuTree.Selection)
         {
             if (sel.Value is IconerScene iconer)
-                _cachedSelection.Add(iconer); 
+                _cachedSelection.Add(iconer);
         } 
     }
-
     [Serializable] public class CamSettingsScriptable : ScriptableObject
     {
         [HideLabel, HideReferenceObjectPicker] public CamSettings Settings;
