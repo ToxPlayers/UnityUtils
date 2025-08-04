@@ -140,8 +140,7 @@ public class IconerEditorWindow : OdinMenuEditorWindow
     List<IconerScene> _cachedSelection = new(); 
     void DrawSettings()
     {
-        SirenixEditorGUI.BeginIndentedHorizontal();
-        SirenixEditorGUI.BeginBox("Framing");
+        SirenixEditorGUI.BeginBox("Framing", false);
         var settings = _camSettings.Settings;
         try
         {
@@ -157,7 +156,6 @@ public class IconerEditorWindow : OdinMenuEditorWindow
         }
         catch (Exception ex) { Debug.LogException(ex); }
         SirenixEditorGUI.EndBox();
-        SirenixEditorGUI.EndIndentedHorizontal();
     }
     List<Awaitable> _generationAwaits = new();
     protected override void OnBeginDrawEditors()
@@ -198,11 +196,14 @@ public class IconerEditorWindow : OdinMenuEditorWindow
             }
             var iconer = _cachedSelection[i];
             iconer.RenderWithCamSettings(settings);
-            SirenixEditorGUI.BeginBox(iconer.GetFileName(settings));
-            var width = GUILayout.Width(Mathf.RoundToInt(iconer.CamTex.width * settings.PreviewSize));
+
+            var widthInt = Mathf.RoundToInt(iconer.CamTex.width * settings.PreviewSize);
+            var width = GUILayout.Width(widthInt);
             var height = GUILayout.Height(Mathf.RoundToInt(iconer.CamTex.height * settings.PreviewSize));
-            var res = EditorGUILayout.GetControlRect(width, height);
-            SirenixEditorFields.PreviewObjectField(res, iconer.CamTex, false, false, false, false);
+            SirenixEditorGUI.BeginBox(iconer.GetFileName(settings), true, GUILayout.Width(widthInt));
+            var rect = EditorGUILayout.GetControlRect(width, height);
+            SirenixEditorFields.PreviewObjectField(rect, iconer.CamTex,
+                false, false, false, false);
             if (generate)
                 _generationAwaits.Add(iconer.Generate(settings));
             SirenixEditorGUI.EndBox();
