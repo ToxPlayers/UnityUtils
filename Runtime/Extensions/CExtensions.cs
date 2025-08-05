@@ -48,7 +48,15 @@ static public class CExtensions
     {  
         flagMask &= (~flags);
     }
-
+	static public IEnumerable<int> EnumFlags(this int mask)
+	{
+		for (int i = 0; i < 32; ++i)
+		{
+		  var toFlag = 1 << i;
+		  if (toFlag.IsSetBitFlags(mask))
+			  yield return mask;
+		}
+	}
     #endregion
 	
     [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, char until) => input.Substring(input.LastIndexOf(until) + 1); 
