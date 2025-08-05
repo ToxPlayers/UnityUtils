@@ -54,7 +54,7 @@ static public class CExtensions
 		{
 		  var toFlag = 1 << i;
 		  if (toFlag.IsSetBitFlags(mask))
-			  yield return mask;
+			  yield return toFlag;
 		}
 	}
     #endregion
