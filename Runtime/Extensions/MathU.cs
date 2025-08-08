@@ -209,6 +209,8 @@ static public class MathU
     { 
         return new Color(1-color.r, 1-color.g, 1-color.b, color.a); 
     }
+	[MethodImpl(INLINED)] 
+    static public Vector3 ToFloat(this in Vector3Int vec2Int) => new Vector3(vec2Int.x, vec2Int.y, vec2Int.z);
     [MethodImpl(INLINED)] 
     static public Vector2 ToFloat(this in Vector2Int vec2Int) => new Vector2(vec2Int.x, vec2Int.y);
     [MethodImpl(INLINED)]
