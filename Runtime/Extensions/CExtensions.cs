@@ -31,6 +31,8 @@ static public class CExtensions
 
         return n;
     } 
+	[MethodImpl(INLINE)]
+	public static int FlagsCount(this in int mask) => System.Numerics.BitOperations.PopCount(mask);
     [MethodImpl(INLINE)]
 	public static int ToFlagsMask(this ref int bitIndex) => 1 << bitIndex;
     [MethodImpl(INLINE)]
