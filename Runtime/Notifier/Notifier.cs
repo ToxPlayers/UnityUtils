@@ -6,7 +6,7 @@ using TriInspector;
 #endif
 using UnityEngine.Events;
 using System;
-
+using UnityInternalExpose;
 
 [Serializable, HideMonoScript, InlineProperty]
 public class Notifier<T>
@@ -30,16 +30,16 @@ public class Notifier<T>
     [NonSerialized] UnityEvent<T> _onChangeSingle = new();
     public ReadOnly Readonly => new(this);
     public T PreviousValue => _prevValue;
-    public int EstimatedListenerCount { get; private set; }
+    public int ListenerCount => _onChange.GetListenerCount() + _onChangeSingle.GetListenerCount();
     [ShowInInspector, HideLabel, PropertyOrder(-10)]
 #if ODIN_INSPECTOR
-    [SuffixLabel("@" + nameof(EstimatedListenerCount), SdfIconType.EarFill)]
+    [SuffixLabel("@" + nameof(ListenerCount), SdfIconType.EarFill)]
 #endif
     public T Value
     {
         get => _value; 
 		set
-		{ 
+		{  
             if (_value == null && value == null)
 				return;
 
@@ -50,7 +50,7 @@ public class Notifier<T>
     } 
 	public Notifier() {}
     public Notifier(T value)
-    {
+    { 
         ForceValueChange(value);
     }
     public void ForceValueChange(T value)
@@ -67,14 +67,12 @@ public class Notifier<T>
     public void Sub(UnityAction<T> action, bool callNow = true)
     {
         _onChangeSingle.AddListener(action);
-        EstimatedListenerCount++;
         if (callNow)
             action.Invoke(_value);
     }
 
     public void Sub(UnityAction<T, T> action, bool callNow = true)
     {
-        EstimatedListenerCount++;
         _onChange.AddListener(action);
         if (callNow)
             action.Invoke(_prevValue, _value);
@@ -93,13 +91,11 @@ public class Notifier<T>
     }
     public void Unsub(UnityAction<T, T> action)
     {
-        EstimatedListenerCount--;
         _onChange.RemoveListener(action);
     }
     public void Unsub(UnityAction<T> action)
     {
-        EstimatedListenerCount--;
-        _onChangeSingle.RemoveListener(action);
+        _onChangeSingle.RemoveListener(action); 
     }
     static public implicit operator T(Notifier<T> w) => w.Value;
 }
