@@ -20,6 +20,8 @@ public class ModuleData : ScriptableObject {}
 
 [JsonConverter(typeof(Files.UnityObjectJsonConverter<Module>))] 
 public class Module : MonoBehaviour {}
+
+public class ModuleRegistry : Files.AssetRegistry<Module> { }
 ```
 dependencies<br> 
 Odin Inspector <br> 
