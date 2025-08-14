@@ -1,5 +1,5 @@
 Added saving ScriptableObjects and Prefabs refrences including components of prefabs.
-```
+```cs
 public class FilesManager : ScriptableSingleton<FilesManager>
 { 
     [Serializable] public class Prefrences { }
