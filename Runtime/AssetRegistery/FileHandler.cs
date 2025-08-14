@@ -150,8 +150,9 @@ namespace Files
                     var bytes = File.ReadAllBytes(path);
                     content = Decrypt(bytes);
                 }
-                else content = File.ReadAllText(path);
-                value = JsonConvert.DeserializeObject<T>(content, Settings.SerializerSettings);
+                else content = File.Exists(path) ? File.ReadAllText(path) : ""; 
+                value = string.IsNullOrEmpty(content) ? default :
+                    JsonConvert.DeserializeObject<T>(content, Settings.SerializerSettings) ;
                 if (log)
                     Debug.Log($"Loaded {typeof(T).Name} -> {path}");
                 return true;

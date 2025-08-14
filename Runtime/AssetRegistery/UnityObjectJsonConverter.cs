@@ -10,11 +10,15 @@ namespace Files
     {
         public override T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
+            return StaticReadJson(reader);
+        }
+
+        static public T StaticReadJson(JsonReader reader)
+        {
             if (reader.Value == null)
                 return null;
             var strValue = reader.Value.ToString();
-            Debug.Log("reading " + strValue);
-            if (string.IsNullOrEmpty(strValue)) 
+            if (string.IsNullOrEmpty(strValue))
                 return null;
             if (!AssetRegistry<T>.Instance)
             {
@@ -25,10 +29,10 @@ namespace Files
                 return val;
             return null;
         }
-         
+
         public override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer)
         {
             writer.WriteValue(AssetRegistry<T>.Instance.GetKeyAddress(value));
-        } 
+        }
     }
 }
