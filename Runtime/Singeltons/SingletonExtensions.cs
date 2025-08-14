@@ -31,7 +31,8 @@ static public class SingletonExtensions
             }
             catch (Exception ex) { Debug.LogException(ex); }
         }  
-        Debug.Log($"Removed {removedCount} singletons\n{log}");  
+        if(removedCount > 0)
+            Debug.Log($"Removed {removedCount} singletons\n{log}");  
     }
     /*[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]*/
     [UnityEditor.MenuItem("Tools/Singletons/Force All Singeltons Instances")]
