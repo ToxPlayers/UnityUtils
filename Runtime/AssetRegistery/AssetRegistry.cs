@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 namespace Files
-{ 
+{  
     public abstract class AssetRegistry<T> : ScriptableSingleton<AssetRegistry<T>> where T : UnityEngine.Object
     {
         static public JsonConverter Converter => new UnityObjectJsonConverter<T>();
@@ -29,7 +29,16 @@ namespace Files
                 return "t:" + name;
             }
         }
-
+         
+        public override void OnAssembliesLoaded()
+        {
+            base.OnAssembliesLoaded();
+#if UNITY_EDITOR
+            AssetImportEvent.OnImport.AddListener(OnImport);
+            foreach (var assetReg in Resources.FindObjectsOfTypeAll<AssetRegistry<T>>())
+                assetReg.ReregisterAllAssets();
+#endif
+        } 
 
         public virtual T Register(T asset)
         {
@@ -44,13 +53,7 @@ namespace Files
 
 #if UNITY_EDITOR
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void Hook()
-        {
-            AssetImportEvent.OnImport.AddListener(OnImport);
-            foreach (var assetReg in Resources.FindObjectsOfTypeAll<AssetRegistry<T>>())
-                assetReg.ReregisterAllAssets();
-        }
+        
 
         public virtual void OnValidate()
         {

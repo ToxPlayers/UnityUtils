@@ -6,6 +6,6 @@ static public class ScriptableSingletonWakeup
     static void Wakeup()
     {
         foreach (var scr in Resources.FindObjectsOfTypeAll<ScriptableSingleton>())
-            scr.Wakeup();
+            scr.OnAssembliesLoaded();
     } 
 }

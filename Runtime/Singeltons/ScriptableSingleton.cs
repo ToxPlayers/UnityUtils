@@ -2,9 +2,13 @@ using Sirenix.OdinInspector;
 using System;
 using System.IO;
 using UnityEditor;
-using UnityEngine;
-public abstract class ScriptableSingleton : SerializedScriptableObject { public abstract void Wakeup(); }
-public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableObject 
+using UnityEngine; 
+public class ScriptableSingleton : SerializedScriptableObject
+{
+    static public readonly string SingletonsResFolder = "Singletons";
+    public virtual void OnAssembliesLoaded() { }
+}
+public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
 { 
 
     private static T _instance;
@@ -19,7 +23,6 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableOb
             return _instance;
         }
     }
-    static readonly string SingletonsFolder = "Singletons";
 
     protected virtual void Awake()
     {
@@ -33,11 +36,10 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableOb
             _instance = this as T;
     }
 
-    public void WakeupInstance() => Awake();
-
+    public void WakeupInstance() => Awake(); 
     static T Load()
     {
-        var dirPath = SingletonsFolder;
+        var dirPath = SingletonsResFolder;
         var instances = Resources.LoadAll<T>(dirPath);
         T instance = null;
         if (instances.Length == 0)
@@ -45,8 +47,8 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableOb
 #if UNITY_EDITOR
             if (Application.isEditor)
             {
-                Directory.CreateDirectory(SingletonsFolder);
-                var path = Path.Join(SingletonsFolder, typeof(T).Name + ".asset");
+                Directory.CreateDirectory(SingletonsResFolder);
+                var path = Path.Join(SingletonsResFolder, typeof(T).Name + ".asset");
                 AssetDatabase.CreateAsset(CreateInstance<T>(), path);
                 AssetDatabase.ImportAsset(path);
                 Debug.Log("Created Scriptable singleton at " + path); 
@@ -60,5 +62,5 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableOb
 
         return instance;
     }
-    public override void Wakeup() { }
+    public override void OnAssembliesLoaded() { }
 }
