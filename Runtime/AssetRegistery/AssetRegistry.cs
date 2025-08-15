@@ -48,13 +48,23 @@ namespace Files
 #if UNITY_EDITOR
         static AssetRegistry()
         {
-            EditorApplication.delayCall += Static_EditorApplication_Wake;
+            EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
         }
 
-        private static void Static_EditorApplication_Wake()
+        private static void SetAllSingletonsAsPreloaded()
         {
-            foreach (var assetReg in Resources.FindObjectsOfTypeAll<AssetRegistry<T>>())
-                assetReg.HookProjectChanged();
+            var allRegistris = Resources.FindObjectsOfTypeAll<AssetRegistry<T>>().ToList();
+            var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
+            var removed = preloadedAssets.RemoveAll(o => o == null);
+            var nonPreloadedRegistries = allRegistris.Except(preloadedAssets).ToList();
+            if(nonPreloadedRegistries.Count > 0 || removed > 0) 
+            {
+                var arr = nonPreloadedRegistries.Union(preloadedAssets).ToArray();
+                PlayerSettings.SetPreloadedAssets(arr); 
+            } 
+             
+            foreach (var reg in allRegistris)
+                reg.HookProjectChanged();
         }
         [NonSerialized] bool _isHooked = false; 
         public void HookProjectChanged()
