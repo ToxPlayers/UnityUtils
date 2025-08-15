@@ -29,16 +29,10 @@ namespace Files
                 return "t:" + name;
             }
         }
-         
-        public override void OnAssembliesLoaded()
-        {
-            base.OnAssembliesLoaded();
-#if UNITY_EDITOR
-            AssetImportEvent.OnImport.AddListener(OnImport);
-            foreach (var assetReg in Resources.FindObjectsOfTypeAll<AssetRegistry<T>>())
-                assetReg.ReregisterAllAssets();
-#endif
-        } 
+          
+
+     
+
 
         public virtual T Register(T asset)
         {
@@ -52,26 +46,31 @@ namespace Files
 
 
 #if UNITY_EDITOR
+        static AssetRegistry()
+        {
+            EditorApplication.delayCall += Static_EditorApplication_Wake;
+        }
 
-        
+        private static void Static_EditorApplication_Wake()
+        {
+            foreach (var assetReg in Resources.FindObjectsOfTypeAll<AssetRegistry<T>>())
+                assetReg.HookProjectChanged();
+        }
+        [NonSerialized] bool _isHooked = false; 
+        public void HookProjectChanged()
+        {
+            if (!_isHooked) 
+            {
+                _isHooked = true;
+                EditorApplication.projectChanged += ReregisterAllAssets;
+            }
+        } 
 
         public virtual void OnValidate()
         {
             if (_assets == null || _assets.Count == 0)
                 ReregisterAllAssets();
-        }
-
-        static void OnImport(AssetImportEvent.Data data)
-        {
-            var ins = Instance;
-            if (ins)
-            {
-                if (data.deletedAssets.Length > 0)
-                    ins.ClearNulls();
-                foreach (var path in data.movedAssets.Union(data.importedAssets))
-                    ins.TryRegister(path);
-            }
-        }
+        } 
 
         public void ClearNulls()
         {
@@ -87,7 +86,7 @@ namespace Files
         public void ReregisterAllAssets()
         {
             _assets ??= new();
-            _assets.Clear();
+            ClearNulls();
             var guids = AssetDatabase.FindAssets(SearchString, new string[] { "Assets" });
             foreach (var guid in guids)
             {
@@ -104,17 +103,20 @@ namespace Files
                 return;
             var address = GetKeyAddress(asset);
 
-            if(_assets.TryGetValue(address, out T containAsset))
+            if (_assets.TryGetValue(address, out T containAsset))
             {
                 var containedAddress = GetKeyAddress(containAsset);
-                if (containedAddress == address)
+                if (containedAddress == address && containAsset == asset)
                     return;
                 var containedPath = AssetDatabase.GetAssetPath(containAsset);
                 Debug.LogError($"Cant register same asset name:\n{path}\nAlready Registered: {containedPath}\n", asset);
             }
-            else _assets.TryAdd(address, asset);
+            else
+            {
+                Debug.Log($"{asset.name} Added to {GetType().Name}");
+                _assets.TryAdd(address, asset);
+            }
         }
-
 
 #endif
 

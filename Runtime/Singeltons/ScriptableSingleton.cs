@@ -5,8 +5,7 @@ using UnityEditor;
 using UnityEngine; 
 public class ScriptableSingleton : SerializedScriptableObject
 {
-    static public readonly string SingletonsResFolder = "Singletons";
-    public virtual void OnAssembliesLoaded() { }
+    static public readonly string SingletonsResFolder = "Singletons"; 
 }
 public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
 { 
@@ -61,6 +60,5 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
             instance = instances[0];
 
         return instance;
-    }
-    public override void OnAssembliesLoaded() { }
+    } 
 }
