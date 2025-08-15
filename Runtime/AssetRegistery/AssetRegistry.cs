@@ -46,35 +46,18 @@ namespace Files
 
 
 #if UNITY_EDITOR
-        static AssetRegistry()
+       
+         
+        [NonSerialized] bool _isHooked = false;
+        protected override void OnEditorPreloaded()
         {
-            EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
-        }
-
-        private static void SetAllSingletonsAsPreloaded()
-        {
-            var allRegistris = Resources.FindObjectsOfTypeAll<AssetRegistry<T>>().ToList();
-            var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
-            var removed = preloadedAssets.RemoveAll(o => o == null);
-            var nonPreloadedRegistries = allRegistris.Except(preloadedAssets).ToList();
-            if(nonPreloadedRegistries.Count > 0 || removed > 0) 
-            {
-                var arr = nonPreloadedRegistries.Union(preloadedAssets).ToArray();
-                PlayerSettings.SetPreloadedAssets(arr); 
-            } 
-             
-            foreach (var reg in allRegistris)
-                reg.HookProjectChanged();
-        }
-        [NonSerialized] bool _isHooked = false; 
-        public void HookProjectChanged()
-        {
-            if (!_isHooked) 
-            {
+            base.OnEditorPreloaded();
+            if (!_isHooked)
+            { 
                 _isHooked = true;
                 EditorApplication.projectChanged += ReregisterAllAssets;
-            }
-        } 
+            }  
+        }  
 
         public virtual void OnValidate()
         {
