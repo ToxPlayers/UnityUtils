@@ -47,6 +47,7 @@ namespace Files
 
         [SerializeField]
         public SaveSettings Settings = new();
+		public T DefaultValue;
         T _value;
         [ShowInInspector, HideLabel, InlineProperty]
         public T Value
@@ -54,7 +55,7 @@ namespace Files
             get
             {
                 if (_value == null && ! TryLoad(out _value))
-                    _value ??= new();
+                    _value ??= DefaultValue;
                 return _value;
             }
             set => SetValue(_value = value, true);
