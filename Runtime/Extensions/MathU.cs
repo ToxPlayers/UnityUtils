@@ -535,6 +535,40 @@ static public class MathU
         return nearestEdgePoint;
     }
 
+    #region Cells
+    [MethodImpl(INLINED)]
+    public static Vector3 GetCellCenter(in Vector3 pos, in float cellSize) => GetCellCenter(pos.x, pos.y, pos.z, cellSize);
+    [MethodImpl(INLINED)]
+    public static Vector3 GetCellCenter(in float x, in float y, in float z, in float cellSize)
+    {
+        return new Vector3()
+        {
+            x = GetCellCenter(x, cellSize),
+            y = GetCellCenter(y, cellSize),
+            z = GetCellCenter(z, cellSize)
+        };
+    }  
+    [MethodImpl(INLINED)]
+    public static Vector3 GetCellMin(in Vector3 pos, in float cellSizeSqr)
+    {
+        return new Vector3()
+        {
+            x = GetCellMin(pos.x, cellSizeSqr),
+            y = GetCellMin(pos.y, cellSizeSqr),
+            z = GetCellMin(pos.z, cellSizeSqr)
+        };
+    }
+
+    [MethodImpl(INLINED)]
+    public static Vector3 GetCellMax(in Vector3 pos, in float cellSizeSqr)
+    {
+        return new Vector3()
+        {
+            x = GetCellMax(pos.x, cellSizeSqr),
+            y = GetCellMax(pos.y, cellSizeSqr),
+            z = GetCellMax(pos.z, cellSizeSqr)
+        };
+    } 
     [MethodImpl(INLINED)]
     public static Vector2 GetCellCenter(in float posX, in float posZ, in float cellSize)
     {
@@ -567,8 +601,8 @@ static public class MathU
     {
         return new Vector2()
         {
-            x = GetCellCenter(pos.x, cellSize),
-            y = GetCellCenter(pos.y, cellSize)
+            x = GetCellCenterInt(pos.x, cellSize),
+            y = GetCellCenterInt(pos.y, cellSize)
         };
     } 
 
@@ -577,8 +611,8 @@ static public class MathU
     {
         return new Vector2()
         {
-            x = GetCellMin(pos.x, cellSizeSqr),
-            y = GetCellMin(pos.y, cellSizeSqr)
+            x = GetCellMinInt(pos.x, cellSizeSqr),
+            y = GetCellMinInt(pos.y, cellSizeSqr)
         };
     } 
 
@@ -587,18 +621,30 @@ static public class MathU
     {
         return new Vector2()
         {
-            x = GetCellMax(pos.x, cellSizeSqr),
-            y = GetCellMax(pos.y, cellSizeSqr)
+            x = GetCellMaxInt(pos.x, cellSizeSqr),
+            y = GetCellMaxInt(pos.y, cellSizeSqr)
         };
     }
+    #region float cells 
     [MethodImpl(INLINED)]
     public static float GetCellCenter(in float pos, in float cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize;
-    }
-
+    } 
     [MethodImpl(INLINED)]
-    public static float GetCellCenter(in float pos, in int cellSize)
+    public static float GetCellMax(in float pos, in float cellSize)
+    {
+        return GetCellCenter(pos, cellSize) + cellSize / 2f;
+    }
+    [MethodImpl(INLINED)]
+    public static float GetCellMin(in float pos, in float cellSize)
+    {
+        return GetCellCenter(pos, cellSize) - cellSize / 2f;
+    }
+    #endregion 
+    #region Int cells
+    [MethodImpl(INLINED)]
+    public static float GetCellCenterInt(in float pos, in int cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize;
     }
@@ -608,17 +654,19 @@ static public class MathU
         return pos / cellSize * cellSize;
     }
     [MethodImpl(INLINED)]
-    public static float GetCellMax(in float pos, in int cellSize)
+    public static float GetCellMaxInt(in float pos, in int cellSize)
     {
         return  Mathf.Round(pos / cellSize) * cellSize + cellSize /2f;
     } 
 
     [MethodImpl(INLINED)]
-    public static float GetCellMin(in float pos, in int cellSize)
+    public static float GetCellMinInt(in float pos, in int cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize - cellSize / 2f;
     }
-     
+    #endregion
+    #endregion
+
     [MethodImpl(INLINED)]
     public static string V3Str(this in Vector3 v3) => $"{v3.x},{v3.y},{v3.z}";
     [MethodImpl(INLINED)]
