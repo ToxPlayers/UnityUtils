@@ -161,8 +161,10 @@ namespace Files
             if(!loaded && !IsBackupPath(path))
                 return TryLoad(BackupPath(path), out value);
 
-            if (!loaded)
-                Debug.LogWarning($"Failed to load <{typeof(T).Name}> from:\n" + path);
+            if (loaded)
+                Debug.Log($"Loaded file <{typeof(T).Name}> from:\n" + path);
+            else
+                Debug.LogWarning($"Failed to load file <{typeof(T).Name}> from:\n" + path);
 
             return loaded;
         } 
