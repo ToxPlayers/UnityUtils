@@ -2,11 +2,10 @@
 using UnityEngine.UI; 
 public abstract class ButtonListener : MonoBehaviour
 {
-    protected Button _btn;
-    private void Awake()
+    [SerializeField, Get] public Button Btn;
+    protected virtual void Awake()
     {
-        _btn = GetComponent<Button>();
-        _btn.onClick.AddListener(OnClick);
+        Btn.onClick.AddListener(OnClick);
     }
     public abstract void OnClick();
 } 

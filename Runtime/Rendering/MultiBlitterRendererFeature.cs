@@ -23,8 +23,33 @@ public class BlitRequest
 
         RenderGraphUtils.BlitMaterialParameters para = new(src, dst, Material, 0);
         graph.AddBlitPass(para, passName: "Blit-" + Name);
+    } 
+}
+
+[System.Serializable]
+public class BlitInjection
+{
+    public string PassName = "Blit Pass";
+    public BlitRequest Blit = new();
+    public CameraType CamType = CameraType.Game | CameraType.SceneView;
+    BlitRenderPass _pass;
+
+    public void Inject()
+    {
+        RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
+        RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
+    }
+    public void UnInject() => RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
+    void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext context, Camera camera)
+    {
+        if (CamType.HasFlag(camera.cameraType) && camera.TryGetComponent(out UniversalAdditionalCameraData data) )
+        {
+            _pass ??= new BlitRenderPass(PassName, RenderPassEvent.AfterRenderingPostProcessing, Blit);
+            data.scriptableRenderer.EnqueuePass(_pass);
+        }
     }
 }
+
 
 public class MultiBlitterRendererFeature : ScriptableRendererFeature
 {
