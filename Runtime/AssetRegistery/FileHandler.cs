@@ -1,7 +1,5 @@
 using Newtonsoft.Json;
 using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using Sirenix.Serialization;
 using System;
 using System.IO;
 using System.Text;
