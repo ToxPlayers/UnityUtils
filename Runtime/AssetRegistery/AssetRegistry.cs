@@ -124,7 +124,7 @@ namespace Files
                     removeLst.Add(keyValue.Key);
             }
             foreach (var rmvLst in removeLst)
-                removeLst.Remove(rmvLst);
+                _assets.Remove(rmvLst); 
 #endif
         }
     }

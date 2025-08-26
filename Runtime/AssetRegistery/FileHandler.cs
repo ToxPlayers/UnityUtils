@@ -1,14 +1,11 @@
 using Newtonsoft.Json;
 using Sirenix.OdinInspector;
+using Sirenix.OdinInspector.Editor;
+using Sirenix.Serialization;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Files
 {
@@ -25,9 +22,9 @@ namespace Files
             }
         }
         public const string BackupExtension = ".backup";
-        public string OverrideFileExtension;
         public string FileName;
         public string Folder;
+        public string OverrideFileExtension;
         public bool IsPrefrencesFile;
         public bool IsEncrypted = false;
         public bool Backup = true;
@@ -36,26 +33,22 @@ namespace Files
     }
 
     [Serializable]
+#if UNITY_EDITOR
+    [LabelText(@"@""File<"" + $property.ValueEntry.TypeOfValue.GetGenericArguments()[0].FullName.Replace(""+"",""."") + ""> "" + $property.NiceName", 
+        Icon = SdfIconType.FileText)]
+#endif
     public class FileHandler<T> where T : new()
     {
-#if UNITY_EDITOR
-        public string GetInspcetorName()
-        {
-            return $"File[{typeof(T).Name}]:"+ Path.ChangeExtension(Settings.FileName, Settings.FileExtension);
-        }
-#endif
-
-        [SerializeField]
-        public SaveSettings Settings = new();
-		public T DefaultValue;
+        [SerializeField, FoldoutGroup("Save Settings"), HideLabel]
+        public SaveSettings Settings = new() { FileName = typeof(T).Name };
         T _value;
-        [ShowInInspector, HideLabel, InlineProperty]
-        public T Value
+        [ShowInInspector, HideLabel, HideReferenceObjectPicker] 
+        public T Value  
         {
             get
             {
-                if (_value == null && ! TryLoad(out _value))
-                    _value ??= DefaultValue;
+                if (_value == null && ! TryLoad())
+                    _value = new();
                 return _value;
             }
             set => SetValue(_value = value, true);
@@ -82,39 +75,48 @@ namespace Files
                 return Application.persistentDataPath;
 
             if (Application.isEditor)
-                return Path.Join(Application.streamingAssetsPath, "Saves");
+                return Path.Join(Application.streamingAssetsPath, "FileSaves");
+
             return Application.dataPath;
         }
 
         public string GetFullPath()
         {
-            var parentDir = GetParentPath();
-            var path = Path.Join(parentDir, Settings.FileName);
+            var path = GetParentPath();
+            if( ! string.IsNullOrWhiteSpace(Settings.Folder))
+                path = Path.Join(path, Settings.Folder);
+            path = Path.Join(path, Settings.FileName);
             return Path.ChangeExtension(path, Settings.FileExtension);
         }
 
-        [Button]
-        public string Save(bool log = true) => Save(_value ??= new(), GetFullPath(), log);
+        [HorizontalGroup("Buttons"), Button, PropertyOrder(1000)]
+        public string Save() => Save(true);
+        public string Save(bool log) => Save(_value ??= new(), GetFullPath(), log);
 
         public string Save(T storage, bool log = true) => Save(storage, GetFullPath(), log);
 
         public string Save(T storage, string fullPath, bool log = true)
         {
+            var content = JsonConvert.SerializeObject(storage, Settings.SerializerSettings);
+            Save(content, fullPath, log);
+            return content;
+        }
+        public void Save(string content, string fullPath, bool log = true)
+        {
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-                var content = JsonConvert.SerializeObject(storage, Settings.SerializerSettings);
-
                 if (Settings.IsEncrypted)
                     Encrypt(fullPath, content);
                 else
                     File.WriteAllText(fullPath, content);
                 if(log)
                     Debug.Log($"saved {typeof(T).Name} -> {fullPath}");
-                return content;
             }
             catch (Exception ex) { Debug.LogException(ex); }
-            return null;
+
+            if (Settings.Backup && !IsBackupPath(fullPath))
+                Save(content, BackupPath(fullPath), log);
         }
 
         const byte Key = 0x42;
@@ -133,36 +135,41 @@ namespace Files
             return Encoding.UTF8.GetString(data);
         }
 
-        [Button]
-        public T TryLoad(bool log = true)
+        [HorizontalGroup("Buttons",Order = 1000), Button]
+        public bool TryLoad() => TryLoad(true);
+        public bool TryLoad(bool log)
         {
-            TryLoad(out T val, log);
-            return val;
+            return TryLoad(GetFullPath(), out _value, log); 
         }
-        bool TryLoad(out T value, bool log = true)
+
+        bool TryLoad(string path, out T value, bool log = true)
         {
-            value = default;
-            var path = GetFullPath();
-            try
+            string content;
+            if (Settings.IsEncrypted)
             {
-                string content;
-                if (Settings.IsEncrypted)
-                {
-                    var bytes = File.ReadAllBytes(path);
-                    content = Decrypt(bytes);
-                }
-                else content = File.Exists(path) ? File.ReadAllText(path) : ""; 
-				if( string.IsNullOrEmpty(content))
-					return false;
-                value = JsonConvert.DeserializeObject<T>(content, Settings.SerializerSettings);
-                if (log)
-                    Debug.Log($"Loaded {typeof(T).Name} -> {path}");
-                return true;
+                var bytes = File.ReadAllBytes(path);
+                content = Decrypt(bytes);
             }
-            catch (Exception ex) { Debug.LogException(ex); }
-            if (log)
-                Debug.Log($"FAILED to load {typeof(T).Name} -> {path}");
-            return false;
-        }
+            else content = File.Exists(path) ? File.ReadAllText(path) : "";
+            var loaded = !string.IsNullOrEmpty(content);
+            value = default;
+            if (loaded)
+            {
+                value = JsonConvert.DeserializeObject<T>(content, Settings.SerializerSettings);
+                if (value == null)
+                    return false;
+            }
+
+            if(!loaded && !IsBackupPath(path))
+                return TryLoad(BackupPath(path), out value);
+
+            if (!loaded)
+                Debug.LogWarning($"Failed to load <{typeof(T).Name}> from:\n" + path);
+
+            return loaded;
+        } 
+
+        string BackupPath(string path) => path + SaveSettings.BackupExtension; 
+        bool IsBackupPath(string path) => path.EndsWith(SaveSettings.BackupExtension); 
     }
 }
