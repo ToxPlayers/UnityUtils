@@ -8,27 +8,26 @@ using UnityEngine.Events;
 using System;
 using UnityInternalExpose;
 
-[Serializable, HideMonoScript, InlineProperty]
-public class Notifier<T>
-{
-    public class ReadOnly
-    {
-        Notifier<T> _notifier;
-        public ReadOnly(Notifier<T> notifier)
-        { _notifier = notifier; }
-        public T Value => _notifier.Value;
-        public T PreviousValue => _notifier.PreviousValue; 
-        public void Sub(UnityAction<T, T> action, bool callNow = true) => _notifier.Sub(action, callNow);
-        public void SubToggle(UnityAction<T, T> action, bool sub) => _notifier.SubToggle(action, sub);
-        public void Unsub(UnityAction<T, T> action) => _notifier.Sub(action);
-        static public implicit operator T(ReadOnly w) => w.Value;
-    }
+public interface IReadOnlyNotifier<T>
+{  
+    public T Value { get; }
+    public T PreviousValue { get; }
+    public void Sub(UnityAction<T, T> action, bool callNow = true);
+    public void Sub(UnityAction<T> action, bool callNow = true);
+    public void SubToggle(UnityAction<T, T> action, bool sub);
+    public void SubToggle(UnityAction<T> action, bool sub);
+    public void Unsub(UnityAction<T, T> action);
+    public void Unsub(UnityAction<T> action);
+}
 
+[Serializable, HideMonoScript, InlineProperty]
+public class Notifier<T> : IReadOnlyNotifier<T>
+{ 
     [NonSerialized] T _prevValue;
     [SerializeField, HideInInspector] T _value;
     [NonSerialized] UnityEvent<T, T> _onChange = new();
     [NonSerialized] UnityEvent<T> _onChangeSingle = new();
-    public ReadOnly Readonly => new(this);
+    public IReadOnlyNotifier<T> Readonly => this;
     public T PreviousValue => _prevValue;
     public int ListenerCount => _onChange.GetListenerCount() + _onChangeSingle.GetListenerCount();
     [ShowInInspector, HideLabel, PropertyOrder(-10)]

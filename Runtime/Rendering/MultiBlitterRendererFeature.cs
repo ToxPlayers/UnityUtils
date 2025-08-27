@@ -17,34 +17,32 @@ public class BlitRequest
     public Material Material;
     public RenderPassEvent PassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
     public void AddBlit(RenderGraph graph, TextureHandle src, TextureHandle dst)
-    {
-        if (!Material)
-           Material = new Material(Shader.Find("Shader Graphs/CopyBlit"));
-
+    { 
         RenderGraphUtils.BlitMaterialParameters para = new(src, dst, Material, 0);
         graph.AddBlitPass(para, passName: "Blit-" + Name);
     } 
 }
 
-[System.Serializable]
+[Serializable]
 public class BlitInjection
 {
-    public string PassName = "Blit Pass";
     public BlitRequest Blit = new();
     public CameraType CamType = CameraType.Game | CameraType.SceneView;
     BlitRenderPass _pass;
 
     public void Inject()
-    {
-        RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
-        RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
-    }
+	{
+		if (!Blit.Material)
+			throw new InvalidOperationException("Blit material not set");
+		RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
+		RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
+	}
     public void UnInject() => RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
     void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (CamType.HasFlag(camera.cameraType) && camera.TryGetComponent(out UniversalAdditionalCameraData data) )
         {
-            _pass ??= new BlitRenderPass(PassName, RenderPassEvent.AfterRenderingPostProcessing, Blit);
+            _pass ??= new BlitRenderPass(Blit.Name, RenderPassEvent.AfterRenderingPostProcessing, Blit);
             data.scriptableRenderer.EnqueuePass(_pass);
         }
     }
