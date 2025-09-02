@@ -10,6 +10,7 @@ using UnityEngine;
 public class ScriptableSingleton : SerializedScriptableObject
 {
     static public readonly string SingletonsResFolder = "Singletons";
+    static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
 #if UNITY_EDITOR
     static ScriptableSingleton()
     {
@@ -46,9 +47,13 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
     {
         get
         {
-            if (!_instance)
-                _instance = Load();
+            try
+            {
+                if (!_instance)
+                    _instance = Load();
+            } catch(Exception ex) { Debug.LogException(ex); }
 
+             
             return _instance;
         }
     }
@@ -76,14 +81,14 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
 #if UNITY_EDITOR
             if (Application.isEditor)
             {
-                Directory.CreateDirectory(SingletonsResFolder);
-                var path = Path.Join(SingletonsResFolder, typeof(T).Name + ".asset");
+                Directory.CreateDirectory(AssetsSingletonsResFolder);
+                var path = Path.Join(AssetsSingletonsResFolder, typeof(T).Name + ".asset");
                 AssetDatabase.CreateAsset(CreateInstance<T>(), path);
                 AssetDatabase.ImportAsset(path);
                 Debug.Log("Created Scriptable singleton at " + path); 
             }
-            else
-#endif
+            else 
+#endif 
                 Debug.LogError($"Critical Error: Scriptable Singleton of type {typeof(T).FullName} Not Found In {dirPath}");
         }
         else

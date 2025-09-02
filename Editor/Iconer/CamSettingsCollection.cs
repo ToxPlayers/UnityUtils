@@ -2,15 +2,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 namespace EditorIconer
 {
-    [CreateAssetMenu(fileName = IconerEditorWindow.CamSettingsCollectionName, menuName = "EditorCamSettings")]
-    [Serializable]
-    public class CamSettingsCollection : ScriptableObject
+    public class CamSettingsCollection : ScriptableSingleton<CamSettingsCollection>
     {
         public List<CamSettings> AllCamSettings = new();
-        [SerializeField] int _currentIndex;
+        [SerializeField] int _currentIndex; 
         public int CurrentIndex
         {
             get => _currentIndex;

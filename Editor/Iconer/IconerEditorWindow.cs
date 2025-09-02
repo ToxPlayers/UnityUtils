@@ -90,8 +90,8 @@ namespace EditorIconer
             Selection.objects = _cachedSelection.Select(s => s.Prefab).ToArray();
         } 
         public const string CamSettingsCollectionName = "CamSettingsCollection";
-
-        CamSettingsCollection _camSettingCollection;
+         
+        CamSettingsCollection _camSettingCollection => CamSettingsCollection.Instance;
         CamSettingsScriptable ___camSettingsScriptable__;
         CamSettings Settings => _camSettingCollection.Current;
         CamSettingsScriptable _camSettingScriptable
@@ -106,18 +106,11 @@ namespace EditorIconer
             }
         }
 
-        PropertyTree _camSettingsEditor;
-        const string default_settings_key = "_ICONER_EDITOR_WIN_SETT";
-
-        void ValidateCamSettings()
-        {
-            if (!_camSettingCollection)
-                _camSettingCollection = Resources.Load<CamSettingsCollection>(CamSettingsCollectionName); 
-        }
+        PropertyTree _camSettingsEditor; 
 
         void SaveCamSettings()
         {
-            EditorUtility.SetDirty(_camSettingCollection);
+            EditorUtility.SetDirty(_camSettingCollection); 
             AssetDatabase.SaveAssetIfDirty(_camSettingCollection);
         }
 
@@ -211,12 +204,11 @@ namespace EditorIconer
                 return;
             }
 
-            ValidateCamSettings();
             DrawSettings();
-
+             
             SirenixEditorGUI.BeginBox("Previews");
             var generate = SirenixEditorGUI.Button("Generate Icons", ButtonSizes.Medium);
-
+             
             var settings = _camSettingScriptable.Settings;
             int colCount = (int)Math.Ceiling(Math.Sqrt(_cachedSelection.Count));
             GUILayout.BeginHorizontal();
