@@ -92,17 +92,17 @@ namespace EditorIconer
         public const string CamSettingsCollectionName = "CamSettingsCollection";
 
         CamSettingsCollection _camSettingCollection;
-        CamSettingsScriptable _camSettingsScriptable;
+        CamSettingsScriptable ___camSettingsScriptable__;
         CamSettings Settings => _camSettingCollection.Current;
-        CamSettingsScriptable _camSettings
+        CamSettingsScriptable _camSettingScriptable
         {
             get
             {
-                if(!_camSettingsScriptable)
-                    _camSettingsScriptable = CreateInstance<CamSettingsScriptable>();
-                if(_camSettingsScriptable.Settings != _camSettingCollection.Current)
-                    _camSettingsScriptable.Settings = _camSettingCollection.Current;
-                return _camSettingsScriptable;
+                if(!___camSettingsScriptable__)
+                    ___camSettingsScriptable__ = CreateInstance<CamSettingsScriptable>();
+                if(___camSettingsScriptable__.Settings != _camSettingCollection.Current)
+                    ___camSettingsScriptable__.Settings = _camSettingCollection.Current;
+                return ___camSettingsScriptable__;
             }
         }
 
@@ -123,33 +123,58 @@ namespace EditorIconer
 
         List<IconerScene> _cachedSelection = new();
 
+        void OnSettingOptionSelected(object i)
+        { 
+            _camSettingCollection.CurrentIndex = (int)i; 
+        }
+
         void DrawCamSettingsDropdown()
         {
             EditorGUILayout.BeginHorizontal();
             var settings = Settings;
-
-            EditorGUILayout.LabelField("Preset");
-            if(EditorGUILayout.DropdownButton(new GUIContent("Preset") , FocusType.Passive))
+            var settingList = _camSettingCollection.AllCamSettings;
+            EditorGUILayout.LabelField("Preset", GUILayout.MaxWidth(50));
+            if (GUILayout.Button("<"))
+                _camSettingCollection.CurrentIndex--;
+            if (EditorGUILayout.DropdownButton(new GUIContent(settings.CamSettingName) , FocusType.Passive, GUILayout.ExpandWidth(true)))
             {
-
+                Rect mRect = GUILayoutUtility.GetLastRect();
+                mRect.position = Event.current.mousePosition;
+                var menu = new GenericMenu();
+                for (int i = 0; i < settingList.Count; i++)
+                    menu.AddItem(new GUIContent(settingList[i].CamSettingName), _camSettingCollection.CurrentIndex == i, OnSettingOptionSelected, i);
+                menu.DropDown(mRect);
             }
-            SirenixEditorGUI.Button("+", ButtonSizes.Medium);
+            if (GUILayout.Button(">"))
+                _camSettingCollection.CurrentIndex++;
+
+            if (GUILayout.Button("+"))
+            {
+                settingList.Add(new() { CamSettingName = "New Cam Setting " + settingList.Count});
+                _camSettingCollection.CurrentIndex = settingList.Count - 1;
+            }
+            if (_camSettingCollection.AllCamSettings.Count > 1 && GUILayout.Button("-"))
+            {
+                settingList.RemoveAt(_camSettingCollection.CurrentIndex);
+            }
+            GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space(5);
 
         }
         bool _undoCamSettClicked;
         void DrawSettings()
         {
             DrawCamSettingsDropdown();
-            SirenixEditorGUI.BeginBox("Framing", false);
-            var settings = _camSettings.Settings;
+            SirenixEditorGUI.BeginBox("", false);
+            var settings = _camSettingScriptable.Settings;
 
 
             try
             {
                 if (_camSettingsEditor == null)
                 {
-                    _camSettingsEditor = PropertyTree.Create(_camSettings);
+                    _camSettingsEditor = PropertyTree.Create(_camSettingScriptable);
                     _camSettingsEditor.OnUndoRedoPerformed += () => _undoCamSettClicked = true;
                 }
                 EditorGUI.BeginChangeCheck();
@@ -157,7 +182,7 @@ namespace EditorIconer
                 if (EditorGUI.EndChangeCheck() || _undoCamSettClicked)
                 {
                     _undoCamSettClicked = false;
-                    _camSettings.Settings.ValidateRes(_camSettings.Settings.TextureResoulation);
+                    _camSettingScriptable.Settings.ValidateRes(_camSettingScriptable.Settings.TextureResoulation);
                     SaveCamSettings();
                     settings.UpdatedSettingsCount++;
                 }
@@ -192,7 +217,7 @@ namespace EditorIconer
             SirenixEditorGUI.BeginBox("Previews");
             var generate = SirenixEditorGUI.Button("Generate Icons", ButtonSizes.Medium);
 
-            var settings = _camSettings.Settings;
+            var settings = _camSettingScriptable.Settings;
             int colCount = (int)Math.Ceiling(Math.Sqrt(_cachedSelection.Count));
             GUILayout.BeginHorizontal();
             var scaling = settings.TextureResoulation.ToFloat() * settings.PreviewSize;
@@ -257,6 +282,7 @@ namespace EditorIconer
             Scene _scene;
             bool _isSceneOpen;
             int _lastSettingsId = -1;
+            CamSettings _lastSetSetting;
             public IconerScene(string prefabPath, GameObject prefab)
             {
                 _prefabPath = prefabPath;
@@ -267,6 +293,7 @@ namespace EditorIconer
             {
                 try
                 {
+                    _lastSetSetting = settings;
                     if (!_isSceneOpen)
                     {
                         _isSceneOpen = true;
@@ -311,7 +338,7 @@ namespace EditorIconer
 
             public void RenderWithCamSettings(CamSettings settings)
             {
-                if (settings.UpdatedSettingsCount != _lastSettingsId)
+                if (settings.UpdatedSettingsCount != _lastSettingsId || settings != _lastSetSetting)
                 {
                     UpdateCamSettings(settings);
                     _cam.Render();

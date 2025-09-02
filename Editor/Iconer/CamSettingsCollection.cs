@@ -10,18 +10,26 @@ namespace EditorIconer
     public class CamSettingsCollection : ScriptableObject
     {
         public List<CamSettings> AllCamSettings = new();
-        [SerializeField] int _current;
-        public CamSettings DefaultSetting = new();
-        public int CurrentIndex;
+        [SerializeField] int _currentIndex;
+        public int CurrentIndex
+        {
+            get => _currentIndex;
+            set => _currentIndex = value.RollIndex(AllCamSettings.Count); 
+        }  
+
+        private void OnValidate()
+        {
+            if (AllCamSettings.Count == 0)
+                AllCamSettings.Add(new() { CamSettingName = "Default" });
+        }
+        public bool IsDefault => _currentIndex == 0;
         public CamSettings Current
         {
             get
-            { 
-                _current = _current.RollIndex(AllCamSettings.Count);
-                if (AllCamSettings.ValidIndex(_current))
-                    return AllCamSettings[_current];
-
-                return DefaultSetting;
+            {
+                OnValidate(); 
+                CurrentIndex = CurrentIndex.RollIndex(AllCamSettings.Count);
+                return AllCamSettings[CurrentIndex];
             }
         }
     }

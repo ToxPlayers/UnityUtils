@@ -12,16 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f633076906603be45aa7c49debbe3e89, type: 3}
   m_Name: CamSettingsCollection
   m_EditorClassIdentifier: Assembly-CSharp-Editor::IconerEditorWindow/CamSettingsScriptableCollection
-  AllCamSettings: []
-  _current: 0
-  DefaultSetting:
-    CamSettingName: Default
-    TextureResoulation: {x: 512, y: 512}
-    Distance: 2
-    OrbitalRotation: {x: 17, y: 45, z: 0}
+  AllCamSettings:
+  - CamSettingName: New Cam Setting 2
+    Distance: 3
+    OrbitalRotation: {x: 19.01, y: 45, z: 0}
     FrameOffset: {x: 0, y: 0, z: 0}
+    CullingMask:
+      serializedVersion: 2
+      m_Bits: 55
+    PostProcessing: 0
+    RenderShadows: 0
+    Orthographic: 0
+    OrthoSize: 5
+    FOV: 60
+    TextureResoulation: {x: 512, y: 512}
+    PreviewSize: 0.5
     OutputFileRegex: $_icon
     OutputToSameFolder: 1
     OutputFolder: 
+  - CamSettingName: New Cam Setting 1
+    Distance: 3
+    OrbitalRotation: {x: 14.76, y: 45, z: 0}
+    FrameOffset: {x: 31.9, y: 0, z: 0}
+    CullingMask:
+      serializedVersion: 2
+      m_Bits: 52
+    PostProcessing: 0
+    RenderShadows: 0
+    Orthographic: 0
+    OrthoSize: 5
+    FOV: 60
+    TextureResoulation: {x: 512, y: 512}
     PreviewSize: 0.5
-  CurrentIndex: 0
+    OutputFileRegex: $_icon
+    OutputToSameFolder: 1
+    OutputFolder: 
+  _currentIndex: 1

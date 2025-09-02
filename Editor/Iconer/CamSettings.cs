@@ -14,6 +14,7 @@ namespace EditorIconer
     [Serializable]
     public class CamSettings
     {
+        [BoxGroup("A/Camera Settings")]
         public string CamSettingName;
         [HorizontalGroup("A")]
         [BoxGroup("A/Camera Settings")]
@@ -31,6 +32,7 @@ namespace EditorIconer
         [BoxGroup("A/Camera Settings")]
 
         [OnValueChanged(nameof(ValidateRes))]
+        [BoxGroup("A/Output")]
         public Vector2Int TextureResoulation = new(512, 512);
         [Range(0.1f, 2f)]
         [BoxGroup("A/Output")]
