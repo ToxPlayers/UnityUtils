@@ -16,21 +16,21 @@ namespace EditorIconer
     {
         [BoxGroup("A/Camera Settings")]
         public string CamSettingName;
+        [BoxGroup("A/Camera Settings/Framing")]
+        public Vector3 OrbitalSphere = new(17f, 45f, 0),
+    CamPosition = new Vector3(0, 0, 2f), CamRotation, ObjectPosition, ObjectRotation;
+        [HorizontalGroup("A/Camera Settings/Framing/fov")]
+        public bool Orthographic;
+        [HorizontalGroup("A/Camera Settings/Framing/fov")]
+        [ShowIf(nameof(Orthographic))] public float OrthoSize = 5;
+        [HorizontalGroup("A/Camera Settings/Framing/fov")]
+        [HideIf(nameof(Orthographic))] public float FOV = 60;
         [HorizontalGroup("A")]
-        [BoxGroup("A/Camera Settings")]
-        public float Distance = 3f;
-        [BoxGroup("A/Camera Settings")]
-        public Vector3 OrbitalRotation = new(17f, 45f, 0), FrameOffset;
         [BoxGroup("A/Camera Settings")]
         public LayerMask CullingMask = Physics.AllLayers;
         [BoxGroup("A/Camera Settings")]
-        public bool PostProcessing, RenderShadows, Orthographic;
-        [BoxGroup("A/Camera Settings")]
-        [ShowIf(nameof(Orthographic))] public float OrthoSize = 5;
-        [BoxGroup("A/Camera Settings")]
-        [HideIf(nameof(Orthographic))] public float FOV = 60;
-        [BoxGroup("A/Camera Settings")]
-
+        public bool PostProcessing, RenderShadows;
+        [BoxGroup("A/Camera Settings")] 
         [OnValueChanged(nameof(ValidateRes))]
         [BoxGroup("A/Output")]
         public Vector2Int TextureResoulation = new(512, 512);

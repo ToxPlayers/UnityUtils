@@ -269,6 +269,7 @@ namespace EditorIconer
             string _prefabPath;
             [NonSerialized, HideInInspector] public GameObject Prefab;
             GameObject _camParent;
+            Transform _spawnedObj;
             Camera _cam;
             [NonSerialized, HideInInspector] public RenderTexture CamTex;
             Scene _scene;
@@ -291,7 +292,7 @@ namespace EditorIconer
                         _isSceneOpen = true;
                         _scene = EditorSceneManager.NewPreviewScene();
 
-                        PrefabUtility.InstantiatePrefab(Prefab, _scene);
+                        _spawnedObj = (PrefabUtility.InstantiatePrefab(Prefab, _scene) as GameObject).transform;
 
                         _camParent = new GameObject();
                         _cam = new GameObject().AddComponent<Camera>();
@@ -319,9 +320,11 @@ namespace EditorIconer
                         _cam.fieldOfView = settings.FOV;
                     _cam.nearClipPlane = 0.01f;
                     _cam.farClipPlane = 5000;
-                    _cam.transform.localPosition = Vector3.forward * -settings.Distance;
-                    _camParent.transform.localEulerAngles = settings.OrbitalRotation;
-                    _camParent.transform.localPosition = settings.FrameOffset;
+                    _camParent.transform.localEulerAngles = settings.OrbitalSphere; 
+                    _cam.transform.localPosition = - settings.CamPosition;
+                    _cam.transform.localEulerAngles = settings.CamRotation;
+                    _spawnedObj.localPosition = settings.ObjectPosition;
+                    _spawnedObj.localEulerAngles = settings.ObjectRotation;
                     _cam.cullingMask = settings.CullingMask;
 
                 }
