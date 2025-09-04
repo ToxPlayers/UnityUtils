@@ -10,7 +10,10 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 namespace Files
-{  
+{
+#if UNITY_EDITOR
+    [InitializeOnLoad]
+#endif
     public abstract class AssetRegistry<T> : ScriptableSingleton<AssetRegistry<T>> where T : UnityEngine.Object
     {
         static public JsonConverter Converter => new UnityObjectJsonConverter<T>();
@@ -29,10 +32,8 @@ namespace Files
                 return "t:" + name;
             }
         }
-          
-
-     
-
+                
+        
 
         public virtual T Register(T asset)
         {
@@ -48,15 +49,16 @@ namespace Files
 #if UNITY_EDITOR
 
         [NonSerialized] bool _isHooked = false;
-        public override void OnSingletonEditorAwake()
+        protected override void OnEditorPreloaded()
         {
-            base.OnSingletonEditorAwake();
+            base.OnEditorPreloaded();
             if (!_isHooked)
             {
                 _isHooked = true;
                 EditorApplication.projectChanged += ReregisterAllAssets;
+                ReregisterAllAssets();
             }
-        }
+        } 
 
         public virtual void OnValidate()
         {

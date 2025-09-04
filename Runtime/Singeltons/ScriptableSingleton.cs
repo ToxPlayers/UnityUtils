@@ -4,12 +4,40 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
 public abstract class ScriptableSingleton : SerializedScriptableObject
 {
+    static public readonly string SingletonsResFolder = "Singletons";
+    static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
     bool _isSingletonAwake;
+#if UNITY_EDITOR
+    static ScriptableSingleton()
+    {
+        EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
+    }
+    private static void SetAllSingletonsAsPreloaded()
+    {
+        var allSingletons = Resources.LoadAll(SingletonsResFolder).ToList();
+        var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
+        var removed = preloadedAssets.RemoveAll(o => o == null);
+        var nonPreloadedRegistries = allSingletons.Except(preloadedAssets).ToList();
+        if (nonPreloadedRegistries.Count > 0 || removed > 0)
+        {
+            var arr = nonPreloadedRegistries.Union(preloadedAssets).ToArray();
+            PlayerSettings.SetPreloadedAssets(arr);
+        }
+
+        foreach (var singleton in allSingletons)
+        {
+            if (singleton is ScriptableSingleton so)
+                so.OnEditorPreloaded();
+        }
+    }
+    protected virtual void OnEditorPreloaded() { }
+#endif
 
     public void VerifySingletonAwake()
     {
@@ -20,8 +48,7 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
 #if UNITY_EDITOR
         OnSingletonEditorAwake();
 #endif
-    }
-
+    } 
 
     public abstract void OnSingletonAwake();  
 
@@ -30,12 +57,13 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
 #endif
 }
 
+[InfoBox(@"@$value.IsInstance ? ""Scriptable Instance"" : "" Not Scriptable Instance""")]
 public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
-{
-    static public readonly string SingletonsResFolder = "Singletons";
-    static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
+{ 
+    
     static T _instance;
-
+    public bool IsInstance => _instance == this;
+    public bool HasInstance => _instance;
     public static T Instance
     {
         get
