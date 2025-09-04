@@ -19,7 +19,9 @@ public class UObjKeyDictionaryConverter<TKey, TValue> : JsonConverter<Dictionary
             TKey key = UnityObjectJsonConverter<TKey>.StaticReadJson(reader);
             reader.Read(); // Value
             TValue value = serializer.Deserialize<TValue>(reader);
-            dictionary.Add(key, value);
+            if(key is not null)
+                dictionary.Add(key, value);
+            else Debug.LogError("Json Dictionary Error: Could not read NULL key with value: " + value);
             reader.Read(); // EndObject or next PropertyName
         }
         return dictionary;
