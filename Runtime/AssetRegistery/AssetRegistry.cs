@@ -44,20 +44,19 @@ namespace Files
             return asset;
         }
 
-
+        public override void OnSingletonAwake() { }
 #if UNITY_EDITOR
-       
-         
+
         [NonSerialized] bool _isHooked = false;
-        protected override void OnEditorPreloaded()
+        public override void OnSingletonEditorAwake()
         {
-            base.OnEditorPreloaded();
+            base.OnSingletonEditorAwake();
             if (!_isHooked)
-            { 
+            {
                 _isHooked = true;
                 EditorApplication.projectChanged += ReregisterAllAssets;
-            }  
-        }  
+            }
+        }
 
         public virtual void OnValidate()
         {

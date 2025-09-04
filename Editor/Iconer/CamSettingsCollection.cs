@@ -21,6 +21,9 @@ namespace EditorIconer
             if (AllCamSettings.Count == 0)
                 AllCamSettings.Add(new() { CamSettingName = "Default" });
         }
+
+        public override void OnSingletonAwake() { }
+
         public bool IsDefault => _currentIndex == 0;
         public CamSettings Current
         {

@@ -3,45 +3,38 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEngine; 
+using UnityEngine;
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
-public class ScriptableSingleton : SerializedScriptableObject
+public abstract class ScriptableSingleton : SerializedScriptableObject
 {
-    static public readonly string SingletonsResFolder = "Singletons";
-    static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
-#if UNITY_EDITOR
-    static ScriptableSingleton()
-    {
-        EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
-    }
-    private static void SetAllSingletonsAsPreloaded()
-    {
-        var allSingletons = Resources.LoadAll(SingletonsResFolder).ToList();
-        var preloadedAssets = PlayerSettings.GetPreloadedAssets().ToList();
-        var removed = preloadedAssets.RemoveAll(o => o == null);
-        var nonPreloadedRegistries = allSingletons.Except(preloadedAssets).ToList();
-        if (nonPreloadedRegistries.Count > 0 || removed > 0)
-        {
-            var arr = nonPreloadedRegistries.Union(preloadedAssets).ToArray();
-            PlayerSettings.SetPreloadedAssets(arr);
-        }
+    bool _isSingletonAwake;
 
-        foreach(var singleton in allSingletons)
-        {
-            if (singleton is ScriptableSingleton so)
-                so.OnEditorPreloaded();
-        }
+    public void VerifySingletonAwake()
+    {
+        if (_isSingletonAwake)
+            return;
+        _isSingletonAwake = true;
+        OnSingletonAwake();
+#if UNITY_EDITOR
+        OnSingletonEditorAwake();
+#endif
     }
-    protected virtual void OnEditorPreloaded() { }
+
+
+    public abstract void OnSingletonAwake();  
+
+#if UNITY_EDITOR
+    public virtual void OnSingletonEditorAwake() { }
 #endif
 }
 
-public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
-{ 
-
-    private static T _instance;
+public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
+{
+    static public readonly string SingletonsResFolder = "Singletons";
+    static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
+    static T _instance;
 
     public static T Instance
     {
@@ -49,8 +42,9 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
         {
             try
             {
-                if (!_instance)
-                    _instance = Load();
+                if (!_instance) 
+                    LoadOrCreateInstance();
+                return _instance;
             } catch(Exception ex) { Debug.LogException(ex); }
 
              
@@ -70,9 +64,16 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
             _instance = this as T;
     }
 
-    public void WakeupInstance() => Awake(); 
-    static T Load()
+    public void WakeupInstance() => Awake();
+    protected virtual void OnEnable()
     {
+        LoadOrCreateInstance();
+    }
+
+    static void LoadOrCreateInstance()
+    {
+        if (_instance)
+            return; 
         var dirPath = SingletonsResFolder;
         var instances = Resources.LoadAll<T>(dirPath);
         T instance = null;
@@ -94,6 +95,12 @@ public class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSi
         else
             instance = instances[0];
 
-        return instance;
+        if (instance)
+        {
+            instance.OnSingletonAwake();
+
+        }
+        _instance = instance;
+        _instance.VerifySingletonAwake();
     } 
 }
