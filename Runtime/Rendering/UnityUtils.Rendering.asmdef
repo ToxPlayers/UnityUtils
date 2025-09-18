@@ -1,0 +1,19 @@
+{
+    "name": "UnityUtils.Rendering",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ad968d605628d06499b62cdc30f11cf8",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:86bc95e6fdb13ff43aa04316542905ae",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

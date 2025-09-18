@@ -1,0 +1,16 @@
+{
+    "name": "Unity.InternalAPIEngineBridge.004",
+    "rootNamespace": "",
+    "references": [
+        "Unity.InternalAPIEditorBridge.001"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,11 @@
+{
+  "name": "com.tox.unityutils",
+  "displayName": "Tox Unity Utils",
+  "description": "Utilities and Extensions for Unity",
+  "version": "1.0.0",
+  "unity": "2020.3",
+  "author": "Tox (https://github.com/ToxPlayers/UnityUtils)",
+  "homepage": "https://github.com/ToxPlayers/UnityUtils",
+  "dependencies": { 
+  }
+}
