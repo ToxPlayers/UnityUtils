@@ -17,9 +17,9 @@ using HideInEdit = TriInspector.HideInEditModeAttribute;
  
  
 [Serializable]
-public class RealTimer
+public struct RealTimer
 { 
-    public bool UseFrameTime = false;
+    public bool UseInconsistentFrameTime;
     public float MaxTime;
     public float TimeStarted { get; private set; }
     public bool TimerOver => IsTimerOver(MaxTime);
@@ -33,7 +33,7 @@ public class RealTimer
             return Mathf.FloorToInt(TimeRunning / MaxTime);
         }
     }
-    public float TimeSinceStartup => GetTimeSinceStartup(UseFrameTime);
+    public float TimeSinceStartup => GetTimeSinceStartup(UseInconsistentFrameTime);
     static public float GetTimeSinceStartup(bool UseFrameTime)
     {
         if (UseFrameTime)
@@ -73,14 +73,16 @@ public class RealTimer
         TimeStarted = - MaxTime;
     }
 
-    public RealTimer(bool useFrameTime, float maxTime)
+    public RealTimer(bool useInconsistentFrameTime, float maxTime)
     { 
         MaxTime = maxTime;
-        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(useFrameTime) : 0f; 
+        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(useInconsistentFrameTime) : 0f;
+        UseInconsistentFrameTime = useInconsistentFrameTime;
     }
 	public RealTimer(float maxTime)
     { 
         MaxTime = maxTime;
-        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(false) : 0f; 
+        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(false) : 0f;
+        UseInconsistentFrameTime = false;
     } 
 }
