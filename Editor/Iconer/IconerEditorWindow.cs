@@ -35,12 +35,15 @@ namespace EditorIconer
             ForceMenuTreeRebuild();
         }
         const string IsMenuFlattenPrefKey = "KEY_ICONER_IsMenuFlatten";
-        bool isMenuFlatten;
+        bool isMenuFlatten; 
         protected override void OnEnable()
         {
             isMenuFlatten = EditorPrefs.GetBool(IsMenuFlattenPrefKey, false);
-            base.OnEnable();
+            base.OnEnable(); 
+            wantsMouseEnterLeaveWindow = true;
         }
+         
+
         protected override void DrawMenu()
         {
             if (SirenixEditorGUI.Button(isMenuFlatten ? "UnFlatten" : "Flatten", ButtonSizes.Medium))
@@ -49,10 +52,18 @@ namespace EditorIconer
                 EditorPrefs.SetBool(IsMenuFlattenPrefKey, isMenuFlatten);
                 ForceMenuTreeRebuild();
             }
+
+            if(SirenixEditorGUI.Button("Highlight In Project", ButtonSizes.Medium))
+                HighlightInProject();
+
             base.DrawMenu();
         }
+
+        Dictionary<GameObject, OdinMenuItem> PrefabToMenuItem = new();
+
         protected override OdinMenuTree BuildMenuTree()
         {
+            PrefabToMenuItem.Clear();
             var tree = new OdinMenuTree();
             tree.AddAllAssetsAtPath("", "", typeof(GameObject), true, isMenuFlatten);
 
@@ -64,15 +75,28 @@ namespace EditorIconer
                     item.AddThumbnailIcon(true);
                 var prefab = item.Value as GameObject;
                 item.Value = new IconerScene(AssetDatabase.GetAssetPath(prefab), prefab);
+                PrefabToMenuItem.Add(prefab, item);
             }
 
             DrawMenuSearchBar = true;
             tree.Selection.SupportsMultiSelect = true;
-            tree.Selection.SelectionChanged += Selection_SelectionChanged;
+            tree.Selection.Clear();
+            tree.Selection.SelectionChanged += TreeSelection_SelectionChanged;
+            tree.Selection.SelectionConfirmed += Selection_SelectionConfirmed;
             return tree;
         }
 
-        private void Selection_SelectionChanged(SelectionChangedType obj)
+        private void Selection_SelectionConfirmed(OdinMenuTreeSelection obj) => HighlightInProject();
+
+        void HighlightInProject()
+        {
+            var treeSel = MenuTree.Selection;
+            if (treeSel.SelectedValue is IconerScene s && s.Prefab)
+                EditorGUIUtility.PingObject(s.Prefab);
+            Selection.objects = _cachedSelection.Select(s => s.Prefab).ToArray();
+        }
+
+        private void TreeSelection_SelectionChanged(SelectionChangedType t)
         {
             _cachedSelection.Clear();
 
@@ -87,7 +111,6 @@ namespace EditorIconer
                     if (sel.Value is IconerScene iconer)
                         _cachedSelection.Add(iconer);
                 }
-            Selection.objects = _cachedSelection.Select(s => s.Prefab).ToArray();
         } 
         public const string CamSettingsCollectionName = "CamSettingsCollection";
          
@@ -186,7 +209,7 @@ namespace EditorIconer
         List<Awaitable> _generationAwaits = new();
         protected override void OnBeginDrawEditors()
         {
-            base.OnBeginDrawEditors();
+            base.OnBeginDrawEditors(); 
 
             if (_generationAwaits.Count > 0)
             {
@@ -205,8 +228,10 @@ namespace EditorIconer
             }
 
             DrawSettings();
-             
-            SirenixEditorGUI.BeginBox("Previews");
+            if (HandleDragDrop())
+                return;
+
+            SirenixEditorGUI.BeginBox("Previews");  
             var generate = SirenixEditorGUI.Button("Generate Icons", ButtonSizes.Medium);
              
             var settings = _camSettingScriptable.Settings;
@@ -247,6 +272,37 @@ namespace EditorIconer
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             SirenixEditorGUI.EndBox();
+        }
+        private bool HandleDragDrop()
+        {
+            var e = Event.current;
+            var mousePos = GUIUtility.GUIToScreenPoint(e.mousePosition);
+            var mouseInScreen = position.Contains(mousePos);
+            if (!mouseInScreen)
+                return false;
+
+            var itemDrags = DragAndDrop.objectReferences
+                .Where(o => o is GameObject go && PrefabToMenuItem.ContainsKey(go)).Select(g => PrefabToMenuItem[g as GameObject]);
+            if (itemDrags.Any())
+            {
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                SirenixEditorGUI.Title("Drop Here", "", TextAlignment.Center, true);
+                var isPerformedDrag = e.type == EventType.DragPerform;
+                if (isPerformedDrag)
+                    e.Use();
+                foreach (var item in itemDrags)
+                {
+                    var scene = item.Value as IconerScene;
+                    var prefab = scene.Prefab;
+                    EditorGUILayout.LabelField(prefab.name);
+                    if (isPerformedDrag)
+                        MenuTree.Selection.Add(item);
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         protected override void OnDisable()

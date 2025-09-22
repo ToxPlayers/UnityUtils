@@ -39,7 +39,8 @@ static public class MathU
     #region Floats & Ints
      
 
-
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static public float FractionalPart(this float f) => f - (int)f;
     static public int AsInt<TValue>(this TValue value) where TValue : Enum => (int)(object)value;
     static public bool IsMask(this int maskOrLayer) => maskOrLayer != 0 && maskOrLayer.BitsSetCount() > 1;  
 
