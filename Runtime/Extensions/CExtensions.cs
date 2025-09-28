@@ -66,6 +66,24 @@ static public class CExtensions
 	}
     #endregion
 	
+	static public void SetLength<T>(IList<T> lst, int length)
+	{
+		if (lst == null)
+			throw new ArgumentNullException("list");
+
+		if (length < 0)
+			throw new ArgumentException("Length must be larger than or equal to 0.");
+
+		if (lst.GetType().IsArray)
+			throw new ArgumentException("Cannot use the SetLength extension method on an array. Use Array.Resize or the ListUtilities.SetLength(ref IList<T> list, int length) overload.");
+
+		while (lst.Count < length)
+			lst.Add(default);
+
+		while (lst.Count > length)
+			lst.RemoveAt(lst.Count - 1);
+	}
+	
     [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, char until) => input.Substring(input.LastIndexOf(until) + 1); 
 	[MethodImpl(INLINE)] static public string TrimEndUntil(this string input, string until) => input.Substring(input.LastIndexOf(until) + 1);
 	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , char until) => input.Substring(input.IndexOf(until) + 1); 

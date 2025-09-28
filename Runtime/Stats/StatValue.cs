@@ -10,7 +10,7 @@ public class StatValue
 {
     [ShowInInspector, ReadOnly, TableList]
     public HashSet<IStatModifierBase> Modifiers = new();
-    public float BaseValue;
+    public float BaseValue = 1f;
     [ShowInInspector] public float Value
     {
         get
@@ -27,7 +27,8 @@ public class StatValue
     public StatValue(float baseValue) { BaseValue = baseValue; }
 
     public int ValueRounded => Value.RoundInt();
-    public UnityEvent<IStatModifierBase> OnAddedModifier, OnRemovedModifier;
+    [HideInInspector]
+    public UnityEvent<IStatModifierBase> OnAddedModifier = new(), OnRemovedModifier = new();
 
     public void AddModifier(IStatModifierBase modifier)
     {

@@ -49,17 +49,60 @@ static public class UnityExtensions
         return result;
     }
     [MethodImpl(INLINE)]
-    static public float EularX(this Transform tf) => tf.eulerAngles.x;
-    [MethodImpl(INLINE)]
-    static public float EularY(this Transform tf) => tf.eulerAngles.y;
-    [MethodImpl(INLINE)]
-    static public float EularZ(this Transform tf) => tf.eulerAngles.z;
-    [MethodImpl(INLINE)]
-    static public float PosX(this Transform tf) => tf.position.x;
-    [MethodImpl(INLINE)]
-    static public float PosY(this Transform tf) => tf.position.y;
-    [MethodImpl(INLINE)]
-    static public float PosZ(this Transform tf) => tf.position.z;
+	static public void SetEularX(this Transform tf, float x)
+	{
+		var eular = tf.eulerAngles;
+		eular.x = x;
+		tf.eulerAngles = eular;
+	}
+	[MethodImpl(INLINE)]
+	static public void SetEularY(this Transform tf, float y)
+	{
+		var eular = tf.eulerAngles;
+		eular.y = y;
+		tf.eulerAngles = eular;
+
+	}
+	[MethodImpl(INLINE)]
+	static public void SetEularZ(this Transform tf, float z)
+	{
+		var eular = tf.eulerAngles;
+		eular.z = z;
+		tf.eulerAngles = eular;
+	}
+	[MethodImpl(INLINE)]
+	static public float GetEularX(this Transform tf) => tf.eulerAngles.x;
+	[MethodImpl(INLINE)]
+	static public float GetEularY(this Transform tf) => tf.eulerAngles.y;
+	[MethodImpl(INLINE)]
+	static public float GetEularZ(this Transform tf) => tf.eulerAngles.z;
+	[MethodImpl(INLINE)]
+	static public void SetPosX(this Transform tf, float x)
+	{
+		var pos = tf.position;
+		pos.x = x;
+		tf.position = pos;
+	}
+	[MethodImpl(INLINE)]
+	static public void SetPosY(this Transform tf, float y)
+	{
+		var pos = tf.position;
+		pos.y = y;
+		tf.position = pos; 
+	}
+	[MethodImpl(INLINE)]
+	static public void SetPosZ(this Transform tf, float z)
+	{
+		var pos = tf.position;
+		pos.z = z;
+		tf.position = pos;
+	}
+	[MethodImpl(INLINE)]
+	static public float GetPosX(this Transform tf) => tf.position.x;
+	[MethodImpl(INLINE)]
+	static public float GetPosY(this Transform tf) => tf.position.y;
+	[MethodImpl(INLINE)]
+	static public float GetPosZ(this Transform tf) => tf.position.z;
 	static public void MoveRelativeToChild(this Transform parent, Transform child, Transform target)
 	{
 		var childOriginParent = child.parent;

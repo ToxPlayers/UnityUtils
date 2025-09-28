@@ -303,7 +303,9 @@ static public class MathU
     #endregion
 
     #region Vectors  
-	    [MethodImpl(INLINED)]
+    public const int XIndex = 0, YIndex = 1, ZIndex = 2, WIndex = 3;
+    public const int RightIndex = XIndex, UpIndex = YIndex, ForwardIndex = ZIndex;
+	[MethodImpl(INLINED)]
     static public Quaternion InverseTransformRotation(this Transform tf, in Quaternion rotation) => Quaternion.Inverse(tf.rotation) * rotation;
     [MethodImpl(INLINED)]
     static public Quaternion Inverse(this in Quaternion quaternion) => Quaternion.Inverse(quaternion);
