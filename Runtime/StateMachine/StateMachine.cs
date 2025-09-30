@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace StateMachines
 {  
-    public class StateMachine<TContext> : MonoBehaviour
+    public class StateMachine<TContext, TStateData> : MonoBehaviour
     {
         public abstract class StateTransition
         {
             public StateBase State;
-            public abstract bool ShouldTransition(StateMachine<TContext> stateMachine);
+			public abstract void Init(StateMachine<TContext, TStateData> stateMachine); 
+            public abstract bool ShouldTransition(StateMachine<TContext, TStateData> stateMachine);
 			public abstract void OnPreTransition();
 			public abstract void OnPostTransition();
         } 
@@ -17,13 +18,16 @@ namespace StateMachines
         {
             [field: SerializeField] public List<StateTransition> Transitions { get; private set; }
             public bool IsInState { get; private set; }
-            public StateMachine<TContext> StateMachine { get; private set; }
+            public TStateData StateData { get; private set; }
+            public StateMachine<TContext, TStateData> StateMachine { get; private set; }
             public TContext Context => StateMachine.Context;
-            public void Init(StateMachine<TContext> stateMachine)
+            public void Init(StateMachine<TContext, TStateData> stateMachine)
             {
                 IsInState = false;
                 StateMachine = stateMachine;
+				OnInit();
             }
+            internal abstract void OnInit();
             internal abstract void StateEnter();
             internal abstract void StateUpdate();
             internal abstract void StateExit();
@@ -46,7 +50,11 @@ namespace StateMachines
             State = state;
             State?.StateEnter();
         }
-        private void OnEnable()
+		protected virtual void Awake()
+		{
+			foreach(
+		}
+        protected virtual void OnEnable()
         {
             SetState(StartingState);
         }
