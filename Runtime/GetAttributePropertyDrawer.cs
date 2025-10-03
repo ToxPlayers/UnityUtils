@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 
 #if UNITY_EDITOR
-using UnityEditor; 
+using UnityEditor;
 #endif
 namespace UnityEngine
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public class GetAttribute : PropertyAttribute 
-    { 
+    public class GetAttribute : PropertyAttribute
+    {
         public bool Required { get; set; }
         public GetAttribute() { }
-        public GetAttribute(bool required) => Required = required; 
+        public GetAttribute(bool required) => Required = required;
     }
     public sealed class GetChildAttribute : GetAttribute { }
     public sealed class GetParentAttribute : GetAttribute { }
@@ -36,39 +36,39 @@ namespace UnityEngine
         const float BoxMargin = 5;
 
         public abstract Component FindComponentAction(GameObject go, Type type);
-        
+
         static public string SetColor(string str, Color color)
         {
             return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{str}</color>";
         }
 
         void DrawDefault(Rect rect, SerializedProperty property, GUIContent label)
-        { 
+        {
+            if (property.serializedObject.hasModifiedProperties)
+                property.serializedObject.ApplyModifiedProperties();
             EditorGUI.PropertyField(rect, property, label, true);
             if (property.serializedObject.hasModifiedProperties)
                 property.serializedObject.ApplyModifiedProperties();
         }
-        protected bool ShouldntFindComp(SerializedProperty property, out string invalidErrors, out GameObject ownerGo)
-        {
-            ownerGo = null;
+        static List<GameObject> _tmpGoList;
+        protected bool IsInvalidType(SerializedProperty property, out string invalidErrors)
+        { 
             invalidErrors = null;
-            var wrongPropType = property.propertyType != SerializedPropertyType.ObjectReference;
 
-            if (Application.isPlaying || (!wrongPropType && property.objectReferenceValue != null))
+            if (property.propertyType != SerializedPropertyType.ObjectReference)
+            {
+                invalidErrors = $"Only object ref type is allowed (and not {property.propertyType})";
                 return true;
+            }
 
-            var targetObj = property.serializedObject.targetObject;
-            var comp = targetObj as Component;
-            if (!comp)
-                invalidErrors = $"Only component class {targetObj.GetType().Name} with {nameof(GetAttribute)}"
-                                    + " must be a gameobject";
-            ownerGo = comp.gameObject;
             var fieldType = fieldInfo.FieldType;
-            var isFieldTypeWrong = !typeof(Component).IsAssignableFrom(fieldType);
-            if (isFieldTypeWrong)
-                invalidErrors = SetColor(fieldType.Name, ClassColor) + $" is not a component type";
-
-            return invalidErrors != null;
+            var isComponentType = typeof(Component).IsAssignableFrom(fieldType);
+            if (!isComponentType)
+            {
+                invalidErrors = SetColor(fieldType.Name, ClassColor) + " is not a component type";
+                return true;
+            } 
+            return false;
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -77,7 +77,7 @@ namespace UnityEngine
         }
 
         float _msgRectHeight;
-        void DrawMsgBox(Rect rect, SerializedProperty property, string msg, bool isError)
+        void DrawMsgBox(Rect rect, string msg, bool isError)
         {
             _msgShown = true;
 
@@ -107,39 +107,39 @@ namespace UnityEngine
             GUI.DrawTexture(iconRect, isError ? ErrorIcon : WarnIcon, ScaleMode.ScaleToFit);
         }
 
-        bool _msgShown; 
+        bool _msgShown;
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
             _msgShown = false;
-            _msgRectHeight = 0; 
-            if (ShouldntFindComp(property, out string error, out GameObject ownerGo))
-            {
-                if (error != null)
-                    DrawMsgBox(rect, property, error, true);
-                DrawDefault(rect, property, label);
-                return;
-            }  
+            _msgRectHeight = 0;
 
-            bool isPropertyValueNull = property.objectReferenceValue == null;
-            if (isPropertyValueNull)
+            string error = null;
+            if (Application.isPlaying || IsInvalidType(property, out error) || property.serializedObject.isEditingMultipleObjects)
             {
-                var foundComponent = FindComponentAction(ownerGo, fieldInfo.FieldType);
-                if (foundComponent)
-                    property.objectReferenceValue = foundComponent;
-                else if (attribute is GetAttribute attr && attr.Required)
+                if(error != null)
+                    DrawMsgBox(rect, error, true);
+            }
+            else
+            {
+                var target = property.serializedObject.targetObject;
+                if (target is Component parentComp)
                 {
-                    var warnMsg = $"Failed to find ";
-                    warnMsg += SetColor(fieldInfo.FieldType.Name, ClassColor);
-                    DrawMsgBox(rect, property, warnMsg, false);
+                    var foundComponent = FindComponentAction(parentComp.gameObject, fieldInfo.FieldType);
+                    if (foundComponent)
+                        property.objectReferenceValue = foundComponent;
+                    else if (attribute is GetAttribute attr && attr.Required)
+                    {
+                        var warnMsg = $"Failed to find ";
+                        warnMsg += SetColor(fieldInfo.FieldType.Name, ClassColor);
+                        DrawMsgBox(rect, warnMsg, false);
+                    }
                 }
-            } 
-            
-            if(property.serializedObject.hasModifiedProperties)
-                property.serializedObject.ApplyModifiedProperties();
-             
+                else
+                    DrawMsgBox(rect, target + "is not a component. GetComp attribute is only allowed on components.", true);
+            }
 
-            EditorGUI.PropertyField(rect, property, label, true);
+            DrawDefault(rect, property, label);
         }
 
         string GetAttributeDisplayName()
@@ -153,9 +153,9 @@ namespace UnityEngine
     public class GetAttributeDrawer : GetAttributePropertyDrawerBase
     {
         public override Component FindComponentAction(GameObject go, Type type)
-        { 
+        {
             return go.GetComponent(type);
-        } 
+        }
     }
 
     [CustomPropertyDrawer(typeof(GetChildAttribute))]
@@ -163,7 +163,7 @@ namespace UnityEngine
     {
         public override Component FindComponentAction(GameObject go, Type type)
         {
-            return go.GetComponentInChildren(type);
+            return go.GetComponentInChildren(type, true);
         }
     }
 
@@ -172,7 +172,7 @@ namespace UnityEngine
     {
         public override Component FindComponentAction(GameObject go, Type type)
         {
-            return go.GetComponentInParent(type);
+            return go.GetComponentInParent(type, true);
         }
     }
 

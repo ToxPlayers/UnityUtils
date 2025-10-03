@@ -1049,12 +1049,13 @@ static public class Easing
         return null;
     }
 
-
     static public readonly ReadOnlyCollection<EaseFunc> EasingFuncs;
     static public float Calc(Ease ease, float from, float to, float normalizedTime)
     {
         return EasingFuncs[(int)ease].Invoke(from, to, normalizedTime);
     }
+
+    static public float CalcNormalized(Ease ease, float value) => Calc(ease, 0f, 1f, value);
 
     static Easing()
     {
