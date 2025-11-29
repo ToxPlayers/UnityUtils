@@ -10,21 +10,18 @@ using HideInEdit = Sirenix.OdinInspector.HideInEditorModeAttribute;
 using HideInEdit = TriInspector.HideInEditModeAttribute;
 #endif
 using UnityEngine.Events;
- 
+
 public interface IHealth 
 { 
 	public float MaxHP { get; }
 	public float HPValue { get; } 
-	public float HPNormalized { get; }
-	public void Damage(float dmg);
+    public void Damage(float dmg);
     public void Heal(float heal);
 }
 
 public class Health : MonoBehaviour, IHealth
 {    
 	[SerializeField, Min(1f)] float _maxHP = 100f;
-    [ShowInInspector, Range(0f, 1f), PropertyOrder(-200)]
-    public float HPNormalized => HPValue / MaxHP;
     [ShowInInspector, ReadOnly, HideInEdit] float _health;
     public float MaxHP => _maxHP;
     public float HPValue => _health;

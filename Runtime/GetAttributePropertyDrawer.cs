@@ -22,14 +22,7 @@ namespace UnityEngine
     {
         static Texture ErrorIcon = EditorGUIUtility.IconContent("console.erroricon").image;
         static Texture WarnIcon = EditorGUIUtility.IconContent("console.warnicon").image;
-        static GUIStyle ErrorLabelStyle = new GUIStyle(EditorStyles.label)
-        {
-            padding = new RectOffset(26, 4, 4, 4),
-            fontSize = 10,
-            alignment = TextAnchor.MiddleLeft,
-            richText = true,
-            wordWrap = true
-        };
+        static GUIStyle ErrorLabelStyle;
         static readonly Color ClassColor = new Color(0.3f, 0.78f, 0.7f);
 
         const float IconMargin = 3;
@@ -83,6 +76,15 @@ namespace UnityEngine
 
             var guiLabel = GUI.skin.textArea;
             guiLabel.richText = true;
+
+            ErrorLabelStyle ??= new GUIStyle(EditorStyles.label)
+            {
+                padding = new RectOffset(26, 4, 4, 4),
+                fontSize = 10,
+                alignment = TextAnchor.MiddleLeft,
+                richText = true,
+                wordWrap = true
+            };
 
             _msgRectHeight = ErrorLabelStyle.CalcHeight(new GUIContent(msg), rect.width);
 

@@ -13,17 +13,17 @@ using Random = System.Random;
 static public class MathU
 {
     static readonly Matrix4x4 MatOne = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one);
-    static public readonly Vector3 ZeroVector3 = new(); 
-    static public readonly Vector2 ZeroVector2 = new(); 
+    static public readonly Vector3 ZeroVector3 = new();
+    static public readonly Vector2 ZeroVector2 = new();
 
-    const int INLINED = (int) MethodImplOptions.AggressiveInlining;
+    const int INLINED = (int)MethodImplOptions.AggressiveInlining;
 
     #region Random
     static Random _pureRandom = new Random();
     static int randomUsages;
     public static int PureRandom
     {
-        get 
+        get
         {
             lock (_pureRandom)
             {
@@ -37,12 +37,20 @@ static public class MathU
     #endregion
 
     #region Floats & Ints
-     
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	static public float FractionalPart(this float f) => f - (int)f;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public int WrapIndex(int index, int length)
+    {
+        return (index % length + length) % length;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public Vector3 AsNormalizedDirection(this Quaternion rotation) => rotation * Vector3.forward;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static public float FractionalPart(this float f) => f - (int)f;
     static public int AsInt<TValue>(this TValue value) where TValue : Enum => (int)(object)value;
-    static public bool IsMask(this int maskOrLayer) => maskOrLayer != 0 && maskOrLayer.BitsSetCount() > 1;  
+    static public bool IsMask(this int maskOrLayer) => maskOrLayer != 0 && maskOrLayer.BitsSetCount() > 1;
 
     [BurstCompile]
     public static bool IsAlmostZero(this float number)
@@ -59,7 +67,7 @@ static public class MathU
     static public float TimeLerp(float lerpAmount, float timeStarted)
     {
         return Mathf.Clamp01(Mathf.InverseLerp(timeStarted + lerpAmount, timeStarted, Time.time));
-    } 
+    }
 
     static public void Clamp(this int[] arr, int min, int max)
     {
@@ -69,9 +77,9 @@ static public class MathU
     static public void SafeDestroyChildren(this Transform tf)
     {
         //done this way to fix infinite looping when destroying transform isn't immdiate
-        var count = tf.childCount; 
-		var list = new List<Transform>(count);
-        for (int i = 0; i < count; i++) 
+        var count = tf.childCount;
+        var list = new List<Transform>(count);
+        for (int i = 0; i < count; i++)
             list.Add(tf.GetChild(i));
 
         foreach (var child in list)
@@ -94,15 +102,15 @@ static public class MathU
     }
 
     public static Vector2 ClosestCircleEdge(Vector2 circleCenter, float radius, Vector2 point)
-    {   
+    {
         Vector2 direction = point - circleCenter; // vector pointing from center of circle to point
         direction.Normalize(); // normalize to get unit vector pointing towards point
         return circleCenter + (direction * radius); // point on edge of circle closest to point
     }
     static public IEnumerable<Vector2> EnumRadius(float radiusPointCount, float pointSize)
     {
-        Vector2Int posI = new Vector2Int(0,0);
-        Vector2Int zeroCenter = new Vector2Int(0,0); 
+        Vector2Int posI = new Vector2Int(0, 0);
+        Vector2Int zeroCenter = new Vector2Int(0, 0);
         for (; posI.x < radiusPointCount; posI.x++)
         {
             posI.y = 0;
@@ -178,9 +186,9 @@ static public class MathU
 
     [MethodImpl(INLINED)]
     public static bool IsValidMinMax(in Vector2 MinMax, float value)
-	{ 
-        return value >= MinMax.x &&  value <= MinMax.y;
-	}
+    {
+        return value >= MinMax.x && value <= MinMax.y;
+    }
 
     [MethodImpl(INLINED)]
     static public Vector3 ToV3(this in Color color)
@@ -211,23 +219,23 @@ static public class MathU
     }
     [MethodImpl(INLINED)]
     static public Color OppositeColor(this in Color color)
-    { 
-        return new Color(1-color.r, 1-color.g, 1-color.b, color.a); 
+    {
+        return new Color(1 - color.r, 1 - color.g, 1 - color.b, color.a);
     }
-	[MethodImpl(INLINED)] 
+    [MethodImpl(INLINED)]
     static public Vector3 ToFloat(this in Vector3Int vec2Int) => new Vector3(vec2Int.x, vec2Int.y, vec2Int.z);
-    [MethodImpl(INLINED)] 
+    [MethodImpl(INLINED)]
     static public Vector2 ToFloat(this in Vector2Int vec2Int) => new Vector2(vec2Int.x, vec2Int.y);
     [MethodImpl(INLINED)]
-    static public Vector3Int RoundToInt(this in Vector3 v3) 
-        => new Vector3Int(){ x = Mathf.RoundToInt(v3.x), y = Mathf.RoundToInt(v3.y), z = Mathf.RoundToInt(v3.z) };
+    static public Vector3Int RoundToInt(this in Vector3 v3)
+        => new Vector3Int() { x = Mathf.RoundToInt(v3.x), y = Mathf.RoundToInt(v3.y), z = Mathf.RoundToInt(v3.z) };
     [MethodImpl(INLINED)]
-	static public Vector3Int CeilToInt(this in Vector3 v3) => new(Mathf.CeilToInt(v3.x), Mathf.CeilToInt(v3.y), Mathf.CeilToInt(v3.z));
+    static public Vector3Int CeilToInt(this in Vector3 v3) => new(Mathf.CeilToInt(v3.x), Mathf.CeilToInt(v3.y), Mathf.CeilToInt(v3.z));
     [MethodImpl(INLINED)]
-	static public Vector3Int FloorToInt(this in Vector3 v3) => new(Mathf.FloorToInt(v3.x), Mathf.FloorToInt(v3.y), Mathf.FloorToInt(v3.z));
-    [MethodImpl(INLINED)] 
-    static public Vector2Int RoundToInt(this in Vector2 v2) 
-        => new Vector2Int () { x = Mathf.RoundToInt(v2.x), y = Mathf.RoundToInt(v2.y) };
+    static public Vector3Int FloorToInt(this in Vector3 v3) => new(Mathf.FloorToInt(v3.x), Mathf.FloorToInt(v3.y), Mathf.FloorToInt(v3.z));
+    [MethodImpl(INLINED)]
+    static public Vector2Int RoundToInt(this in Vector2 v2)
+        => new Vector2Int() { x = Mathf.RoundToInt(v2.x), y = Mathf.RoundToInt(v2.y) };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Cross(this Vector2 v1, Vector2 v2)
@@ -240,11 +248,11 @@ static public class MathU
         => new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
     [MethodImpl(INLINED)]
     static public void AddOrSet<Key, Val>(this Dictionary<Key, Val> dic, in Key key, in Val value)
-	{
+    {
         if (dic.ContainsKey(key))
             dic[key] = value;
         else dic.Add(key, value);
-	} 
+    }
     [MethodImpl(INLINED)]
     static public Val TryGetOrAddDefault<Key, Val>(this Dictionary<Key, Val> dic, in Key key, in Val defaultVal)
     {
@@ -255,15 +263,15 @@ static public class MathU
         return value;
     }
     [MethodImpl(INLINED)]
-    static public int RoundInt(this float f) => Mathf.RoundToInt(f); 
+    static public int RoundInt(this float f) => Mathf.RoundToInt(f);
     [MethodImpl(INLINED)]
     static public void SetZero(this ref Vector3 v) { v.x = 0f; v.y = 0f; v.z = 0f; }
     [MethodImpl(INLINED)]
     static public bool IsZero(this ref Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f;
     [MethodImpl(INLINED)]
-    static public void SetZero(this ref Vector2 v) { v.x = 0f; v.y = 0f; } 
+    static public void SetZero(this ref Vector2 v) { v.x = 0f; v.y = 0f; }
     [MethodImpl(INLINED)]
-    static public bool IsZero(this ref Vector2 v) => v.x == 0f && v.y == 0f; 
+    static public bool IsZero(this ref Vector2 v) => v.x == 0f && v.y == 0f;
 
     [MethodImpl(INLINED)]
     static public bool IsNanOrInifinity(this in Vector3 v)
@@ -281,7 +289,7 @@ static public class MathU
         if (fromMax - fromMin == 0)
             fromMax = 0.0000001f;
         return (toMax - toMin) * (val - fromMin) / (fromMax - fromMin) + toMin;
-    } 
+    }
 
 
     [BurstCompile]
@@ -305,7 +313,17 @@ static public class MathU
     #region Vectors  
     public const int XIndex = 0, YIndex = 1, ZIndex = 2, WIndex = 3;
     public const int RightIndex = XIndex, UpIndex = YIndex, ForwardIndex = ZIndex;
-	[MethodImpl(INLINED)]
+    /// <summary>
+    /// Calculates the normalized projection of the Vector3 'vec'
+    /// onto the horizontal plane defined by the orthogonal vector (0, 1, 0)
+    /// </summary>
+    /// <param name="vec">The vector to project</param>
+    /// <returns>The normalized projection of 'vec' onto the horizontal plane</returns>
+    public static Vector3 GetFloorProjection(in Vector3 vec)
+    {
+        return Vector3.ProjectOnPlane(vec, Vector3.up).normalized;
+    }
+    [MethodImpl(INLINED)]
     static public Quaternion InverseTransformRotation(this Transform tf, in Quaternion rotation) => Quaternion.Inverse(tf.rotation) * rotation;
     [MethodImpl(INLINED)]
     static public Quaternion Inverse(this in Quaternion quaternion) => Quaternion.Inverse(quaternion);
@@ -316,12 +334,38 @@ static public class MathU
         CopyToFloat3(from, arr3);
         return arr3;
     }
+    public static float GetDominant(this Vector3 v3) => v3[v3.GetDominantAxis()];
+    public static int GetDominantAxis(this Vector3 v3)
+    {
+        var v3Abs = v3.Abs();
+        int maxIdx = 0;
+        for (int i = 1; i < 3; i++)
+            if (v3Abs[i] > v3Abs[maxIdx])
+                maxIdx = i;
+        return maxIdx;
+    }
+    public static Vector3 ExtractDominant(this Vector3 v3)
+    {
+        var max = GetDominantAxis(v3.Abs());
+        for (int i = 0; i < 3; i++)
+            if (i != max)
+                v3[i] = 0;
+        return v3;
+    }
+    static public JointDrive Multiplied(this JointDrive joint, float mult)
+    {
+        joint.maximumForce *= mult;
+        joint.positionDamper *= mult;
+        joint.positionSpring *= mult;
+        return joint;
+    }
+
     [BurstCompile]
     static public void CopyToFloat3(this NativeArray<float2>.ReadOnly from, NativeArray<float3> to)
         => CopyToFloat3(from, to, 0, to.Length);
     [BurstCompile]
     static public void CopyToFloat3(this NativeArray<float2>.ReadOnly from, NativeArray<float3> to, int startIndex, int count)
-    { 
+    {
         for (int i = 0; i < count; i++)
         {
             var f2 = from[i];
@@ -333,7 +377,7 @@ static public class MathU
     => CopyToFloat3(from, to, 0, to.Length);
     [BurstCompile]
     static public void CopyToFloat3(this NativeArray<float2> from, NativeArray<float3> to, int startIndex, int count)
-    { 
+    {
         for (int i = 0; i < count; i++)
         {
             var f2 = from[i];
@@ -341,7 +385,7 @@ static public class MathU
         }
     }
 
-    [BurstCompile] 
+    [BurstCompile]
     static public float3 GetTriangleNormal(in float3 A, in float3 B, in float3 C)
     {
         var AB = B - A;
@@ -393,15 +437,15 @@ static public class MathU
     static public bool Approximately(in Vector2 v1, in Vector2 v2)
    => Mathf.Approximately(v1.x, v2.x) && Mathf.Approximately(v1.y, v2.y);
 
-    [MethodImpl(INLINED)] 
+    [MethodImpl(INLINED)]
     static public Vector2 ClampValues(this in Vector2 toClamp, float maxX, float maxY)
     => new Vector2
         (
            Mathf.Clamp(toClamp.x, 0, maxX),
            Mathf.Clamp(toClamp.y, 0, maxY)
-        ); 
+        );
     [MethodImpl(INLINED)]
-     
+
     static public Vector2 ClampMinValues(this in Vector2 toClamp, in Vector2 minClamp)
        => new Vector2()
        {
@@ -414,7 +458,7 @@ static public class MathU
             x = Mathf.Clamp(toClamp.x, minClamp.x, maxClamp.x),
             y = Mathf.Clamp(toClamp.y, minClamp.y, maxClamp.y),
         };
-    static public Vector3 ClampMinValues(this  Vector3 toClamp, Vector3 minClamp)
+    static public Vector3 ClampMinValues(this Vector3 toClamp, Vector3 minClamp)
         => ClampV3(toClamp, minClamp, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue));
     static public Vector3 ClampV3(this in Vector3 toClamp, Vector3 minClamp, Vector3 maxClamp)
     => new Vector3()
@@ -433,35 +477,35 @@ static public class MathU
         v.x = (cos * tx) - (sin * ty);
         v.y = (sin * tx) + (cos * ty);
         return v;
-    } 
-	static public void AngleTo(this in Quaternion rot, in Quaternion target, out float angle, out Vector3 axis)
-	{
-		Quaternion rotation = Quaternion.Inverse(rot) * target;
-		rotation.ToAngleAxis(out angle, out axis);
-	}
-	static public Quaternion Between(this in Quaternion rot, in Quaternion subtract)
-	{
-		return Quaternion.Inverse(subtract) * rot;
-	}
-	
+    }
+    static public void AngleTo(this in Quaternion rot, in Quaternion target, out float angle, out Vector3 axis)
+    {
+        Quaternion rotation = Quaternion.Inverse(rot) * target;
+        rotation.ToAngleAxis(out angle, out axis);
+    }
+    static public Quaternion Between(this in Quaternion rot, in Quaternion subtract)
+    {
+        return Quaternion.Inverse(subtract) * rot;
+    }
+
     static public Rect GetNearestRect(Vector2 posXZ, float cellSize, Vector2 cellCenter)
     {
         var rightDist = Mathf.Abs(posXZ.x - cellCenter.x);
         var topDis = Mathf.Abs(posXZ.y - cellCenter.y);
-        Rect neighborRect = new() { size = new Vector2(cellSize, cellSize) , center = cellCenter };
+        Rect neighborRect = new() { size = new Vector2(cellSize, cellSize), center = cellCenter };
         if (rightDist > topDis)//is right or top
         {
             if (posXZ.x > cellCenter.x) // right
                 neighborRect.x += cellSize;
             else //left
-                neighborRect.x -= cellSize; 
+                neighborRect.x -= cellSize;
         }
         else
         {
             if (posXZ.y > cellCenter.y)//top
                 neighborRect.y += cellSize;
             else//bottom
-                neighborRect.y -= cellSize; 
+                neighborRect.y -= cellSize;
         }
         return neighborRect;
     }
@@ -470,33 +514,35 @@ static public class MathU
 
     [MethodImpl(INLINED)]
     public static Vector2 Abs(this in Vector2 v) => new Vector2(Mathf.Abs(v.x), Mathf.Abs(v.y));
-	[MethodImpl(INLINED)]
-	public static Vector2 XZ(this in Vector3Int vv) => new Vector2(vv.x, vv.z);
-	[MethodImpl(INLINED)]
-	public static Vector2Int XZRoundToInt(this in Vector3 vv) => new Vector2Int( Mathf.RoundToInt( vv.x) , Mathf.RoundToInt(vv.z));
-	[MethodImpl(INLINED)]
-	public static Vector2Int XZInt(this in Vector3Int vv) => new Vector2Int(vv.x, vv.z); 
-	[MethodImpl(INLINED)]
-	public static Vector3Int XZToXYZInt(this in Vector2 v2) => new Vector3Int( Mathf.RoundToInt(v2.x), 0,  Mathf.RoundToInt(v2.y));
-	[MethodImpl(INLINED)]
-	public static Vector3Int XZToXYZInt(this in Vector2 v2, int y) => new Vector3Int( Mathf.RoundToInt(v2.x), y,  Mathf.RoundToInt(v2.y));
+    [MethodImpl(INLINED)]
+    public static Vector2 XZ(this in Vector3Int vv) => new Vector2(vv.x, vv.z);
+    [MethodImpl(INLINED)]
+    public static Vector2Int XZRoundToInt(this in Vector3 vv) => new Vector2Int(Mathf.RoundToInt(vv.x), Mathf.RoundToInt(vv.z));
+    [MethodImpl(INLINED)]
+    public static Vector2Int XZInt(this in Vector3Int vv) => new Vector2Int(vv.x, vv.z);
+    [MethodImpl(INLINED)]
+    public static Vector3Int XZToXYZInt(this in Vector2 v2) => new Vector3Int(Mathf.RoundToInt(v2.x), 0, Mathf.RoundToInt(v2.y));
+    [MethodImpl(INLINED)]
+    public static Vector3Int XZToXYZInt(this in Vector2 v2, int y) => new Vector3Int(Mathf.RoundToInt(v2.x), y, Mathf.RoundToInt(v2.y));
+    [MethodImpl(INLINED)]
+    public static Vector2 FlipYX(this in Vector2 v2) => new Vector2() { x = v2.y, y = v2.x };
     [MethodImpl(INLINED)]
     public static Vector2 XZ(this in Vector3 vv) => new Vector2(vv.x, vv.z);
-	[MethodImpl(INLINED)]
-	public static Vector3 XZToXYZ(this in Vector2 v2) => new Vector3(v2.x, 0, v2.y);
+    [MethodImpl(INLINED)]
+    public static Vector3 XZToXYZ(this in Vector2 v2) => new Vector3(v2.x, 0, v2.y);
 
-	[MethodImpl(INLINED)]
+    [MethodImpl(INLINED)]
     public static Vector3Int XZToXYZInt(this in Vector2Int v2) => new Vector3Int(v2.x, 0, v2.y);
-	[MethodImpl(INLINED)] 
-	public static Vector3 XZToXYZ(this in Vector2Int v2) => new Vector3(v2.x, 0, v2.y);
-	[MethodImpl(INLINED)]
-    public static Vector3 XZToXYZ(this in Vector2 v2, float Y) => new Vector3(v2.x, Y, v2.y); 
+    [MethodImpl(INLINED)]
+    public static Vector3 XZToXYZ(this in Vector2Int v2) => new Vector3(v2.x, 0, v2.y);
+    [MethodImpl(INLINED)]
+    public static Vector3 XZToXYZ(this in Vector2 v2, float Y) => new Vector3(v2.x, Y, v2.y);
     [MethodImpl(INLINED)]
     public static string Vector2Hash(this in Vector2 hash) => $"{hash.x},{hash.y}";
-    [MethodImpl(INLINED)] 
-    public static Vector3 ToV3(this in Vector2 v2) => new Vector3(v2.x,v2.y,0);
     [MethodImpl(INLINED)]
-    static public Vector3 Abs(this in Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.x), z = Mathf.Abs(v.x) };
+    public static Vector3 ToV3(this in Vector2 v2) => new Vector3(v2.x, v2.y, 0);
+    [MethodImpl(INLINED)]
+    static public Vector3 Abs(this in Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.y), z = Mathf.Abs(v.z) };
 
 
 
@@ -506,7 +552,7 @@ static public class MathU
     [MethodImpl(INLINED)]
     public static Vector2 DegreeToV2(float degree) => RadianToVector2(degree * Mathf.Deg2Rad);
 
-   
+
 
     public static Vector2 NearestEdge(this in Rect rect, in Vector2 point)
     {
@@ -557,7 +603,7 @@ static public class MathU
             y = GetCellCenter(y, cellSize),
             z = GetCellCenter(z, cellSize)
         };
-    }  
+    }
     [MethodImpl(INLINED)]
     public static Vector3 GetCellMin(in Vector3 pos, in float cellSizeSqr)
     {
@@ -578,7 +624,7 @@ static public class MathU
             y = GetCellMax(pos.y, cellSizeSqr),
             z = GetCellMax(pos.z, cellSizeSqr)
         };
-    } 
+    }
     [MethodImpl(INLINED)]
     public static Vector2 GetCellCenter(in float posX, in float posZ, in float cellSize)
     {
@@ -614,7 +660,7 @@ static public class MathU
             x = GetCellCenterInt(pos.x, cellSize),
             y = GetCellCenterInt(pos.y, cellSize)
         };
-    } 
+    }
 
     [MethodImpl(INLINED)]
     public static Vector2 GetCellMin(in Vector2 pos, in int cellSizeSqr)
@@ -624,7 +670,7 @@ static public class MathU
             x = GetCellMinInt(pos.x, cellSizeSqr),
             y = GetCellMinInt(pos.y, cellSizeSqr)
         };
-    } 
+    }
 
     [MethodImpl(INLINED)]
     public static Vector2 GetCellMax(in Vector2 pos, in int cellSizeSqr)
@@ -640,7 +686,7 @@ static public class MathU
     public static float GetCellCenter(in float pos, in float cellSize)
     {
         return Mathf.Round(pos / cellSize) * cellSize;
-    } 
+    }
     [MethodImpl(INLINED)]
     public static float GetCellMax(in float pos, in float cellSize)
     {
@@ -666,8 +712,8 @@ static public class MathU
     [MethodImpl(INLINED)]
     public static float GetCellMaxInt(in float pos, in int cellSize)
     {
-        return  Mathf.Round(pos / cellSize) * cellSize + cellSize /2f;
-    } 
+        return Mathf.Round(pos / cellSize) * cellSize + cellSize / 2f;
+    }
 
     [MethodImpl(INLINED)]
     public static float GetCellMinInt(in float pos, in int cellSize)
@@ -719,15 +765,14 @@ static public class MathU
         };
     }
     [MethodImpl(INLINED)]
-    public static int PositionToIndex(float cellSize,int rowLen, Vector2 pos)
+    public static int PositionToIndex(float cellSize, int rowLen, Vector2 pos)
     {
         var col = Mathf.RoundToInt(pos.y / cellSize);
         var row = Mathf.RoundToInt(pos.x / cellSize);
         return row * rowLen + col;
     }
-
-
-    public static List<T> GetNameTagInLocalChildren<T>(this Transform transform, string nameTag) where T : Component
+     
+    public static List<T> GetNameTagsInLocalChildren<T>(this Transform transform, string nameTag) where T : Component
     {
         List<T> list = new List<T>();
         int count = transform.childCount;
@@ -995,6 +1040,19 @@ static public class MathU
         var b = PureRandom;
         return  new(r, g, b);   
     }
+
+    public static Color RandomColor(float brightnessValue)
+    {
+        var h = PureRandom;
+        var s = PureRandom;
+        return Color.HSVToRGB(h, s, brightnessValue);
+    }
+
+    public static Color RandomColor(Random rnd, float saturation = 1f, float brightnessValue = 1f)
+    { 
+        return Color.HSVToRGB(rnd.NextFloat(), saturation, brightnessValue);
+    }
+
 
     #endregion
 

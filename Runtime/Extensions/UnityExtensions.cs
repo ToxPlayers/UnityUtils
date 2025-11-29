@@ -49,6 +49,12 @@ static public class UnityExtensions
         return result;
     }
     [MethodImpl(INLINE)]
+    static public void MatchPositionAndRotation(this Transform dest, in Transform src)
+    {
+        src.GetPositionAndRotation(out var pos, out var rot);
+        dest.SetPositionAndRotation(pos, rot);
+    }
+    [MethodImpl(INLINE)]
 	static public void SetEularX(this Transform tf, float x)
 	{
 		var eular = tf.eulerAngles;
@@ -146,7 +152,9 @@ static public class UnityExtensions
     }
     #endregion
 
-    #region Components   
+    #region Components    
+    static public float GetHPNormalized(this IHealth hp) => hp.HPValue / hp.MaxHP; 
+
 #if UNITY_EDITOR
     [MenuItem("Tools/Remove Selected Missing Scripts")]
     static public void RemoveSelectedMissingScripts()
@@ -328,6 +336,9 @@ static public class UnityExtensions
     static public T AddComponent<T>(this Component comp) where T : Component => comp.gameObject.AddComponent<T>();
 
     [MethodImpl(INLINE)]
+    static public Component AddComponent(this Component comp, Type t) => comp.gameObject.AddComponent(t);
+
+    [MethodImpl(INLINE)]
     public static void SafeDelay(this UnityEngine.Object behave, Action action)
     {
 #if UNITY_EDITOR
@@ -500,6 +511,9 @@ static public class UnityExtensions
         if(disposable.IsCreated)
             disposable.Dispose();
     }
-    #endregion
 
+
+
+    #endregion
+     
 }

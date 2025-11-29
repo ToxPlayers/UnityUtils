@@ -1,9 +1,10 @@
 ﻿using NUnit.Framework;
+using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
 using UnityEngine.Animations;
 namespace AnimationCalls
-{ 
+{  
     public class AnimationEventStateBehaviour<TState> : StateMachineBehaviour where TState : struct, Enum
     {
         [SerializeField] TState _state;

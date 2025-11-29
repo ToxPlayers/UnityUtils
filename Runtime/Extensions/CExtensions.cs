@@ -64,9 +64,18 @@ static public class CExtensions
 			  yield return toFlag;
 		}
 	}
-    #endregion
-	
-	static public void SetLength<T>(IList<T> lst, int length)
+	#endregion
+
+	[MethodImpl(INLINE)]
+	static public float GetFractional(this in float f)
+	{
+		var floored = MathF.Floor(f);
+		return f - floored;
+    }
+
+	static public T WrapIndex<T>(this T[] arr, int idx) => arr[MathU.WrapIndex(idx, arr.Length)];
+	static public T WrapIndex<T>(this IList<T> lst, int idx) => lst[MathU.WrapIndex(idx, lst.Count)];
+    static public void SetLength<T>(this IList<T> lst, int length)
 	{
 		if (lst == null)
 			throw new ArgumentNullException("list");
@@ -84,10 +93,10 @@ static public class CExtensions
 			lst.RemoveAt(lst.Count - 1);
 	}
 	
-    [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, char until) => input.Substring(input.LastIndexOf(until) + 1); 
-	[MethodImpl(INLINE)] static public string TrimEndUntil(this string input, string until) => input.Substring(input.LastIndexOf(until) + 1);
-	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , char until) => input.Substring(input.IndexOf(until) + 1); 
-	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , string until) => input.Substring(input.IndexOf(until) + 1); 
+    [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, in char until) => input.Substring(input.LastIndexOf(until) + 1); 
+	[MethodImpl(INLINE)] static public string TrimEndUntil(this string input, in string until) => input.Substring(input.LastIndexOf(until) + 1);
+	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , in char until) => input.Substring(input.IndexOf(until) + 1); 
+	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , in string until) => input.Substring(input.IndexOf(until) + 1); 
 
 	[MethodImpl(INLINE)] 	static public string ToStringEnum(this IEnumerable enumerable)
 	{
