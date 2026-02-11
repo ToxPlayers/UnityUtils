@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,15 +14,24 @@ public class ScreenRelativeScale : MonoBehaviour
     };
 
     static public float GlobalScaling = 0.7f;
-    public float Scaling = 1f;
-    public float MinScaling = 0f;
-    public float MaxScaling = 10_000;
-      
-    public bool ConformToScreenUsingParent;
-    public float ConformZExtent;
+    [BoxGroup("Scaling")]
+    public bool UseScaling;
+    [BoxGroup("Scaling"), ShowIf(nameof(UseScaling))]
+    public float Scaling = 1f, MinScaling = 0f, MaxScaling = 10_000;
+
+    [BoxGroup("LookAt")]
     public bool LookAtCam;
-    public float ScreenConformExtentsOffset;
-    float _targetAnimationAlpha = -1f;
+    [BoxGroup("LookAt"), ShowIf(nameof(LookAtCam))]
+    public SnapAxis LookAtAxis = SnapAxis.Y;
+    [BoxGroup("LookAt"), ShowIf(nameof(LookAtCam))]
+    public Quaternion LookAtOffset;
+
+
+    [BoxGroup("Conform To Screen")]
+    public bool ConformToScreenUsingParent;
+    [BoxGroup("Conform To Screen"), ShowIf(nameof(ConformToScreenUsingParent))]
+    public float ConformZExtent, ScreenConformExtentsOffset;
+
 
     private void OnEnable()
     {
@@ -68,13 +78,30 @@ public class ScreenRelativeScale : MonoBehaviour
         }
 
         if (LookAtCam)
-            transform.LookAt(cam.transform);
+        {
+            var camPos = cam.transform.position;
+            var lookEuler = Quaternion.LookRotation(camPos).eulerAngles;
+            
+            if (LookAtAxis != SnapAxis.All)
+            {
+                var originalEuler = transform.eulerAngles;
+                var mask = LookAtAxis.AsInt(); 
+                for (int i = 0; i < 3; i++)
+                    if (!mask.IsSetBitFlags(i.ToFlagsMask()))
+                        lookEuler[i] = originalEuler[i];
+            }
 
-        var distance = Vector3.Distance(cam.transform.position, transform.position);
-        var scale = distance * Scaling / 15f * GlobalScaling;
-        scale = Mathf.Clamp( scale , MinScaling, MaxScaling);
-        var size = Vector3.one * scale;
-        transform.localScale = size;
+            transform.rotation = LookAtOffset * Quaternion.Euler(lookEuler); 
+        }
+
+        if(UseScaling)
+        {
+            var distance = Vector3.Distance(cam.transform.position, transform.position);
+            var scale = distance * Scaling / 15f * GlobalScaling;
+            scale = Mathf.Clamp(scale, MinScaling, MaxScaling);
+            var size = Vector3.one * scale;
+            transform.localScale = size;
+        }
     }
 
 

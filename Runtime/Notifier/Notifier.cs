@@ -7,7 +7,7 @@ using TriInspector;
 using UnityEngine.Events;
 using System;
 using UnityInternalExpose;
-
+ 
 public interface IReadOnlyNotifier<T>
 {  
     public T Value { get; }
@@ -18,7 +18,7 @@ public interface IReadOnlyNotifier<T>
     public void SubToggle(UnityAction<T> action, bool sub);
     public void Unsub(UnityAction<T, T> action);
     public void Unsub(UnityAction<T> action);
-}
+} 
 
 [Serializable, HideMonoScript, InlineProperty]
 public class Notifier<T> : IReadOnlyNotifier<T>

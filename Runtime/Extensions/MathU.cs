@@ -49,7 +49,7 @@ static public class MathU
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static public float FractionalPart(this float f) => f - (int)f;
-    static public int AsInt<TValue>(this TValue value) where TValue : Enum => (int)(object)value;
+    static public int AsInt<TValue>(this TValue value) where TValue : Enum => Convert.ToInt32(value);
     static public bool IsMask(this int maskOrLayer) => maskOrLayer != 0 && maskOrLayer.BitsSetCount() > 1;
 
     [BurstCompile]
@@ -323,6 +323,12 @@ static public class MathU
     {
         return Vector3.ProjectOnPlane(vec, Vector3.up).normalized;
     }
+    /// <summary>
+    /// World space rotation to local rotation
+    /// </summary>
+    /// <param name="tf"></param>
+    /// <param name="rotation"></param>
+    /// <returns></returns>
     [MethodImpl(INLINED)]
     static public Quaternion InverseTransformRotation(this Transform tf, in Quaternion rotation) => Quaternion.Inverse(tf.rotation) * rotation;
     [MethodImpl(INLINED)]
@@ -354,7 +360,6 @@ static public class MathU
     }
     static public JointDrive Multiplied(this JointDrive joint, float mult)
     {
-        joint.maximumForce *= mult;
         joint.positionDamper *= mult;
         joint.positionSpring *= mult;
         return joint;
@@ -543,8 +548,8 @@ static public class MathU
     public static Vector3 ToV3(this in Vector2 v2) => new Vector3(v2.x, v2.y, 0);
     [MethodImpl(INLINED)]
     static public Vector3 Abs(this in Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.y), z = Mathf.Abs(v.z) };
-
-
+    [MethodImpl(INLINED)]
+    static public half3 AsHalf3(this in Vector3 v) => new () { x = new(v.x), y = new(v.y), z = new(v.z) };
 
     [MethodImpl(INLINED)]
     public static Vector2 RadianToVector2(float radian) => new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));

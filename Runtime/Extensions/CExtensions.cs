@@ -103,11 +103,21 @@ static public class CExtensions
 		var str = "";
 		var i = 0;
 		foreach (var e in enumerable)
-			str += $"[{i++}]: {e.ToString()}\n";
+			str += $"[{i++}]: {e}\n";
 		return str;
 	}
+    [MethodImpl(INLINE)]
+    static public string ToStringEnum(this IEnumerable enumerable, string preStr, string postStr)
+    {
+        var str = ""; 
+        foreach (var e in enumerable)
+            str += $"{preStr}{e}{postStr}";
+		str.TrimStart(preStr);
+		str.TrimEnd(postStr);
+        return str;
+    }
 
-	[MethodImpl(INLINE)]
+    [MethodImpl(INLINE)]
 	static public bool IsNullOrEmpty(this ICollection col) => col is null || col.Count == 0;	
 
 	[MethodImpl(INLINE)]
@@ -211,10 +221,18 @@ static public class CExtensions
 		if (!source.EndsWith(trimValue))
 			return source;
 
-		return source.Remove(source.LastIndexOf(trimValue)); 
+		return source[trimValue.Length..]; 
 	}
+    [MethodImpl(INLINE)]
+    static public string TrimStart(this string source, string trimValue)
+    { 
+        if (!source.StartsWith(trimValue))
+            return source;
+		 
+        return source[..trimValue.Length];
+    }
 
-	[MethodImpl(INLINE)]	
+    [MethodImpl(INLINE)]	
 	static public void LoopRemove<T>(this LinkedList<T> list, Predicate<T> shouldRemove, long maxLoopTimeMilliseconds)
 	{
 		var watch = System.Diagnostics.Stopwatch.StartNew();

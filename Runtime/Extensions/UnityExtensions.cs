@@ -54,6 +54,14 @@ static public class UnityExtensions
         src.GetPositionAndRotation(out var pos, out var rot);
         dest.SetPositionAndRotation(pos, rot);
     }
+
+    [MethodImpl(INLINE)]
+    static public void MatchLocalPositionAndRotation(this Transform dest, in Transform src)
+    {
+        src.GetLocalPositionAndRotation(out var pos, out var rot);
+        dest.SetLocalPositionAndRotation(pos, rot);
+    }
+
     [MethodImpl(INLINE)]
 	static public void SetEularX(this Transform tf, float x)
 	{
@@ -276,6 +284,8 @@ static public class UnityExtensions
         catch (Exception ex) { Debug.Log($"Faied to dispose ({disposable})\n{ex.Message}"); }
     }
 
+    [MethodImpl(INLINE)]
+    static public float AsAngle(this Vector2 v2) => v2 == Vector2.zero ? 0f : Mathf.Atan2(v2.x, v2.y) * Mathf.Rad2Deg;
 
     [MethodImpl(INLINE)]
     static public float Distance(this Vector3 from, Vector3 to) => Vector3.Distance(from, to);
