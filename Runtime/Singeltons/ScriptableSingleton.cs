@@ -17,7 +17,7 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
     static ScriptableSingleton()
     {
         EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
-    }
+    } 
     private static void SetAllSingletonsAsPreloaded()
     {
         var allSingletons = Resources.LoadAll(SingletonsResFolder).ToList();
@@ -57,20 +57,24 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
 #endif
 }
 #if UNITY_EDITOR
-[InfoBox("Scriptable Instance<" + nameof(T) + ">", nameof(IsInstance), InfoMessageType = InfoMessageType.Info)]
-[InfoBox( "@" + nameof(GetNonInstanceInspectorInfobox) + "()", "@!" + nameof(IsInstance),InfoMessageType = InfoMessageType.Warning)]
+[InfoBox("@$value."+nameof(InstanceInspectorInfobox), "@$value." + nameof(IsInstance), InfoMessageType = InfoMessageType.Info)]
+[InfoBox("@$value."+nameof(NonInstanceInspectorInfobox), "@!$value." + nameof(IsInstance), InfoMessageType = InfoMessageType.Warning)]
 #endif
 public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
 {
 
 #if UNITY_EDITOR
-    string GetNonInstanceInspectorInfobox()
+    string InstanceInspectorInfobox => "Scriptable Instance<" + typeof(T).Name + ">";
+    string NonInstanceInspectorInfobox
     {
-        var str = $"Not instance of <" + typeof(T).Name + ">";
-        if (_instance)
-            str += $"({AssetDatabase.GetAssetPath(_instance)})";
-        return str;
-    }
+        get
+        {
+            var str = $"Not instance of <" + typeof(T).Name + ">";
+            if (_instance)
+                str += $"({AssetDatabase.GetAssetPath(_instance)})";
+            return str;
+        }
+    } 
 #endif
 
     static T _instance;
@@ -96,16 +100,15 @@ public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : Scr
     protected virtual void Awake() { }
 
     public void WakeupInstance() => Awake();
-    int i = 0;
     protected virtual void OnEnable()
     {
-        if (_instance != null)
+        if (!_instance)
         {
             _instance = this as T;
             VerifySingletonEnable();
         }
     }
-
+     
     static void LoadOrCreateInstance()
     {
         if (_instance)
@@ -132,6 +135,6 @@ public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : Scr
             instance = instances[0];
 
         _instance = instance;
-        _instance.VerifySingletonEnable();
+        _instance.VerifySingletonEnable(); 
     }
 }

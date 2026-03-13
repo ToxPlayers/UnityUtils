@@ -66,14 +66,24 @@ static public class CExtensions
 	}
 	#endregion
 
+
 	[MethodImpl(INLINE)]
-	static public float GetFractional(this in float f)
+    static public float GetFractional(this in float f)
 	{
 		var floored = MathF.Floor(f);
 		return f - floored;
     }
-
+	static public EnuT ForEach<EnuT,T>(this EnuT enu, Action<T> act) where EnuT : IEnumerable<T> {
+		foreach (var e in enu)
+			act?.Invoke(e);
+		return enu;
+	}
 	static public T WrapIndex<T>(this T[] arr, int idx) => arr[MathU.WrapIndex(idx, arr.Length)];
+	static public void ClearOrNew<T>(ref List<T> lst) {
+		if (lst.Count == 0)
+			lst = new();
+		else lst.Clear();
+	}
 	static public T WrapIndex<T>(this IList<T> lst, int idx) => lst[MathU.WrapIndex(idx, lst.Count)];
     static public void SetLength<T>(this IList<T> lst, int length)
 	{
@@ -92,7 +102,12 @@ static public class CExtensions
 		while (lst.Count > length)
 			lst.RemoveAt(lst.Count - 1);
 	}
-	
+    static public void AddIfNotContains<T>(this IList<T> lst, T item) {
+		if (!lst.Contains(item))
+			lst.Add(item);
+	}
+
+
     [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, in char until) => input.Substring(input.LastIndexOf(until) + 1); 
 	[MethodImpl(INLINE)] static public string TrimEndUntil(this string input, in string until) => input.Substring(input.LastIndexOf(until) + 1);
 	[MethodImpl(INLINE)] static public string TrimStartUntil(this string input , in char until) => input.Substring(input.IndexOf(until) + 1); 
@@ -109,12 +124,12 @@ static public class CExtensions
     [MethodImpl(INLINE)]
     static public string ToStringEnum(this IEnumerable enumerable, string preStr, string postStr)
     {
-        var str = ""; 
+        var str = "";  
         foreach (var e in enumerable)
             str += $"{preStr}{e}{postStr}";
-		str.TrimStart(preStr);
-		str.TrimEnd(postStr);
-        return str;
+		if (str.Length == 0)
+			return str;
+		return str[preStr.Length..^postStr.Length];
     }
 
     [MethodImpl(INLINE)]
@@ -146,7 +161,7 @@ static public class CExtensions
 	} 
 
     [MethodImpl(INLINE)]
-	static public bool ValidIndex<T>(this ICollection<T> collection , int index)
+	static public bool ValidIndex(this ICollection collection , int index)
 	{
 		return index >= 0 && index < collection.Count;
 	}
@@ -221,7 +236,7 @@ static public class CExtensions
 		if (!source.EndsWith(trimValue))
 			return source;
 
-		return source[trimValue.Length..]; 
+		return source[..^trimValue.Length]; 
 	}
     [MethodImpl(INLINE)]
     static public string TrimStart(this string source, string trimValue)
@@ -229,7 +244,7 @@ static public class CExtensions
         if (!source.StartsWith(trimValue))
             return source;
 		 
-        return source[..trimValue.Length];
+        return source[trimValue.Length..];
     }
 
     [MethodImpl(INLINE)]	

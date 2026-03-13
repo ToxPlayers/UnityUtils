@@ -1,19 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System;
-using UnityEngine.UIElements;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using UnityEditor;
-using UnityEngine.SceneManagement;
-using Unity.Mathematics;
+using System.Threading;
+using TMPro;
 using Unity.Burst;
 using Unity.Collections;
-using System.Diagnostics;
+using Unity.Mathematics;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using Debug = UnityEngine.Debug;
 using UObj = UnityEngine.Object;
-using System.Linq;
-using System.Threading;
 
 #if UNITY_EDITOR
 [InitializeOnLoad]
@@ -47,6 +48,10 @@ static public class UnityExtensions
         result.SetPixels(rpixels, 0);
         result.Apply();
         return result;
+    }
+    [MethodImpl(INLINE)]
+    static public void MatchPositionAndRotation(this Transform dest, in Rigidbody src) {
+        dest.SetPositionAndRotation(src.position, src.rotation);
     }
     [MethodImpl(INLINE)]
     static public void MatchPositionAndRotation(this Transform dest, in Transform src)
@@ -161,7 +166,34 @@ static public class UnityExtensions
     #endregion
 
     #region Components    
-    static public float GetHPNormalized(this IHealth hp) => hp.HPValue / hp.MaxHP; 
+    static public float GetHPNormalized(this IHealth hp) => hp.HPValue / hp.MaxHP;
+
+    static public Collider[] TemporaryColliders = new Collider[64];
+
+    public static void AddAccelerationTowards(this Rigidbody rb, Vector3 tPos, Vector3 lastPosDelta, float power, float fixedDeltaTime) {
+        rb.AddForce(GetAccelerationToMoveTowards(rb, tPos - rb.worldCenterOfMass, lastPosDelta, power, fixedDeltaTime), ForceMode.Acceleration);
+    }
+    public static Vector3 GetAccelerationToMoveTowards(this Rigidbody rigidbody, Vector3 positionDifference, Vector3 lastestPositionDelta, float power, float fixedDelta) {
+        float factor = (rigidbody.mass * (0.05f + 0.85f * power)) / (fixedDelta * fixedDelta);
+        float damper = (0.55f + 0.325f * power) * (2 * Mathf.Sqrt(factor * rigidbody.mass));
+
+        Vector3 veloDiff = rigidbody.linearVelocity - lastestPositionDelta;
+
+        return (factor / rigidbody.mass * positionDifference) - (damper / rigidbody.mass * veloDiff);
+    }
+    public static void AddTorqueTowards(this Rigidbody rigidbody, Quaternion targetRotation, float forceMultiply) {
+        float angle = Quaternion.Angle(rigidbody.rotation, targetRotation);
+        Vector3 upAxisCross = Vector3.Cross(rigidbody.rotation * Vector3.up, targetRotation * Vector3.up);
+        Vector3 fwdAxisCross = Vector3.Cross(rigidbody.rotation * Vector3.forward, targetRotation * Vector3.forward);
+
+        Vector3 torque = Vector3.Normalize(fwdAxisCross + upAxisCross) * angle * Mathf.Deg2Rad;
+
+        torque *= forceMultiply;
+        torque /= Time.fixedDeltaTime;
+        torque -= rigidbody.angularVelocity;
+
+        rigidbody.AddTorque(torque, ForceMode.VelocityChange);
+    }
 
 #if UNITY_EDITOR
     [MenuItem("Tools/Remove Selected Missing Scripts")]
@@ -498,7 +530,7 @@ static public class UnityExtensions
     static public bool IsOnUnityThread
     {
         get
-        {
+        { 
             if (_unityThread == null)
                 return false;
             return _unityThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId;
@@ -522,8 +554,5 @@ static public class UnityExtensions
             disposable.Dispose();
     }
 
-
-
     #endregion
-     
 }

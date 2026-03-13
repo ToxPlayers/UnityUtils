@@ -63,7 +63,7 @@ static public class MathU
     {
         return math.abs(numberA - numberB) <= tolerance;
     }
-
+    static public float CurrentDeltaTime() => Time.inFixedTimeStep ? Time.fixedDeltaTime : Time.deltaTime;
     static public float TimeLerp(float lerpAmount, float timeStarted)
     {
         return Mathf.Clamp01(Mathf.InverseLerp(timeStarted + lerpAmount, timeStarted, Time.time));
@@ -154,11 +154,11 @@ static public class MathU
         //    }
         //} 
     }
-    static public void SetPosition(this ref Matrix4x4 mat, Vector3 pos)
+    static public void SetPosition(this ref Matrix4x4 mat, in Vector3 pos)
     {
-        mat[0, 3] = pos.x;
-        mat[1, 3] = pos.y;
-        mat[2, 3] = pos.z;
+        mat.m03 = pos.x;
+        mat.m13 = pos.y;
+        mat.m23 = pos.z;
     }
 
     internal static List<Vector2> ResizePolygon(List<Vector2> verts, Vector2 center, float scale)
@@ -268,6 +268,10 @@ static public class MathU
     static public void SetZero(this ref Vector3 v) { v.x = 0f; v.y = 0f; v.z = 0f; }
     [MethodImpl(INLINED)]
     static public bool IsZero(this ref Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f;
+    static public bool AlmostZero(this ref Vector3 v) => v.sqrMagnitude < (Mathf.Epsilon * Mathf.Epsilon);
+    static public bool Almost(this ref Vector3 v1, in Vector3 v2) => (v1 - v2).sqrMagnitude < (Mathf.Epsilon * Mathf.Epsilon);
+
+
     [MethodImpl(INLINED)]
     static public void SetZero(this ref Vector2 v) { v.x = 0f; v.y = 0f; }
     [MethodImpl(INLINED)]
@@ -291,6 +295,9 @@ static public class MathU
         return (toMax - toMin) * (val - fromMin) / (fromMax - fromMin) + toMin;
     }
 
+    public static float MaxValue(this in Vector4 v) => Mathf.Max(v.x, v.y, v.z, v.w);    
+    public static float MaxValue(this in Vector3 v) => Mathf.Max(v.x, v.y, v.z);
+    public static float MaxValue(this in Vector2 v) => Mathf.Max(v.x, v.y);
 
     [BurstCompile]
     public static float Remap(this int val, in float fromMin, float fromMax, in float toMin, in float toMax)
@@ -340,6 +347,9 @@ static public class MathU
         CopyToFloat3(from, arr3);
         return arr3;
     }
+    public static float GetYRotation(this Vector3 normal) => Mathf.Atan2(normal.x, normal.z) * Mathf.Rad2Deg; 
+    public static float GetXRotation(this Vector3 normal) => Mathf.Atan2(normal.y, normal.z) * Mathf.Rad2Deg; 
+    public static float GetZRotation(this Vector3 normal) => Mathf.Atan2(normal.x, normal.y) * Mathf.Rad2Deg; 
     public static float GetDominant(this Vector3 v3) => v3[v3.GetDominantAxis()];
     public static int GetDominantAxis(this Vector3 v3)
     {
@@ -364,6 +374,23 @@ static public class MathU
         joint.positionSpring *= mult;
         return joint;
     }
+    public static bool IsDistanceGreaterThan(this in Vector3 vec, in Vector3 to, in float magnitude) {
+        return (vec-to).sqrMagnitude > magnitude;
+    }
+    public static bool IsDistanceLowerThan(this in Vector3 vec, in Vector3 to, in float magnitude) {
+        return (vec - to).sqrMagnitude < magnitude;
+    }
+    public static bool IsDistanceGreaterThan(this in Vector2 vec, in Vector2 to, in float magnitude) {
+        return (vec - to).sqrMagnitude > magnitude;
+    }
+    public static bool IsDistanceLowerThan(this in Vector2 vec, in Vector2 to, in float magnitude) {
+        return (vec - to).sqrMagnitude < magnitude;
+    }
+    public static bool IsLongerEqualThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude >= magnitude * magnitude;
+    public static bool IsLongerThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude > magnitude * magnitude;
+    public static bool IsShorterThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude < magnitude * magnitude;
+    public static bool IsLongerThan(this in Vector2 vec, in float magnitude) => vec.sqrMagnitude > magnitude * magnitude;
+    public static bool IsShorterThan(this in Vector2 vec, in float magnitude) => vec.sqrMagnitude < magnitude * magnitude;
 
     [BurstCompile]
     static public void CopyToFloat3(this NativeArray<float2>.ReadOnly from, NativeArray<float3> to)
@@ -547,7 +574,7 @@ static public class MathU
     [MethodImpl(INLINED)]
     public static Vector3 ToV3(this in Vector2 v2) => new Vector3(v2.x, v2.y, 0);
     [MethodImpl(INLINED)]
-    static public Vector3 Abs(this in Vector3 v) => new Vector3() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.y), z = Mathf.Abs(v.z) };
+    static public Vector3 Abs(this in Vector3 v) => new() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.y), z = Mathf.Abs(v.z) };
     [MethodImpl(INLINED)]
     static public half3 AsHalf3(this in Vector3 v) => new () { x = new(v.x), y = new(v.y), z = new(v.z) };
 
@@ -557,6 +584,12 @@ static public class MathU
     [MethodImpl(INLINED)]
     public static Vector2 DegreeToV2(float degree) => RadianToVector2(degree * Mathf.Deg2Rad);
 
+    public static float InverseLerp(this Vector3 value, Vector3 from, Vector3 to) {
+        Vector3 AB = to - from;
+        Vector3 AV = value - from;
+        return Vector3.Dot(AV, AB) / Vector3.Dot(AB, AB);
+    }
+    public static float InverseLerpClamped(this Vector3 from, Vector3 to, Vector3 value) => Mathf.Clamp01(InverseLerp(from, to, value));
 
 
     public static Vector2 NearestEdge(this in Rect rect, in Vector2 point)

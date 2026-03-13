@@ -37,7 +37,7 @@ public struct RealTimer
     static public float GetTimeSinceStartup(bool UseFrameTime)
     {
         if (UseFrameTime)
-            return Time.unscaledTime;
+            return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
         return Time.realtimeSinceStartup;
     } 
 
@@ -73,16 +73,21 @@ public struct RealTimer
         TimeStarted = - MaxTime;
     }
 
-    public RealTimer(bool useInconsistentFrameTime, float maxTime)
+    /// <summary>
+    /// Set <paramref name="setTimeOver"/> true in constructor
+    /// </summary>
+    /// <param name="maxTime"></param>
+    /// <param name="setTimeOver"></param>
+    /// <param name="useInconsistentFrameTime"></param>
+    public RealTimer(float maxTime, bool setTimeOver = false, bool useInconsistentFrameTime = false)
     { 
         MaxTime = maxTime;
-        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(useInconsistentFrameTime) : 0f;
         UseInconsistentFrameTime = useInconsistentFrameTime;
-    }
-	public RealTimer(float maxTime)
-    { 
-        MaxTime = maxTime;
-        TimeStarted = UnityExtensions.IsOnUnityThread ? GetTimeSinceStartup(false) : 0f;
-        UseInconsistentFrameTime = false;
+        if (setTimeOver)
+            TimeStarted = -MaxTime - 1;
+        else {
+            TimeStarted = 0;
+            Restart();
+        }
     } 
 }

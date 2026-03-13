@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 namespace AnimationCalls
-{ 
+{  
     public class AnimationStateNotifier<TState> : MonoBehaviour where TState : struct, Enum
     { 
         static public readonly int StatesCount = CExtensions.EnumCount<TState>();

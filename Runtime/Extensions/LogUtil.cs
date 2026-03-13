@@ -72,7 +72,10 @@ static public class LogUtil
 		return Frame(frame , typeLogColor , methodLogColor, lineLogColor);
 	}
 
-	static public string ToStringFormat(this float f, int maxChars)
+    static public string ToString2Digits(this float f) {
+        return f.ToString("0.00");
+    }
+    static public string ToStringFormat(this float f, int maxChars)
 	{
 		var format = "0.";
 		for (int i = 0; i < maxChars; i++)
