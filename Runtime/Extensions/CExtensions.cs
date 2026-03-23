@@ -106,6 +106,11 @@ static public class CExtensions
 		if (!lst.Contains(item))
 			lst.Add(item);
 	}
+    static public void AddIfNotContains<T>(this IList<T> lst, IList<T> items) {
+		foreach(var item in items) {
+			lst.AddIfNotContains(item);
+		}
+    }
 
 
     [MethodImpl(INLINE)] static public string TrimEndUntil(this string input, in char until) => input.Substring(input.LastIndexOf(until) + 1); 

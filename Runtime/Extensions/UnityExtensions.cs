@@ -166,7 +166,12 @@ static public class UnityExtensions
     #endregion
 
     #region Components    
-    static public float GetHPNormalized(this IHealth hp) => hp.HPValue / hp.MaxHP;
+    static public float GetHPNormalized(this IHealth hp) {
+        if(hp.MaxHP == 0f) {
+            return 0f;
+        }
+        return hp.HPValue / hp.MaxHP;
+    }
 
     static public Collider[] TemporaryColliders = new Collider[64];
 
@@ -303,7 +308,11 @@ static public class UnityExtensions
     static public Vector3 DirectionTo(this Vector3 start, Vector3 end)
     {
         return (end - start).normalized;
-    } 
+    }
+    [MethodImpl(INLINE)]
+    static public Vector3 DirectionToV2(this Vector2 start, Vector2 end) {
+        return (end - start).normalized;
+    }
     [MethodImpl(INLINE)]
     static public Quaternion DirectionToAsRotation(this Vector3 start, Vector3 end)
     {

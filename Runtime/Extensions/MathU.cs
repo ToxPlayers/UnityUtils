@@ -267,15 +267,17 @@ static public class MathU
     [MethodImpl(INLINED)]
     static public void SetZero(this ref Vector3 v) { v.x = 0f; v.y = 0f; v.z = 0f; }
     [MethodImpl(INLINED)]
-    static public bool IsZero(this ref Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f;
-    static public bool AlmostZero(this ref Vector3 v) => v.sqrMagnitude < (Mathf.Epsilon * Mathf.Epsilon);
-    static public bool Almost(this ref Vector3 v1, in Vector3 v2) => (v1 - v2).sqrMagnitude < (Mathf.Epsilon * Mathf.Epsilon);
+    static public bool IsZero(this in Vector3 v) => v.x == 0f && v.y == 0f && v.z == 0f;
+    [MethodImpl(INLINED)]
+    static public bool AlmostZero(this in Vector3 v) => Mathf.Approximately(v.sqrMagnitude, 0);
+    [MethodImpl(INLINED)]
+    static public bool Almost(this in Vector3 v1, in Vector3 v2) => AlmostZero(v1 - v2);
 
 
     [MethodImpl(INLINED)]
     static public void SetZero(this ref Vector2 v) { v.x = 0f; v.y = 0f; }
     [MethodImpl(INLINED)]
-    static public bool IsZero(this ref Vector2 v) => v.x == 0f && v.y == 0f;
+    static public bool IsZero(this in Vector2 v) => v.x == 0f && v.y == 0f;
 
     [MethodImpl(INLINED)]
     static public bool IsNanOrInifinity(this in Vector3 v)
@@ -968,6 +970,12 @@ static public class MathU
         return list;
     }
 
+    static public void RemoveDestroyed<T>(this List<T> list) where T : UnityEngine.Object {
+        for (int i = 0; i < list.Count;)
+            if (list[i])
+                i++; 
+            else list.RemoveAt(i);
+    }
     static public void RemoveNull<T>(this List<T> list)
     {
         for (int i = 0; i < list.Count;)
@@ -975,16 +983,7 @@ static public class MathU
                 list.RemoveAt(i);
             else i++;
     }
-
-    static public List<T> RemoveDestroyed<T>(this List<T> list) where T : UnityEngine.Object
-    {
-        for (int i = 0; i < list.Count;)
-            if (!list[i])
-                list.RemoveAt(i);
-            else i++;
-        return list;
-    }
-
+     
     static public T[] ForceLength<T>(T[] arr, int length)
     {
         if (arr == null)

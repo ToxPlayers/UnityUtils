@@ -15,6 +15,12 @@ public struct CustomLogger {
         Suffix = LogUtil.Color(suffix, suffixColor);
 #endif
     }
+    public CustomLogger(Object pingObj) {
+#if UNITY_EDITOR
+        PingObj = pingObj;
+        Prefix = ""; Suffix = "";
+#endif
+    }
     public CustomLogger(Object pingObj, Color prefixColor, string prefix) {
 #if UNITY_EDITOR
         PingObj = pingObj;
@@ -23,7 +29,7 @@ public struct CustomLogger {
 #endif
     }
 
-
+    [HideInCallstack]
     public string Format(string msg) {
 #if UNITY_EDITOR
         Prefix ??= "";
@@ -34,16 +40,19 @@ public struct CustomLogger {
 #endif
     }
 
+    [HideInCallstack]
     public void Log(string msg) {
-#if UNITY_EDITOR
+#if UNITY_EDITOR 
         msg = Format(msg);
-        if (PingObj != null)
-            Log(msg, PingObj);
+        if (PingObj)
+            Debug.Log(msg, PingObj);
         else Debug.Log(msg);
 #endif
     }
-    public void Log(string msg, Object obj) => Debug.Log(Format(msg), obj);
+    [HideInCallstack]
+    public void Log(string msg, Object ping) => Debug.Log(Format(msg), ping);
 
+    [HideInCallstack]
     public void LogException(System.Exception ex) {
         Debug.LogException(ex, PingObj);
     }
