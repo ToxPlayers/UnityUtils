@@ -219,15 +219,17 @@ static public class UnityExtensions
     static public Collider[] TemporaryColliders = new Collider[64];
 
     public static void AddAccelerationTowards(this Rigidbody rb, Vector3 tPos, Vector3 lastPosDelta, float power, float fixedDeltaTime) {
-        rb.AddForce(GetAccelerationToMoveTowards(rb, tPos - rb.worldCenterOfMass, lastPosDelta, power, fixedDeltaTime), ForceMode.Acceleration);
+        rb.AddForce(GetAccelerationToMoveTowards(rb, tPos, lastPosDelta, power, fixedDeltaTime), ForceMode.Acceleration);
     }
-    public static Vector3 GetAccelerationToMoveTowards(this Rigidbody rigidbody, in Vector3 positionDifference, in Vector3 lastestPositionDelta, in float power, in float fixedDelta) {
-        float factor = (rigidbody.mass * (0.05f + 0.85f * power)) / (fixedDelta * fixedDelta);
-        float damper = (0.55f + 0.325f * power) * (2 * Mathf.Sqrt(factor * rigidbody.mass));
+    public static Vector3 GetAccelerationToMoveTowards(this Rigidbody rb, in Vector3 targetPosition, in Vector3 lastestPositionDelta, in float power, in float fixedDelta) {
+        var positionDifference = targetPosition - rb.worldCenterOfMass;
 
-        Vector3 veloDiff = rigidbody.linearVelocity - lastestPositionDelta;
+        float factor = (rb.mass * (0.05f + 0.85f * power)) / (fixedDelta * fixedDelta);
+        float damper = (0.55f + 0.325f * power) * (2 * Mathf.Sqrt(factor * rb.mass));
 
-        return (factor / rigidbody.mass * positionDifference) - (damper / rigidbody.mass * veloDiff);
+        Vector3 veloDiff = rb.linearVelocity - lastestPositionDelta;
+
+        return (factor / rb.mass * positionDifference) - (damper / rb.mass * veloDiff);
     }
     public static void AddTorqueTowards(this Rigidbody rigidbody, Quaternion targetRotation, float forceMultiply) {
         float angle = Quaternion.Angle(rigidbody.rotation, targetRotation);
