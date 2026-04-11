@@ -72,10 +72,10 @@ static public class LogUtil
 		return Frame(frame , typeLogColor , methodLogColor, lineLogColor);
 	}
 
-    static public string ToString2Digits(this float f) {
+    static public string ToString2Digits(this in float f) {
         return f.ToString("0.00");
     }
-    static public string ToStringFormat(this float f, int maxChars)
+    static public string ToStringFormat(this in float f, in int maxChars)
 	{
 		var format = "0.";
 		for (int i = 0; i < maxChars; i++)
@@ -84,7 +84,7 @@ static public class LogUtil
 	}
 
     [Conditional("UNITY_ASSERTIONS")]
-    public static void Assert(object log, LogType logType)
+    public static void Assert(in object log, in LogType logType)
     {
 		UnityEngine.Debug.unityLogger.Log(logType, log);
     }

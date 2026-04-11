@@ -42,8 +42,29 @@ static public class MathU
     static public int WrapIndex(int index, int length)
     {
         return (index % length + length) % length;
-    }
+    }  
+    public static Quaternion ClampAngle(Quaternion rotation, int eulerAxis, float min, float max)
+	{
+		var euler = rotation.eulerAngles;
+		euler[eulerAxis] = ClampAngle(euler[eulerAxis], min, max); 
+		return Quaternion.Euler(euler);
+	}
+	
+	public static float ClampAngle(float angle, float min, float max)
+	{
+		// Normalize angle to [-180, 180]
+		angle = NormalizeAngle(angle);
 
+		return Mathf.Clamp(angle, min, max);
+	}
+
+	public static float NormalizeAngle(float angle)
+	{
+		angle %= 360f;
+		if (angle > 180f) angle -= 360f;
+		if (angle < -180f) angle += 360f;
+		return angle;
+	}
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static public Vector3 AsNormalizedDirection(this Quaternion rotation) => rotation * Vector3.forward;
 
@@ -85,7 +106,18 @@ static public class MathU
         foreach (var child in list)
             child.SafeDestroy();
     }
-
+	static public Quaternion EulerSeperateX(this Quaternion rot) {
+		var euler = rot.eulerAngles; euler.y = 0; euler.z = 0;
+		return Quaternion.Euler(euler);
+	}
+	static public Quaternion EulerSeperateY(this Quaternion rot) {
+		var euler = rot.eulerAngles; euler.x = 0; euler.z = 0;
+		return Quaternion.Euler(euler);
+	}
+	static public Quaternion EulerSeperateZ(this Quaternion rot) {
+	var euler = rot.eulerAngles; euler.x = 0; euler.y = 0;
+	return Quaternion.Euler(euler);
+	}
     static public bool IsLowerAndNotApprox(float f1, float f2)
        => (!Mathf.Approximately(f1, f1)) && f1 < f2;
     static public bool IsHigherAndNotApprox(float f1, float f2)

@@ -3,14 +3,18 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
+public interface IReaonlyStatValue
+{
+    public float BaseValue { get; }
+    public float Value { get; }
+    public int ValueRounded { get; }
+}
 
 [Serializable]
-public class StatValue
-{
+public class StatValue : IReaonlyStatValue {
     [ShowInInspector, ReadOnly, TableList]
     public HashSet<IStatModifierBase> Modifiers = new();
-    public float BaseValue = 1f;
+    public float BaseValue { get; set; } = 1f;
     [ShowInInspector] public float Value
     {
         get
@@ -25,7 +29,6 @@ public class StatValue
     static public implicit operator float(StatValue stat) => stat.Value;
     public StatValue() { }
     public StatValue(float baseValue) { BaseValue = baseValue; }
-
     public int ValueRounded => Value.RoundInt();
     [HideInInspector]
     public UnityEvent<IStatModifierBase> OnAddedModifier = new(), OnRemovedModifier = new();

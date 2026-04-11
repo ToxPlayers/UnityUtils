@@ -95,6 +95,7 @@ public class Notifier<T> : IReadOnlyNotifier<T>
     public void Unsub(UnityAction<T> action)
     {
         _onChangeSingle.RemoveListener(action); 
-    }
+    } 
+
     static public implicit operator T(Notifier<T> w) => w.Value;
 }

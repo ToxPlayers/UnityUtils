@@ -14,7 +14,7 @@ using UnityEngine.Events;
 public interface IHealth 
 { 
 	public float MaxHP { get; }
-	public float HPValue { get; } 
+	public float Value { get; } 
     public void Damage(float dmg);
     public void Heal(float heal);
 }
@@ -24,7 +24,7 @@ public class Health : MonoBehaviour, IHealth
 	[SerializeField, Min(1f)] float _maxHP = 100f;
     [ShowInInspector, ReadOnly, HideInEdit] float _health;
     public float MaxHP => _maxHP;
-    public float HPValue => _health;
+    public float Value => _health;
 	public bool IsAlive => _health > 0;
 	public bool IsDead => !IsAlive;
 

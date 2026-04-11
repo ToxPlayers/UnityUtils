@@ -16,6 +16,8 @@ using UnityEngine.UIElements;
 using Debug = UnityEngine.Debug;
 using UObj = UnityEngine.Object;
 
+public enum VectorAxis { None = -1, X = 0 , Y = 1, Z = 2 }
+
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
@@ -166,11 +168,52 @@ static public class UnityExtensions
     #endregion
 
     #region Components    
+
+    static public Vector3 GetSpringForceTowards(this Rigidbody rb, in Vector3 targetPosition, in float stiffness, in float damping) {
+        Vector3 error = targetPosition - rb.position;
+        Vector3 errorRate = -rb.linearVelocity;
+
+        Vector3 force = stiffness * error + damping * errorRate;
+        return force;
+    }
+
+    public static void AddSpringForceTowards( this Rigidbody rb, in Vector3 targetPosition, in float stiffness, in float damping, in bool useMass) {
+       
+        rb.AddForce(rb.GetSpringForceTowards(targetPosition,stiffness,damping), useMass ? ForceMode.Force : ForceMode.Acceleration);
+    }
+    public static Vector3 GetSpringTorqueTowards(this Rigidbody rb, in Quaternion targetRotation, in float stiffness, in float damping) {
+        Quaternion delta = targetRotation * Quaternion.Inverse(rb.rotation);
+
+        // Convert to angle-axis
+        delta.ToAngleAxis(out float angle, out Vector3 axis);
+
+        // Fix numerical instability
+        if (angle > 180f)
+            angle -= 360f;
+
+        // Convert degrees to radians
+        angle *= Mathf.Deg2Rad;
+
+        // Angular error
+        Vector3 error = axis * angle;
+
+        // Angular velocity is already the derivative term
+        Vector3 errorRate = -rb.angularVelocity;
+
+        // PD torque
+        Vector3 torque = stiffness * error + damping * errorRate;
+        return torque;
+    }
+    public static void AddSpringTorqueTowards(this Rigidbody rb, in Quaternion targetRotation, in float stiffness, in float damping, in bool useMass) {
+        // Rotation difference (target * inverse(current))
+        rb.AddTorque(rb.GetSpringTorqueTowards(targetRotation, stiffness, damping), useMass ? ForceMode.Force : ForceMode.Acceleration);
+    }
+
     static public float GetHPNormalized(this IHealth hp) {
         if(hp.MaxHP == 0f) {
             return 0f;
         }
-        return hp.HPValue / hp.MaxHP;
+        return hp.Value / hp.MaxHP;
     }
 
     static public Collider[] TemporaryColliders = new Collider[64];
@@ -178,7 +221,7 @@ static public class UnityExtensions
     public static void AddAccelerationTowards(this Rigidbody rb, Vector3 tPos, Vector3 lastPosDelta, float power, float fixedDeltaTime) {
         rb.AddForce(GetAccelerationToMoveTowards(rb, tPos - rb.worldCenterOfMass, lastPosDelta, power, fixedDeltaTime), ForceMode.Acceleration);
     }
-    public static Vector3 GetAccelerationToMoveTowards(this Rigidbody rigidbody, Vector3 positionDifference, Vector3 lastestPositionDelta, float power, float fixedDelta) {
+    public static Vector3 GetAccelerationToMoveTowards(this Rigidbody rigidbody, in Vector3 positionDifference, in Vector3 lastestPositionDelta, in float power, in float fixedDelta) {
         float factor = (rigidbody.mass * (0.05f + 0.85f * power)) / (fixedDelta * fixedDelta);
         float damper = (0.55f + 0.325f * power) * (2 * Mathf.Sqrt(factor * rigidbody.mass));
 
