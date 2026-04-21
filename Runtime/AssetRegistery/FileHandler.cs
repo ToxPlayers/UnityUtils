@@ -40,7 +40,7 @@ namespace Files
         [SerializeField, FoldoutGroup("Save Settings"), HideLabel]
         public SaveSettings Settings = new() { FileName = typeof(T).Name };
         Notifier<T> _value = new();
-        public IReadOnlyNotifier<T> Notifier => _value;
+        public ReadOnlyNotifier<T> Notifier => _value;
         [ShowInInspector, HideLabel, HideReferenceObjectPicker] 
         public T Value  
         {

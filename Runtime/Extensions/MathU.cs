@@ -408,6 +408,7 @@ static public class MathU
         joint.positionSpring *= mult;
         return joint;
     }
+    public static float SqrtDistance(this in Vector3 vec, in Vector3 to) => (vec - to).sqrMagnitude;
     public static bool IsDistanceGreaterThan(this in Vector3 vec, in Vector3 to, in float magnitude) {
         return (vec-to).sqrMagnitude > magnitude;
     }
