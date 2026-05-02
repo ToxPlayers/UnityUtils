@@ -56,25 +56,16 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
     public virtual void OnSingletonEditorAwake() { }
 #endif
 }
-#if UNITY_EDITOR
-[InfoBox("@$value."+nameof(InstanceInspectorInfobox), "@$value." + nameof(IsInstance), InfoMessageType = InfoMessageType.Info)]
-[InfoBox("@$value."+nameof(NonInstanceInspectorInfobox), "@!$value." + nameof(IsInstance), InfoMessageType = InfoMessageType.Warning)]
+#if UNITY_EDITOR 
+[SuffixLabel("@$value ? $value." + nameof(InstanceInspectorInfobox) + ":\"\"")]
 #endif
 public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : ScriptableSingleton
 {
 
 #if UNITY_EDITOR
-    string InstanceInspectorInfobox => "Scriptable Instance<" + typeof(T).Name + ">";
-    string NonInstanceInspectorInfobox
-    {
-        get
-        {
-            var str = $"Not instance of <" + typeof(T).Name + ">";
-            if (_instance)
-                str += $"({AssetDatabase.GetAssetPath(_instance)})";
-            return str;
-        }
-    } 
+    string InstanceInspectorInfobox => IsInstance ? ("Singleton<" + typeof(T).Name + ">") :
+                                        ($"Not Singleton of <" + typeof(T).Name + ">"
+                                         + (_instance ? $"[{_instance.name}]" : "") );
 #endif
 
     static T _instance;

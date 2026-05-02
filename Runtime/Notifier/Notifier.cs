@@ -6,8 +6,8 @@ using TriInspector;
 #endif
 using UnityEngine.Events;
 using System;
-using UnityInternalExpose;
- 
+using UnityInternalExpose; 
+
 public abstract class ReadOnlyNotifier<T>
 {  
     public abstract T Value { get; set; }

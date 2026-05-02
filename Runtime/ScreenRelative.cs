@@ -80,7 +80,7 @@ public class ScreenRelativeScale : MonoBehaviour
         if (LookAtCam)
         {
             var camPos = cam.transform.position;
-            var lookEuler = Quaternion.LookRotation(camPos).eulerAngles;
+            var lookEuler = Quaternion.LookRotation(transform.DirectionTo(camPos), transform.up).eulerAngles;
             
             if (LookAtAxis != SnapAxis.All)
             {

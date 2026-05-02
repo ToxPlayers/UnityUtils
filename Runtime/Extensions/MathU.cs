@@ -410,20 +410,21 @@ static public class MathU
     }
     public static float SqrtDistance(this in Vector3 vec, in Vector3 to) => (vec - to).sqrMagnitude;
     public static bool IsDistanceGreaterThan(this in Vector3 vec, in Vector3 to, in float magnitude) {
-        return (vec-to).sqrMagnitude > magnitude;
+        return (vec-to).sqrMagnitude > magnitude * magnitude;
     }
     public static bool IsDistanceLowerThan(this in Vector3 vec, in Vector3 to, in float magnitude) {
-        return (vec - to).sqrMagnitude < magnitude;
+        return (vec - to).sqrMagnitude < magnitude * magnitude;
     }
     public static bool IsDistanceGreaterThan(this in Vector2 vec, in Vector2 to, in float magnitude) {
-        return (vec - to).sqrMagnitude > magnitude;
+        return (vec - to).sqrMagnitude > magnitude * magnitude;
     }
     public static bool IsDistanceLowerThan(this in Vector2 vec, in Vector2 to, in float magnitude) {
-        return (vec - to).sqrMagnitude < magnitude;
+        return (vec - to).sqrMagnitude < magnitude * magnitude;
     }
     public static bool IsLongerEqualThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude >= magnitude * magnitude;
     public static bool IsLongerThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude > magnitude * magnitude;
     public static bool IsShorterThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude < magnitude * magnitude;
+    public static bool IsShorterEqualThan(this in Vector3 vec, in float magnitude) => vec.sqrMagnitude <= magnitude * magnitude;
     public static bool IsLongerThan(this in Vector2 vec, in float magnitude) => vec.sqrMagnitude > magnitude * magnitude;
     public static bool IsShorterThan(this in Vector2 vec, in float magnitude) => vec.sqrMagnitude < magnitude * magnitude;
 
@@ -612,6 +613,12 @@ static public class MathU
     static public Vector3 Abs(this in Vector3 v) => new() { x = Mathf.Abs(v.x), y = Mathf.Abs(v.y), z = Mathf.Abs(v.z) };
     [MethodImpl(INLINED)]
     static public half3 AsHalf3(this in Vector3 v) => new () { x = new(v.x), y = new(v.y), z = new(v.z) };
+    [MethodImpl(INLINED)]
+    static public half4 AsHalf4(this in Quaternion q) => new() { x = new(q.x), y = new(q.y), z = new(q.z), w = new(q.w) };
+    [MethodImpl(INLINED)]
+    static public Vector3 AsVector3(this in half3 h) => new() { x = h.x, y = h.y, z = h.z };
+    [MethodImpl(INLINED)]
+    static public Quaternion AsQuat(this in half4 q) => new() { x = q.x, y = q.y, z = q.z, w = q.w };
 
     [MethodImpl(INLINED)]
     public static Vector2 RadianToVector2(float radian) => new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
