@@ -369,10 +369,7 @@ static public class UnityExtensions
         { disposable?.Dispose(); }
         catch (Exception ex) { Debug.Log($"Faied to dispose ({disposable})\n{ex.Message}"); }
     }
-
-    [MethodImpl(INLINE)]
-    static public float AsAngle(this Vector2 v2) => v2 == Vector2.zero ? 0f : Mathf.Atan2(v2.x, v2.y) * Mathf.Rad2Deg;
-
+     
     [MethodImpl(INLINE)]
     static public float Distance(this Vector3 from, Vector3 to) => Vector3.Distance(from, to);
     [MethodImpl(INLINE)] 

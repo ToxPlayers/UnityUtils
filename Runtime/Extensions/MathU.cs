@@ -42,7 +42,18 @@ static public class MathU
     static public int WrapIndex(int index, int length)
     {
         return (index % length + length) % length;
-    }  
+    }
+
+    public static Vector2 AngleToVector2(this float degrees)
+    {
+        float rad = degrees * Mathf.Deg2Rad;
+        return new Vector2(-Mathf.Sin(rad), Mathf.Cos(rad));
+    }
+
+    public static float Vector2ToAngle(this in Vector2 dir) {
+        return Mathf.Atan2(-dir.x, dir.y) * Mathf.Rad2Deg;
+    }
+
     public static Quaternion ClampAngle(Quaternion rotation, int eulerAxis, float min, float max)
 	{
 		var euler = rotation.eulerAngles;
