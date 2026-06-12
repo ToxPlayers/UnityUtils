@@ -72,8 +72,62 @@ static public class CExtensions
 	{
 		var floored = MathF.Floor(f);
 		return f - floored;
+    } 
+    public static void RemoveDuplicateReferences<T>(this List<T> list) where T : class {
+        for (int i = 0; i < list.Count; i++) {
+            for (int j = i + 1; j < list.Count;) {
+                if (list[i] == list[j])
+                    list.RemoveAt(j); 
+                else  j++; 
+            }
+        }
     }
-	static public EnuT ForEach<EnuT,T>(this EnuT enu, Action<T> act) where EnuT : IEnumerable<T> {
+
+    static public void RemoveDestroyed<T>(this List<T> list) where T : UnityEngine.Object {
+        for (int i = 0; i < list.Count;)
+            if (list[i])
+                i++;
+            else list.RemoveAt(i);
+    }
+    static public void RemoveNull<T>(this List<T> list) {
+        for (int i = 0; i < list.Count;)
+            if (list[i] == null)
+                list.RemoveAt(i);
+            else i++;
+    }
+
+    static public T[] ForceLength<T>(T[] arr, int length) {
+        if (arr == null)
+            return new T[length];
+
+        if (arr.Length == length)
+            return arr.ToNewArray();
+
+        var tmpList = new List<T>(arr);
+        while (tmpList.Count < length)
+            tmpList.Add(default(T));
+
+        while (tmpList.Count > length)
+            tmpList.RemoveAt(tmpList.Count - 1);
+
+        arr = tmpList.ToArray();
+        return arr;
+    }
+
+    static public T[] ToNewArray<T>(this T[] arr) {
+        int count = arr.Length;
+        var tmpArr = new T[count];
+        arr.CopyTo(tmpArr, 0);
+        return tmpArr;
+    }
+    static public List<T> ToNewList<T>(this ICollection<T> list) => new List<T>(list);
+    static public T[] ToNewArray<T>(this ICollection<T> arr) {
+        int count = arr.Count;
+        var tmpArr = new T[count];
+        arr.CopyTo(tmpArr, 0);
+        return tmpArr;
+    }
+    static public EnuT ForEach<EnuT,T>(this EnuT enu, Action<T> act) where EnuT : IEnumerable<T> {
 		foreach (var e in enu)
 			act?.Invoke(e);
 		return enu;

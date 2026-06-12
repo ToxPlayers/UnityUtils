@@ -9,8 +9,9 @@ using System;
 using UnityInternalExpose; 
 
 public abstract class ReadOnlyNotifier<T>
-{  
-    public abstract T Value { get; set; }
+{
+    public abstract T GetValue();
+    public T Value => GetValue();
     public abstract T PreviousValue { get; }
     public abstract void Sub(UnityAction<T, T> action, bool callNow = true);
     public abstract void Sub(UnityAction<T> action, bool callNow = true);
@@ -18,7 +19,7 @@ public abstract class ReadOnlyNotifier<T>
     public abstract void SubToggle(UnityAction<T> action, bool sub);
     public abstract void Unsub(UnityAction<T, T> action);
     public abstract void Unsub(UnityAction<T> action);
-    static public implicit operator T(ReadOnlyNotifier<T> w) => w.Value;
+    static public implicit operator T(ReadOnlyNotifier<T> w) => w.GetValue();
 }
 
 [Serializable, HideMonoScript, InlineProperty]
@@ -34,7 +35,7 @@ public class Notifier<T> : ReadOnlyNotifier<T> {
 #if ODIN_INSPECTOR
     [SuffixLabel("@" + nameof(ListenerCount), SdfIconType.EarFill)]
 #endif
-    public override T Value
+    public new T Value
     {
         get => _value;
         set {  
@@ -45,8 +46,11 @@ public class Notifier<T> : ReadOnlyNotifier<T> {
 				return;
 			ForceValueChange(value);
 		} 
-    } 
-	public Notifier() {}
+    }
+    public override T GetValue() => Value;
+     
+
+    public Notifier() {}
     public Notifier(T value)
     { 
         ForceValueChange(value);

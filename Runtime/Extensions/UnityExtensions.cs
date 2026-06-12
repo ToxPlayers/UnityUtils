@@ -21,15 +21,13 @@ public enum VectorAxis { None = -1, X = 0 , Y = 1, Z = 2 }
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
-static public class UnityExtensions
-{
+static public class UnityExtensions {
     const int INLINE = (int)MethodImplOptions.AggressiveInlining;
 
     #region GameObject
 
 #if UNITY_EDITOR
-    static public bool IsInPrefabStage(this GameObject go)
-    {
+    static public bool IsInPrefabStage(this GameObject go) {
         var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
         if (stage)
             return stage.IsPartOfPrefabContents(go);
@@ -39,8 +37,7 @@ static public class UnityExtensions
 
     static public Texture2D ResizeFormat(this Texture2D texture2D, int resoulation, TextureFormat format)
                          => ResizeFormat(texture2D, resoulation, resoulation, format);
-    static public Texture2D ResizeFormat(this Texture2D source, int targetWidth, int targetHeight, TextureFormat format)
-    {
+    static public Texture2D ResizeFormat(this Texture2D source, int targetWidth, int targetHeight, TextureFormat format) {
         Texture2D result = new Texture2D(targetWidth, targetHeight, format, true);
         Color[] rpixels = result.GetPixels(0);
         float incX = (1.0f / targetWidth);
@@ -52,115 +49,107 @@ static public class UnityExtensions
         return result;
     }
     [MethodImpl(INLINE)]
+    static public Vector3 TransformPoint(this Rigidbody rb, Vector3 worldPoint) {
+        return rb.position + (rb.rotation * worldPoint);
+    }
+
+    [MethodImpl(INLINE)]
     static public void MatchPositionAndRotation(this Transform dest, in Rigidbody src) {
         dest.SetPositionAndRotation(src.position, src.rotation);
     }
     [MethodImpl(INLINE)]
-    static public void MatchPositionAndRotation(this Transform dest, in Transform src)
-    {
+    static public void MatchPositionAndRotation(this Transform dest, in Transform src) {
         src.GetPositionAndRotation(out var pos, out var rot);
         dest.SetPositionAndRotation(pos, rot);
     }
 
     [MethodImpl(INLINE)]
-    static public void MatchLocalPositionAndRotation(this Transform dest, in Transform src)
-    {
+    static public void MatchLocalPositionAndRotation(this Transform dest, in Transform src) {
         src.GetLocalPositionAndRotation(out var pos, out var rot);
         dest.SetLocalPositionAndRotation(pos, rot);
     }
 
     [MethodImpl(INLINE)]
-	static public void SetEularX(this Transform tf, float x)
-	{
-		var eular = tf.eulerAngles;
-		eular.x = x;
-		tf.eulerAngles = eular;
-	}
-	[MethodImpl(INLINE)]
-	static public void SetEularY(this Transform tf, float y)
-	{
-		var eular = tf.eulerAngles;
-		eular.y = y;
-		tf.eulerAngles = eular;
-
-	}
-	[MethodImpl(INLINE)]
-	static public void SetEularZ(this Transform tf, float z)
-	{
-		var eular = tf.eulerAngles;
-		eular.z = z;
-		tf.eulerAngles = eular;
-	}
-	[MethodImpl(INLINE)]
-	static public float GetEularX(this Transform tf) => tf.eulerAngles.x;
-	[MethodImpl(INLINE)]
-	static public float GetEularY(this Transform tf) => tf.eulerAngles.y;
-	[MethodImpl(INLINE)]
-	static public float GetEularZ(this Transform tf) => tf.eulerAngles.z;
-	[MethodImpl(INLINE)]
-	static public void SetPosX(this Transform tf, float x)
-	{
-		var pos = tf.position;
-		pos.x = x;
-		tf.position = pos;
-	}
-	[MethodImpl(INLINE)]
-	static public void SetPosY(this Transform tf, float y)
-	{
-		var pos = tf.position;
-		pos.y = y;
-		tf.position = pos; 
-	}
-	[MethodImpl(INLINE)]
-	static public void SetPosZ(this Transform tf, float z)
-	{
-		var pos = tf.position;
-		pos.z = z;
-		tf.position = pos;
-	}
-	[MethodImpl(INLINE)]
-	static public float GetPosX(this Transform tf) => tf.position.x;
-	[MethodImpl(INLINE)]
-	static public float GetPosY(this Transform tf) => tf.position.y;
-	[MethodImpl(INLINE)]
-	static public float GetPosZ(this Transform tf) => tf.position.z;
-	static public void MoveRelativeToChild(this Transform parent, Transform child, Transform target)
-	{
-		var childOriginParent = child.parent;
-		var parentOriginParent = parent.parent;
-		child.SetParent(null, true);
-		parent.SetParent(child, true);
-		target.GetPositionAndRotation(out var pos, out var rot);
-		child.transform.SetPositionAndRotation(pos,rot);
-		parent.SetParent(parentOriginParent, true);
-		child.SetParent(childOriginParent, true);
-	} 
+    static public void SetEularX(this Transform tf, float x) {
+        var eular = tf.eulerAngles;
+        eular.x = x;
+        tf.eulerAngles = eular;
+    }
     [MethodImpl(INLINE)]
-    static public Transform AddChild(this Component comp, string name = "GameObject")
-    {
+    static public void SetEularY(this Transform tf, float y) {
+        var eular = tf.eulerAngles;
+        eular.y = y;
+        tf.eulerAngles = eular;
+
+    }
+    [MethodImpl(INLINE)]
+    static public void SetEularZ(this Transform tf, float z) {
+        var eular = tf.eulerAngles;
+        eular.z = z;
+        tf.eulerAngles = eular;
+    }
+    [MethodImpl(INLINE)]
+    static public float GetEularX(this Transform tf) => tf.eulerAngles.x;
+    [MethodImpl(INLINE)]
+    static public float GetEularY(this Transform tf) => tf.eulerAngles.y;
+    [MethodImpl(INLINE)]
+    static public float GetEularZ(this Transform tf) => tf.eulerAngles.z;
+    [MethodImpl(INLINE)]
+    static public void SetPosX(this Transform tf, float x) {
+        var pos = tf.position;
+        pos.x = x;
+        tf.position = pos;
+    }
+    [MethodImpl(INLINE)]
+    static public void SetPosY(this Transform tf, float y) {
+        var pos = tf.position;
+        pos.y = y;
+        tf.position = pos;
+    }
+    [MethodImpl(INLINE)]
+    static public void SetPosZ(this Transform tf, float z) {
+        var pos = tf.position;
+        pos.z = z;
+        tf.position = pos;
+    }
+    [MethodImpl(INLINE)]
+    static public float GetPosX(this Transform tf) => tf.position.x;
+    [MethodImpl(INLINE)]
+    static public float GetPosY(this Transform tf) => tf.position.y;
+    [MethodImpl(INLINE)]
+    static public float GetPosZ(this Transform tf) => tf.position.z;
+    static public void MoveRelativeToChild(this Transform parent, Transform child, Transform target) {
+        var childOriginParent = child.parent;
+        var parentOriginParent = parent.parent;
+        child.SetParent(null, true);
+        parent.SetParent(child, true);
+        target.GetPositionAndRotation(out var pos, out var rot);
+        child.transform.SetPositionAndRotation(pos, rot);
+        parent.SetParent(parentOriginParent, true);
+        child.SetParent(childOriginParent, true);
+    }
+    [MethodImpl(INLINE)]
+    static public Transform AddChild(this Component comp, string name = "GameObject") {
         var childtf = new GameObject(name).transform;
         childtf.SetParent(comp.transform);
         return childtf;
     }
     [MethodImpl(INLINE)]
-    static public T AddChildInstantiate<T>(this Transform tf, T prefab, string name = null) where T : Component
-    { 
+    static public T AddChildInstantiate<T>(this Transform tf, T prefab, string name = null) where T : Component {
         var t = UObj.Instantiate(prefab, tf);
-        if(name != null)
+        if (name != null)
             t.gameObject.name = name;
         return t;
     }
     [MethodImpl(INLINE)]
-    static public GameObject AddChildInstantiate(this Transform tf, GameObject prefab, string name = null)
-    {
+    static public GameObject AddChildInstantiate(this Transform tf, GameObject prefab, string name = null) {
         var go = UObj.Instantiate(prefab, tf);
         if (name != null)
             go.name = name;
         return go;
     }
     [MethodImpl(INLINE)]
-    static public Transform AddChild(this Transform tf, string name = "New GameObject")
-    {
+    static public Transform AddChild(this Transform tf, string name = "New GameObject") {
         var child = new GameObject(name).transform;
         child.parent = tf;
         return child;
@@ -176,10 +165,8 @@ static public class UnityExtensions
         Vector3 force = stiffness * error + damping * errorRate;
         return force;
     }
-
-    public static void AddSpringForceTowards( this Rigidbody rb, in Vector3 targetPosition, in float stiffness, in float damping, in bool useMass) {
-       
-        rb.AddForce(rb.GetSpringForceTowards(targetPosition,stiffness,damping), useMass ? ForceMode.Force : ForceMode.Acceleration);
+    public static void AddSpringForceTowards(this Rigidbody rb, in Vector3 targetPosition, in float stiffness, in float damping, in bool useMass) {
+        rb.AddForce(rb.GetSpringForceTowards(targetPosition, stiffness, damping), useMass ? ForceMode.Force : ForceMode.Acceleration);
     }
     public static Vector3 GetSpringTorqueTowards(this Rigidbody rb, in Quaternion targetRotation, in float stiffness, in float damping) {
         Quaternion delta = targetRotation * Quaternion.Inverse(rb.rotation);
@@ -210,7 +197,7 @@ static public class UnityExtensions
     }
 
     static public float GetHPNormalized(this IHealth hp) {
-        if(hp.MaxHP == 0f) {
+        if (hp.MaxHP == 0f) {
             return 0f;
         }
         return hp.Value / hp.MaxHP;
@@ -231,7 +218,13 @@ static public class UnityExtensions
 
         return (factor / rb.mass * positionDifference) - (damper / rb.mass * veloDiff);
     }
+
     public static void AddTorqueTowards(this Rigidbody rigidbody, Quaternion targetRotation, float forceMultiply) {
+        var torque = GetTorqueTowards(rigidbody, targetRotation, forceMultiply);
+        rigidbody.AddTorque(torque, ForceMode.VelocityChange);
+    }
+
+    public static Vector3 GetTorqueTowards(this Rigidbody rigidbody, Quaternion targetRotation, float forceMultiply) {
         float angle = Quaternion.Angle(rigidbody.rotation, targetRotation);
         Vector3 upAxisCross = Vector3.Cross(rigidbody.rotation * Vector3.up, targetRotation * Vector3.up);
         Vector3 fwdAxisCross = Vector3.Cross(rigidbody.rotation * Vector3.forward, targetRotation * Vector3.forward);
@@ -241,9 +234,9 @@ static public class UnityExtensions
         torque *= forceMultiply;
         torque /= Time.fixedDeltaTime;
         torque -= rigidbody.angularVelocity;
-
-        rigidbody.AddTorque(torque, ForceMode.VelocityChange);
+        return torque;
     }
+
 
 #if UNITY_EDITOR
     [MenuItem("Tools/Remove Selected Missing Scripts")]
@@ -407,7 +400,7 @@ static public class UnityExtensions
     {
         if (go.TryGetComponent<T>(out var outT))
             return outT;
-        return go.gameObject.AddComponent<T>();
+        return go.AddComponent<T>();
     }
     [MethodImpl(INLINE)]
     static public T GetOrAddCompnent<T>(this Component comp) where T : Component

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-public interface IReaonlyStatValue
+public interface IReadonlyStatValue
 {
     public float BaseValue { get; }
     public float Value { get; }
@@ -11,55 +11,37 @@ public interface IReaonlyStatValue
 }
 
 [Serializable]
-public class StatValue : IReaonlyStatValue {
-    [ShowInInspector, ReadOnly, TableList]
-    public HashSet<IStatModifierBase> Modifiers = new();
+public class StatValue : IReadonlyStatValue {
+    [field: SerializeField]
     public float BaseValue { get; set; } = 1f;
-    [ShowInInspector] public float Value
-    {
-        get
-        {
+    [ShowInInspector]
+    public float Value {
+        get {
             var baseVal = BaseValue;
             var mult = 1f;
-            foreach(var mod  in Modifiers) 
+            foreach (var mod in _modifiers)
                 mod.Modify(ref baseVal, ref mult);
             return baseVal * mult;
         }
     }
+    [ShowInInspector, ReadOnly, PropertyOrder(100)]
+    List<IStatModifierBase> _modifiers = new();
     static public implicit operator float(StatValue stat) => stat.Value;
     public StatValue() { }
     public StatValue(float baseValue) { BaseValue = baseValue; }
     public int ValueRounded => Value.RoundInt();
+    public IReadOnlyList<IStatModifierBase> Modifiers => _modifiers;
     [HideInInspector]
     public UnityEvent<IStatModifierBase> OnAddedModifier = new(), OnRemovedModifier = new();
 
     public void AddModifier(IStatModifierBase modifier)
     {
-        if (Modifiers.Add(modifier))
-            OnAddedModifier.Invoke(modifier);
-        else
-            Debug.LogWarning("Tried adding modifier twice to the same StatValue");
+        _modifiers.Add(modifier);
+        OnAddedModifier.Invoke(modifier); 
     }
     public void RemoveModifier(IStatModifierBase modifier)
     {
-        if(Modifiers.Remove(modifier))
+        if(_modifiers.Remove(modifier))
             OnAddedModifier.Invoke(modifier);
     }
-}
-public interface IStatModifierBase
-{
-    public string ModifierName { get; }
-    public void Modify(ref float baseValue, ref float multValue);
-}
-public class StatMultModifier : IStatModifierBase
-{ 
-    public float MultAmount;
-    [field:SerializeField] public string ModifierName { get; private set; }
-    public void Modify(ref float baseValue, ref float multValue) => multValue *= MultAmount;
-}
-public class StatBaseAddModifier : IStatModifierBase
-{ 
-    public float BaseAddAmount;
-    [field: SerializeField] public string ModifierName { get; private set; }
-    public void Modify(ref float baseValue, ref float multValue) => baseValue += BaseAddAmount;
 }

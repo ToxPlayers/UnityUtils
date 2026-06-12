@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
+
 
 
 #if UNITY_EDITOR
@@ -43,16 +45,17 @@ namespace UnityEngine
             if (property.serializedObject.hasModifiedProperties)
                 property.serializedObject.ApplyModifiedProperties();
         }
-        static List<GameObject> _tmpGoList;
         protected bool IsInvalidType(SerializedProperty property, out string invalidErrors)
         { 
             invalidErrors = null;
-
             if (property.propertyType != SerializedPropertyType.ObjectReference)
             {
                 invalidErrors = $"Only object ref type is allowed (and not {property.propertyType})";
                 return true;
             }
+
+            if (property.serializedObject.targetObject)
+                return true;
 
             var fieldType = fieldInfo.FieldType;
             var isComponentType = typeof(Component).IsAssignableFrom(fieldType);
@@ -110,14 +113,15 @@ namespace UnityEngine
         }
 
         bool _msgShown;
-
+        static readonly ProfilerMarker _marker = new ProfilerMarker(nameof(GetAttributeDrawer));
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
+            using var profilerMarker = _marker.Auto();
             _msgShown = false;
             _msgRectHeight = 0;
 
             string error = null;
-            if (Application.isPlaying || IsInvalidType(property, out error) || property.serializedObject.isEditingMultipleObjects)
+           if (Application.isPlaying || IsInvalidType(property, out error) || property.serializedObject.isEditingMultipleObjects)
             {
                 if(error != null)
                     DrawMsgBox(rect, error, true);

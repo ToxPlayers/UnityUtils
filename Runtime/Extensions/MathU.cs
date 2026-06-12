@@ -69,6 +69,10 @@ static public class MathU
 		return Mathf.Clamp(angle, min, max);
 	}
 
+    /// <summary>
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns>Angle between -180 to 180</returns>
 	public static float NormalizeAngle(float angle)
 	{
 		angle %= 360f;
@@ -1021,54 +1025,6 @@ static public class MathU
         return list;
     }
 
-    static public void RemoveDestroyed<T>(this List<T> list) where T : UnityEngine.Object {
-        for (int i = 0; i < list.Count;)
-            if (list[i])
-                i++; 
-            else list.RemoveAt(i);
-    }
-    static public void RemoveNull<T>(this List<T> list)
-    {
-        for (int i = 0; i < list.Count;)
-            if ( list[i] == null )
-                list.RemoveAt(i);
-            else i++;
-    }
-     
-    static public T[] ForceLength<T>(T[] arr, int length)
-    {
-        if (arr == null)
-            return new T[length];
-
-        if (arr.Length == length)
-            return arr.ToNewArray();
-
-        var tmpList = new List<T>(arr);
-        while (tmpList.Count < length)
-            tmpList.Add(default(T));
-
-        while (tmpList.Count > length)
-            tmpList.RemoveAt(tmpList.Count - 1);
-
-        arr = tmpList.ToArray();
-        return arr;
-    }
-
-    static public T[] ToNewArray<T>(this T[] arr)
-    {
-        int count = arr.Length;
-        var tmpArr = new T[count];
-        arr.CopyTo(tmpArr, 0);
-        return tmpArr;
-    }
-    static public List<T> ToNewList<T>(this ICollection<T> list) => new List<T>(list);
-    static public T[] ToNewArray<T>(this ICollection<T> arr)
-    {
-        int count = arr.Count;
-        var tmpArr = new T[count];
-        arr.CopyTo(tmpArr, 0);
-        return tmpArr;
-    }
     
     static public Rect[] SubdivideFromTop(this in Rect rect , float[] ySizes , bool byPrecentage)
     {
