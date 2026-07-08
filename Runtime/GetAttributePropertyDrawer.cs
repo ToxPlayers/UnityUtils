@@ -54,7 +54,7 @@ namespace UnityEngine
                 return true;
             }
 
-            if (property.serializedObject.targetObject)
+            if (property.objectReferenceValue)
                 return true;
 
             var fieldType = fieldInfo.FieldType;

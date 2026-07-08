@@ -1,15 +1,16 @@
 using System;
+using System.Net.Mail;
 using UnityEditor;
 using UnityEngine;
 static public class GizmosU 
 {  
     public static void GizmosArrow(in Vector3 pos, in Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
-        Arrow(true, pos, direction, Gizmos.color, arrowHeadLength, arrowHeadAngle);
+        Arrow(false, pos, direction, Gizmos.color, arrowHeadLength, arrowHeadAngle);
     }
     public static void GizmosArrow(in Vector3 pos, in Vector3 direction, in Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
-        Arrow(true, pos, direction, color, arrowHeadLength, arrowHeadAngle);
+        Arrow(false, pos, direction, color, arrowHeadLength, arrowHeadAngle);
     }
     public static void DebugArrow(in Vector3 pos, in Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
@@ -20,8 +21,11 @@ static public class GizmosU
         Debug.DrawRay(pos, direction, color);
         Arrow(false, pos, direction, color, arrowHeadLength, arrowHeadAngle);
     } 
-    static void Arrow(bool isDebug, in Vector3 pos, in Vector3 direction, in Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
+    static void Arrow(bool isDebug, Vector3 pos, Vector3 direction, in Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
+        //var matrix = Gizmos.matrix;
+        //pos = matrix.MultiplyPoint3x4(pos);
+        //direction = matrix.rotation * direction; 
         var right = Quaternion.LookRotation(direction) * Quaternion.Euler(arrowHeadAngle, 0, 0) * Vector3.back * arrowHeadLength;
         var left = Quaternion.LookRotation(direction) * Quaternion.Euler(-arrowHeadAngle, 0, 0) * Vector3.back * arrowHeadLength;
         var up = Quaternion.LookRotation(direction) * Quaternion.Euler(0, arrowHeadAngle, 0) * Vector3.back * arrowHeadLength;
@@ -46,6 +50,25 @@ static public class GizmosU
             Gizmos.DrawRay(end, down);
             Gizmos.color = colorPrew;
         } 
+    }
+    public static void GizmosRotation(Vector3 pos, Quaternion rotation,in Color sphereColor, in float size) {
+        GizmosRotation(pos, rotation, size, sphereColor, Color.darkRed, Color.darkGreen, Color.darkBlue);
+    }
+
+    public static void GizmosRotation(Vector3 pos, Quaternion rotation, in float size, in Color sphereColor, in Color rightColor, in Color upColor, in Color forwardColor) {
+
+        var arrowLen = size * 0.2f;
+        GizmosArrow(pos, rotation * Vector3.right * size, rightColor, arrowLen);
+        GizmosArrow(pos, rotation * Vector3.up * size, upColor, arrowLen);
+        GizmosArrow(pos, rotation * Vector3.forward * size, forwardColor, arrowLen);
+
+        var prevColor = Gizmos.color;
+        Gizmos.color = sphereColor;
+        var prevMatrix = Gizmos.matrix;
+        Gizmos.matrix *= Matrix4x4.TRS(pos, rotation, Vector3.one);
+        Gizmos.DrawWireSphere(Vector3.zero, size * 0.8f); 
+        Gizmos.color = prevColor;
+        Gizmos.matrix = prevMatrix;
     }
 }
 #if UNITY_EDITOR

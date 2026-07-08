@@ -54,7 +54,11 @@ static public class MathU
         return Mathf.Atan2(-dir.x, dir.y) * Mathf.Rad2Deg;
     }
 
-    public static Quaternion ClampAngle(Quaternion rotation, int eulerAxis, float min, float max)
+    public static bool IsInvalidZero(this in Quaternion rotation) {
+        return rotation.x == 0 || rotation.y == 0 || rotation.z == 0 || rotation.w == 0;
+    }
+
+    public static Quaternion ClampAngle(this in Quaternion rotation, int eulerAxis, float min, float max)
 	{
 		var euler = rotation.eulerAngles;
 		euler[eulerAxis] = ClampAngle(euler[eulerAxis], min, max); 

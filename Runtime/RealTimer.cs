@@ -4,6 +4,8 @@ using UnityEngine;
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using UnityEditor;
+
 
 #else
 using TriInspector;
@@ -38,7 +40,9 @@ public struct RealTimer
     {
         if (UseFrameTime)
             return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
-        return Time.realtimeSinceStartup;
+        if(UnityExtensions.IsOnUnityThread)
+            return Time.realtimeSinceStartup;
+        return 0;
     } 
 
     [ShowInInspector, HideInEdit] public float TimeRunning => TimeSinceStartup - TimeStarted;
@@ -79,15 +83,10 @@ public struct RealTimer
     /// <param name="maxTime"></param>
     /// <param name="setTimeOver"></param>
     /// <param name="useInconsistentFrameTime"></param>
-    public RealTimer(float maxTime, bool setTimeOver = false, bool useInconsistentFrameTime = false)
+    public RealTimer(float maxTime, bool useInconsistentFrameTime = false)
     { 
         MaxTime = maxTime;
         UseInconsistentFrameTime = useInconsistentFrameTime;
-        if (setTimeOver)
-            TimeStarted = -MaxTime - 1;
-        else {
-            TimeStarted = 0;
-            Restart();
-        }
+        TimeStarted = -maxTime*2; 
     } 
 }

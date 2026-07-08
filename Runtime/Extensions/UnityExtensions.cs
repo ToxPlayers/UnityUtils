@@ -8,6 +8,7 @@ using System.Threading;
 using TMPro;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -52,7 +53,10 @@ static public class UnityExtensions {
     static public Vector3 TransformPoint(this Rigidbody rb, Vector3 worldPoint) {
         return rb.position + (rb.rotation * worldPoint);
     }
-
+    [MethodImpl(INLINE)]
+    static public Pose GetPose(this Transform tf) {
+        return new Pose(tf.position, tf.rotation);
+    }
     [MethodImpl(INLINE)]
     static public void MatchPositionAndRotation(this Transform dest, in Rigidbody src) {
         dest.SetPositionAndRotation(src.position, src.rotation);
@@ -204,6 +208,8 @@ static public class UnityExtensions {
     }
 
     static public Collider[] TemporaryColliders = new Collider[64];
+    static public RaycastHit[] TemporaryHits = new RaycastHit[64];
+
 
     public static void AddAccelerationTowards(this Rigidbody rb, Vector3 tPos, Vector3 lastPosDelta, float power, float fixedDeltaTime) {
         rb.AddForce(GetAccelerationToMoveTowards(rb, tPos, lastPosDelta, power, fixedDeltaTime), ForceMode.Acceleration);
@@ -345,10 +351,14 @@ static public class UnityExtensions {
     [MethodImpl(INLINE)]
     static public Vector3 DirectionTo(this Vector3 start, Vector3 end)
     {
+        if (end == start)
+            return Vector3.forward; 
         return (end - start).normalized;
     }
     [MethodImpl(INLINE)]
     static public Vector3 DirectionToV2(this Vector2 start, Vector2 end) {
+        if (end == start)
+            return Vector3.forward;
         return (end - start).normalized;
     }
     [MethodImpl(INLINE)]
@@ -597,6 +607,32 @@ static public class UnityExtensions {
         if(disposable.IsCreated)
             disposable.Dispose();
     }
+
+    static readonly public RayHitCastComparer HitCastComparer = new();
+    public class RayHitCastComparer : IComparer<RaycastHit> {
+        public int Compare(RaycastHit x, RaycastHit y) {
+            return x.distance.CompareTo(y.distance);
+        }
+    } 
+    public static void SortHitsByDistance(this RaycastHit[] tempHits, in int hitCount) {
+        Array.Sort(tempHits, 0, hitCount, HitCastComparer);
+    }
+
+    public static bool SortHitsByDistance<T>(this RaycastHit[] tempHits, in int hitCount, out int i, out T closestComp)
+       where T : Component => SortHitsByDistance(tempHits, hitCount, null, out i, out closestComp);
+    public static bool SortHitsByDistance<T>(this RaycastHit[] tempHits, in int hitCount, Func<T,bool> filter, 
+                                            out int i, out T closestComp) where T : Component {
+        Array.Sort(tempHits, 0, hitCount, HitCastComparer);
+        for(i=0; i < tempHits.Length; i++) {
+            if (tempHits[i].collider.TryGetComponent(out closestComp)) { 
+                return filter == null || filter.Invoke(closestComp);
+            }
+        }
+        i = -1;
+        closestComp = null;
+        return false;
+    } 
+
 
     #endregion
 }
