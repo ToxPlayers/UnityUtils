@@ -74,6 +74,16 @@ public struct CustomLogger {
         Debug.LogError(msg);
 #endif
     }
+	public void LogWarning(string msg) {
+#if UNITY_EDITOR
+        if (Disable)
+            return;
+        msg = Format(msg);
+        if (PingObj)
+            Debug.LogWarning(msg, PingObj);
+        else Debug.LogWarning(msg);
+#endif
+    }
     [Conditional("UNITY_EDITOR"), HideInCallstack] 
     public void Log(Object pingOverride, string msg) {
 #if UNITY_EDITOR
