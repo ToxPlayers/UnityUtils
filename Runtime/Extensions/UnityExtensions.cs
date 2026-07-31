@@ -55,7 +55,13 @@ static public class UnityExtensions {
     }
     [MethodImpl(INLINE)]
     static public Pose GetPose(this Transform tf) {
-        return new Pose(tf.position, tf.rotation);
+        tf.GetPositionAndRotation(out var pos, out var rot);
+        return new Pose(pos, rot);
+    }
+    [MethodImpl(INLINE)]
+    static public Pose GetLocalPose(this Transform tf) {
+        tf.GetLocalPositionAndRotation(out var pos, out var rot);
+        return new Pose(pos, rot);
     }
     [MethodImpl(INLINE)]
     static public void MatchPositionAndRotation(this Transform dest, in Rigidbody src) {

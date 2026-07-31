@@ -50,9 +50,9 @@ static public class MathU
         return new Vector2(-Mathf.Sin(rad), Mathf.Cos(rad));
     }
 
-    public static float Vector2ToAngle(this in Vector2 dir) {
+    public static float Vector2ToAngleDegrees(this in Vector2 dir) {
         return Mathf.Atan2(-dir.x, dir.y) * Mathf.Rad2Deg;
-    }
+    } 
 
     public static bool IsInvalidZero(this in Quaternion rotation) {
         return rotation.x == 0 || rotation.y == 0 || rotation.z == 0 || rotation.w == 0;

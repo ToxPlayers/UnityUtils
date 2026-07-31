@@ -19,15 +19,21 @@ public struct CustomLogger {
     public CustomLogger(Object pingObj) {
 #if UNITY_EDITOR
         PingObj = pingObj;
-        Prefix = "[" + PingObj.GetType().Name + "] "; Suffix = "";
+		if(pingObj)
+			Prefix = "[" + PingObj.GetType().Name + "] "; 
+		else Prefix = "";
+		Suffix = "";
         Disable = false;
 #endif
     }
     public CustomLogger(Object pingObjTypeAsSuffix, Color prefixColor) {
 #if UNITY_EDITOR
         PingObj = pingObjTypeAsSuffix;
-        Prefix = "[" + pingObjTypeAsSuffix.GetType().Name + "] "; 
-        Prefix = LogUtil.Color(Prefix, prefixColor);
+		if(pingObjTypeAsSuffix){
+			 Prefix = "[" + pingObjTypeAsSuffix.GetType().Name + "] "; 
+			Prefix = LogUtil.Color(Prefix, prefixColor);
+		}else Prefix = "";
+       
         Suffix = "";
         Disable = false;
 #endif
