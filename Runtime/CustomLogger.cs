@@ -52,64 +52,50 @@ public struct CustomLogger {
     [HideInCallstack]
     public readonly string Format(string msg) {
 #if UNITY_EDITOR
-        var prefix = Prefix == null ? "" : Prefix;
-        var suffix = Suffix == null ? "" : Suffix;
+        var prefix = Prefix ?? "";
+        var suffix = Suffix ?? "";
         return prefix + msg + suffix;
 #else
         return "";
 #endif
     }
 
+    [HideInCallstack] public readonly void Log(string msg, Object ping = null)  => Log(0, msg, ping);
+    [HideInCallstack] public readonly void LogWarning(string msg) => Log(1, msg);
+    [HideInCallstack] public readonly void LogError(string msg) => Log(2, msg);
+
     [Conditional("UNITY_EDITOR"), HideInCallstack]
-    public readonly void Log(string msg) {
+    public readonly void Log(int logLevel, string msg, Object context = null) {
 #if UNITY_EDITOR
-        Log(msg, PingObj);
-#endif
-    }
+        if(!context)
+            context = PingObj;
 
-    public readonly void Log(string msg, Object context) {
-#if UNITY_EDITOR
-        if(Disable)
-            return;
-        msg = Format(msg);
-        if (context)
-            Debug.Log(msg, context);
-        else Debug.Log(msg);
-#endif
-    }
-
-    [HideInCallstack]
-    public readonly void LogWarning(string msg) {
-#if UNITY_EDITOR
-        if (Disable)
-            return;
-        msg = Format(msg);
-        if (PingObj)
-            Debug.LogWarning(msg, PingObj);
-        else Debug.LogWarning(msg);
+        if(logLevel <= 0) {
+            if (context)
+                Debug.Log(msg, context);
+            else Debug.Log(msg);
+        }
+        else if(logLevel == 1) {
+            if (context)
+                Debug.LogWarning(msg, context);
+            else Debug.LogWarning(msg);
+        } else if (logLevel >= 2) {
+            if (context)
+                Debug.LogError(msg, context);
+            else Debug.LogError(msg);
+        } 
 #endif
     }
 
     [HideInCallstack]
-    public readonly void LogError(string msg) {
-#if UNITY_EDITOR 
-        msg = Format(msg);
-        if (PingObj)
-            Debug.LogError(msg, PingObj);
-        else Debug.LogError(msg);
-#else
-        Debug.LogError(msg);
-#endif
-    }
-
-
-    [HideInCallstack]
-    public readonly void LogException(System.Exception ex) {
+    public readonly void LogException(System.Exception ex, Object ping) {
 #if UNITY_EDITOR
-        Debug.LogException(ex, PingObj);
-#else
-        Debug.LogException(ex);
+        if(!ping)
+            ping = PingObj;
 #endif
+        if(ping)
+            Debug.LogException(ex, ping);
+        else Debug.LogException(ex);
     }
 
 }
