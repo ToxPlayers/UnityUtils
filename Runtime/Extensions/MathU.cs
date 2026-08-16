@@ -37,6 +37,43 @@ static public class MathU
     #endregion
 
     #region Floats & Ints
+    public static Vector2 GetClosestPointOnInfiniteLine2D(Vector2 lineOrigin, Vector2 lineDirection, Vector2 point) {
+        // Ensure the direction vector is normalized
+        lineDirection.Normalize();
+
+        Vector2 projectVector = point - lineOrigin;
+        float dotProduct = Vector2.Dot(projectVector, lineDirection);
+
+        return lineOrigin + lineDirection * dotProduct;
+    }
+    public static Vector3 GetClosestPointOnInfiniteLine(Vector3 lineOrigin, Vector3 lineDirection, Vector3 point) {
+        // Ensure the direction vector is normalized
+        lineDirection.Normalize();
+       
+        Vector3 projectVector = point - lineOrigin;
+        float dotProduct = Vector3.Dot(projectVector, lineDirection);
+
+        return lineOrigin + lineDirection * dotProduct;
+    }
+    public static Vector3 GetClosestPointOnLineSegment(Vector3 start, Vector3 end, Vector3 point) {
+        Vector3 lineDirection = end - start;
+        float lineLength = lineDirection.magnitude;
+
+        // Avoid division by zero if start and end are the same point
+        if (lineLength == 0f) return start;
+
+        lineDirection.Normalize();
+
+        // Project the point onto the line direction vector
+        Vector3 projectVector = point - start;
+        float dotProduct = Vector3.Dot(projectVector, lineDirection);
+
+        // Clamp the projection value so the point stays between start and end
+        dotProduct = Mathf.Clamp(dotProduct, 0f, lineLength);
+
+        return start + lineDirection * dotProduct;
+    }
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static public int WrapIndex(int index, int length)
