@@ -110,7 +110,7 @@ public partial class MainToolbarStartingSceneDropdown : MainToolbarCommonBase {
 
     }
 
-    [OnCodeLoaded] static void OnCodeLoaded() {
+    [OnCodeInitializing] static void OnCodeLoaded() {
         if (EditorPrefs.HasKey(EditorPrefBootSceneKey)) {
             SetPlaymodeScene(EditorPrefs.GetString(EditorPrefBootSceneKey), false);
         }
