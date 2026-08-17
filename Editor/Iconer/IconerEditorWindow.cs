@@ -435,9 +435,12 @@ namespace EditorIconer
                     textureImporter.textureType = TextureImporterType.Sprite;
                     textureImporter.spriteImportMode = SpriteImportMode.Single;
                     textureImporter.SaveAndReimport();
+#if UNITY_6000_2_OR_NEWER
+                    EditorGUIUtility.PingObject(textureImporter.GetEntityId());
+#else 
                     EditorGUIUtility.PingObject(textureImporter.GetInstanceID());
-                }
-                catch (Exception ex) { Debug.LogException(ex); }
+#endif
+                } catch (Exception ex) { Debug.LogException(ex); }
             }
 
             public void Dispose()
@@ -460,4 +463,4 @@ namespace EditorIconer
         }
     }
 #endif
-}
+                }

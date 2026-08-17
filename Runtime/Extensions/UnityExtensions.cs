@@ -579,6 +579,19 @@ static public class UnityExtensions {
     #endregion
 
     #region Native
+    static
+#if UNITY_6000_2_OR_NEWER
+        EntityId
+#else
+        int
+#endif
+        GetUnityID(this UnityEngine.Object obj) {
+#if UNITY_6000_2_OR_NEWER 
+        return obj.GetEntityId();
+#else
+        return obj.GetInstanceID();
+#endif
+    }
 
     static Thread _unityThread;
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -640,5 +653,5 @@ static public class UnityExtensions {
     } 
 
 
-    #endregion
+#endregion
 }
