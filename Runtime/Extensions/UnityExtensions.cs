@@ -168,6 +168,51 @@ static public class UnityExtensions {
 
     #region Components    
 
+    public static bool TryGetClosestPointAndNormal(this Collider targetCollider, Collider optionalCollider, Vector3 checkPosition, out Vector3 closestPoint, out Vector3 normal) {
+        closestPoint = checkPosition;
+        normal = Vector3.up;
+
+        // 1. Calculate a direction from the collider's center to your point to use as a fallback normal
+        Vector3 fallbackDirection = (checkPosition - targetCollider.bounds.center).normalized;
+
+        // 2. Use ComputePenetration by placing an imaginary infinitesimal sphere at checkPosition
+        // We give it a tiny radius (e.g., 0.01f) so it intersects the target collider.
+        float sphereRadius = 0.01f;
+
+        bool isIntersecting = Physics.ComputePenetration(
+            targetCollider, targetCollider.transform.position, targetCollider.transform.rotation,
+            optionalCollider, checkPosition, Quaternion.identity, // Passing null forces Unity to assume a Sphere collider
+            out Vector3 direction, out float distance
+        );
+
+        if (isIntersecting) {
+            // The direction points away from the penetration, which serves as the surface normal
+            normal = direction;
+
+            // Adjust the point back to the actual surface boundary
+            closestPoint = checkPosition + (direction * (distance - sphereRadius));
+            return true;
+        } else {
+            // Fallback: If outside the penetration window, grab the closest point via standard API
+            closestPoint = targetCollider.ClosestPoint(checkPosition);
+
+            // Re-run the check from the computed closest point pushed slightly out
+            Vector3 pushedOutPoint = closestPoint + fallbackDirection * 0.01f;
+
+            if (Physics.ComputePenetration(
+                targetCollider, targetCollider.transform.position, targetCollider.transform.rotation,
+                null, pushedOutPoint, Quaternion.identity,
+                out Vector3 dir, out float dist)) {
+                normal = dir;
+                return true;
+            }
+        }
+
+        // Hard fallback
+        normal = fallbackDirection;
+        return false;
+    }
+
     static public Vector3 GetSpringForceTowards(this Rigidbody rb, in Vector3 targetPosition, in float stiffness, in float damping) {
         Vector3 error = targetPosition - rb.position;
         Vector3 errorRate = -rb.linearVelocity;
