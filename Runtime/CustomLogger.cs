@@ -67,9 +67,12 @@ public struct CustomLogger {
     [Conditional("UNITY_EDITOR"), HideInCallstack]
     public readonly void Log(int logLevel, string msg, Object context = null) {
 #if UNITY_EDITOR
+        if (Disable)
+            return;
+
         if(!context)
             context = PingObj;
-
+        msg = Format(msg);
         if(logLevel <= 0) {
             if (context)
                 Debug.Log(msg, context);

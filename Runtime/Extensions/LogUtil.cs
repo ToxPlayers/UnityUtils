@@ -14,13 +14,11 @@ static public class LogUtil
 	private static readonly UColor RedSoft = new UColor(1f, 0.29f ,0.39f);
 	private static readonly UColor Red = UColor.red;
 	private static readonly UColor Green = UColor.green;
-    static public string ColorStart(UColor color) 
-		=>"<color=#" + ColorUtility.ToHtmlStringRGB(color) + ">";
+    static public string ColorStart(UColor color)  => "<color=#" + ColorUtility.ToHtmlStringRGB(color) + ">";
 	static public string ColorGreen(string str) => Color(str, Green);
 	static public string ColorRed(string str) => Color(str, UColor.red);
 	static public string ColorRedSoft(string str) => Color(str, RedSoft);
-	static public string Color(string str, UColor color)
-		=> ColorStart(color) + str + ColorEnd;
+	static public string Color(string str, UColor color) => ColorStart(color) + str + ColorEnd;
 	public static string KiloFormat(this int num)
     {
         if (num >= 100000000)
