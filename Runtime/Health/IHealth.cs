@@ -13,8 +13,8 @@ using UnityEngine.Events;
 
 public interface IHealth 
 { 
-	public float MaxHP { get; }
+	public float MaxValue { get; }
 	public float Value { get; } 
-    public void Damage(float dmg);
+    public void Damage(float dmg );
     public void Heal(float heal, bool overheal = false);
 }

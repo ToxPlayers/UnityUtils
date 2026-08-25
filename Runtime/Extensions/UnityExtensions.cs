@@ -252,10 +252,10 @@ static public class UnityExtensions {
     }
 
     static public float GetHPNormalized(this IHealth hp) {
-        if (hp.MaxHP == 0f) {
+        if (hp.MaxValue == 0f) {
             return 0f;
         }
-        return hp.Value / hp.MaxHP;
+        return hp.Value / hp.MaxValue;
     }
 
     static public Collider[] TemporaryColliders = new Collider[64];

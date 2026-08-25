@@ -1,17 +1,22 @@
+#define ENABLE_CUSTOM_LOGGER_BUILD
+#if ENABLE_CUSTOM_LOGGER_BUILD || UNITY_EDITOR
+#define ENABLE_CUSTOM_LOGGER
+#endif
 
 using UnityEngine;
 using Conditional = System.Diagnostics.ConditionalAttribute;
 
+
 [System.Serializable]
 public struct CustomLogger {
-#if UNITY_EDITOR
+#if ENABLE_CUSTOM_LOGGER_BUILD
     public Object PingObj; 
     public string Prefix; 
     public string Suffix;
     public bool Disable;
 #endif
     public CustomLogger(Object pingObj, Color prefixColor, string prefix, Color suffixColor, string suffix) {
-#if UNITY_EDITOR
+#if ENABLE_CUSTOM_LOGGER_BUILD
         PingObj = pingObj;
         Prefix = LogUtil.Color(prefix, prefixColor);
         Suffix = LogUtil.Color(suffix, suffixColor);
@@ -19,29 +24,23 @@ public struct CustomLogger {
 #endif
     }
     public CustomLogger(Object pingObj) {
-#if UNITY_EDITOR
+#if ENABLE_CUSTOM_LOGGER_BUILD
         PingObj = pingObj;
-		if(pingObj)
-			Prefix = "[" + PingObj.GetType().Name + "] "; 
-		else Prefix = "";
-		Suffix = "";
+        Prefix = "[" + PingObj.GetType().Name + "] "; Suffix = "";
         Disable = false;
 #endif
     }
     public CustomLogger(Object pingObjTypeAsSuffix, Color prefixColor) {
-#if UNITY_EDITOR
+#if ENABLE_CUSTOM_LOGGER_BUILD
         PingObj = pingObjTypeAsSuffix;
-		if(pingObjTypeAsSuffix){
-			 Prefix = "[" + pingObjTypeAsSuffix.GetType().Name + "] "; 
-			Prefix = LogUtil.Color(Prefix, prefixColor);
-		}else Prefix = "";
-       
+        Prefix = "[" + pingObjTypeAsSuffix.GetType().Name + "] "; 
+        Prefix = LogUtil.Color(Prefix, prefixColor);
         Suffix = "";
         Disable = false;
 #endif
     }
     public CustomLogger(Object pingObj, Color prefixColor, string prefix) {
-#if UNITY_EDITOR
+#if ENABLE_CUSTOM_LOGGER_BUILD
         PingObj = pingObj;
         Prefix = LogUtil.Color(prefix, prefixColor);
         Suffix = "";
@@ -50,55 +49,62 @@ public struct CustomLogger {
     }
 
     [HideInCallstack]
-    public readonly string Format(string msg) {
-#if UNITY_EDITOR
-        var prefix = Prefix ?? "";
-        var suffix = Suffix ?? "";
-        return prefix + msg + suffix;
+    public string Format(string msg) {
+#if ENABLE_CUSTOM_LOGGER_BUILD
+        Prefix ??= "";
+        Suffix ??= ""; 
+        return Prefix + msg + Suffix;
 #else
         return "";
 #endif
     }
 
-    [HideInCallstack] public readonly void Log(string msg, Object ping = null)  => Log(0, msg, ping);
-    [HideInCallstack] public readonly void LogWarning(string msg) => Log(1, msg);
-    [HideInCallstack] public readonly void LogError(string msg) => Log(2, msg);
-
-    [Conditional("UNITY_EDITOR"), HideInCallstack]
-    public readonly void Log(int logLevel, string msg, Object context = null) {
-#if UNITY_EDITOR
+    [Conditional("ENABLE_CUSTOM_LOGGER_BUILD"), HideInCallstack]
+    public void Log(string msg) {
+#if ENABLE_CUSTOM_LOGGER_BUILD
         if (Disable)
             return;
-
-        if(!context)
-            context = PingObj;
         msg = Format(msg);
-        if(logLevel <= 0) {
-            if (context)
-                Debug.Log(msg, context);
-            else Debug.Log(msg);
-        }
-        else if(logLevel == 1) {
-            if (context)
-                Debug.LogWarning(msg, context);
-            else Debug.LogWarning(msg);
-        } else if (logLevel >= 2) {
-            if (context)
-                Debug.LogError(msg, context);
-            else Debug.LogError(msg);
-        } 
+        if (PingObj)
+            Debug.Log(msg, PingObj);
+        else Debug.Log(msg);
 #endif
     }
-
     [HideInCallstack]
-    public readonly void LogException(System.Exception ex, Object ping) {
-#if UNITY_EDITOR
-        if(!ping)
-            ping = PingObj;
+    public void LogError(string msg) {
+#if ENABLE_CUSTOM_LOGGER_BUILD 
+        msg = Format(msg);
+        if (PingObj)
+            Debug.LogError(msg, PingObj);
+        else Debug.LogError(msg);
+#else
+        Debug.LogError(msg);
 #endif
-        if(ping)
-            Debug.LogException(ex, ping);
-        else Debug.LogException(ex);
+    }
+	public void LogWarning(string msg) {
+#if ENABLE_CUSTOM_LOGGER_BUILD
+        if (Disable)
+            return;
+        msg = Format(msg);
+        if (PingObj)
+            Debug.LogWarning(msg, PingObj);
+        else Debug.LogWarning(msg);
+#endif
+    }
+    [Conditional("ENABLE_CUSTOM_LOGGER_BUILD"), HideInCallstack] 
+    public void Log(Object pingOverride, string msg) {
+#if ENABLE_CUSTOM_LOGGER_BUILD
+        if (Disable)
+            Debug.Log(Format(msg), pingOverride);
+#endif
+    }
+    [HideInCallstack]
+    public void LogException(System.Exception ex) {
+#if ENABLE_CUSTOM_LOGGER_BUILD
+        Debug.LogException(ex, PingObj);
+#else
+        Debug.LogException(ex);
+#endif
     }
 
 }
