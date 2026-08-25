@@ -13,7 +13,7 @@ using OnLoadedAttribute =
 #if UNITY_6000_5_OR_NEWER
     Unity.Scripting.LifecycleManagement.OnCodeLoadedAttribute;
 #else
-    UnityEngine.RuntimeInitializeOnLoadMethodAttribute
+    UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
 #endif  
 
 public partial class MainToolbarFPSLimit : MainToolbarCommonBase {  
