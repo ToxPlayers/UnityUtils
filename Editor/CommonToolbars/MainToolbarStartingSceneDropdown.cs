@@ -109,8 +109,12 @@ public partial class MainToolbarStartingSceneDropdown : MainToolbarCommonBase {
         EditorApplication.playModeStateChanged += EditorApplication_playModeStateChanged;
 
     }
-
-    [OnCodeInitializing] static void OnCodeLoaded() {
+#if UNITY_5_3_OR_NEWER
+    [RuntimeInitializeOnLoadMethod]
+#else
+    [OnCodeInitializing]
+#endif
+	static void OnCodeLoaded() {
         if (EditorPrefs.HasKey(EditorPrefBootSceneKey)) {
             SetPlaymodeScene(EditorPrefs.GetString(EditorPrefBootSceneKey), false);
         }
