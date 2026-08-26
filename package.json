@@ -2,7 +2,7 @@
   "name": "com.tox.unityutils",
   "displayName": "Tox Unity Utils",
   "description": "Utilities and Extensions for Unity",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "unity": "2020.3",
   "author": "Tox (https://github.com/ToxPlayers/UnityUtils)",
   "homepage": "https://github.com/ToxPlayers/UnityUtils",
