@@ -7,15 +7,15 @@ using UnityEditorInternal;
 using UnityEngine;
 
 [InitializeOnLoad]
-static public class LayersCodeGenerator
-{
-    static LayersCodeGenerator () { }
+static public class LayersCodeGenerator {
+    static LayersCodeGenerator() { }
     static private readonly string LayersFileName = @"Layers.cs";
 
     static readonly string NameReplacer = "<%name%>";
     static readonly string ValueReplacer = "<%value%>";
     static readonly string ClassTemplate =
-@"static public class Layers
+@"using System.Collections.Immutable;
+static public class Layers
 {
     static public bool ContainsLayer(int mask, int layer)
     {
@@ -29,7 +29,11 @@ $@"
     public const int {NameReplacer}Mask = 1 << {ValueReplacer};
 
 ";
-
+    static readonly string LayerInfoTemplate = $@"new LayerInfo(""{NameReplacer}"", {ValueReplacer})," + '\n';
+    static readonly string AllLayersTemplate =
+    $@"    static public readonly ImmutableArray<LayerInfo> AllLayers = ImmutableArray.Create(
+          {'\t' + LayerInfoTemplate}
+    );" + '\n';
 
     [MenuItem("Tools/Generate Layers Constants")]
     private static void Generate()
@@ -62,31 +66,41 @@ $@"
                 return path;
         }
         return Application.dataPath + $"/{LayersFileName}";
-    }
+    } 
 
+    static string SetLayerAndIdx(string template, string name, string value) {
+        return template.Replace(NameReplacer, name).Replace(ValueReplacer, value);
+    }
 
     static string GenerateCode()
     {
         var fieldsCode = "";
-        List<string> layersAdded = new List<string>();
+        List<LayerInfo> layersAdded = new List<LayerInfo>();
+        var allLayersFields = "";
         for (int i = 0; i < 32; i++)
         {
             var layerName = InternalEditorUtility.GetLayerName(i);
-            if (!string.IsNullOrEmpty(layerName))
+            if (string.IsNullOrEmpty(layerName))
+                continue; 
+            layerName = layerName.Replace(" ", "_");
+            if (layersAdded.Contains(new LayerInfo(layerName, i)))
             {
-                layerName = layerName.Replace(" ", "_");
-                if (layersAdded.Contains(layerName))
-                {
-                    Debug.LogError($"Multiple layers with the same name. ({layerName})");
-                    continue;
-                }
-
-                layersAdded.Add(layerName);
-                var layerCode = LayerIndexTemplate
-                 .Replace(NameReplacer, layerName).Replace(ValueReplacer, i.ToString());
-                fieldsCode += layerCode;
+                Debug.LogError($"Multiple layers with the same name. ({layerName})");
+                continue;
             }
-        } 
+
+            layersAdded.Add(new LayerInfo(layerName, i));
+            var layerCode = SetLayerAndIdx(LayerIndexTemplate, layerName, i.ToString());
+            fieldsCode += layerCode;
+
+            allLayersFields += '\n' + SetLayerAndIdx(LayerInfoTemplate, layerName, i.ToString());
+        }
+        var replaceLastCommaIdx = allLayersFields.LastIndexOf(',');
+        allLayersFields = allLayersFields.Remove(replaceLastCommaIdx, 1); 
+        var allLayerStr = AllLayersTemplate.Replace(LayerInfoTemplate, allLayersFields);
+        fieldsCode += allLayerStr;
+
+
         var index = ClassTemplate.Length - 3;
         return ClassTemplate.Insert(index, fieldsCode);
     } 
