@@ -25,17 +25,30 @@ public partial class MainToolbarStartingSceneDropdown : MainToolbarCommonBase {
     }
 
     const string NoBootSceneLabel = "[Current Scene]";
-    const string EditorPrefBootSceneKey = "MAIN_TOOL_BAR_PREF_BOOT_SCENE";
+    const string StartingSceneUserFilePath = "UserSettings/StartingSceneToolbar.txt";
     [MainToolbarElement(BootSceneSelectorElementName, defaultDockPosition = MainToolbarDockPosition.Left)]
-    public static MainToolbarElement CreateSceneSelectorDropdownForPlayMode() {
+    public static MainToolbarElement CreateStartingSceneSelectorDropdownForPlayMode() {
         var bootScene = EditorSceneManager.playModeStartScene;
         var bootSceneName = (bootScene ? bootScene.name : NoBootSceneLabel);
         var icon = EditorGUIUtility.IconContent("d_PlayButton").image as Texture2D;
         var content = new MainToolbarContent(bootSceneName, icon, "Select playMode scene");
         var bootDropdown = new MainToolbarDropdown(content,  (rect) => ShowDropdownMenu(rect, true));
         bootDropdown.displayed = !Application.isPlaying;
+        if (TryGetUserSettingStartingScene(out string scenePath)) {
+            SetPlaymodeScene(scenePath, false);
+        }
         return bootDropdown;
     }
+
+    static bool TryGetUserSettingStartingScene(out string scenePath) {
+        if (File.Exists(StartingSceneUserFilePath)) {
+            scenePath = File.ReadAllText(StartingSceneUserFilePath);
+            return true;
+        }
+        scenePath = null;
+        return false;
+    }
+
 
     static void ShowDropdownMenu(Rect dropDownRect, bool isSetPlaymode) {
         var menu = new GenericMenu();
@@ -53,16 +66,18 @@ public partial class MainToolbarStartingSceneDropdown : MainToolbarCommonBase {
 
         foreach (string scenePath in scenePaths) {
             string sceneName = Path.GetFileNameWithoutExtension(scenePath);
-            menu.AddItem(new GUIContent(sceneName), currentScenePath == scenePath, 
+            var scenePathTrimmed = scenePath.TrimEnd(sceneName);
+            var label = new GUIContent(sceneName);
+            menu.AddItem(label, currentScenePath == scenePath, 
                 () => { if(isSetPlaymode) { SetPlaymodeScene(scenePath); } else { SwitchScene(scenePath); } });
         }
-
+         
         menu.DropDown(dropDownRect);
     }
 
     static void SaveBootScenePreference(string scenePath) {
         scenePath ??= ""; 
-        EditorPrefs.SetString(EditorPrefBootSceneKey, scenePath);
+        File.WriteAllText(StartingSceneUserFilePath, scenePath);
     }
 
     static void SetPlaymodeScene(string scenePath, bool refresh = true) {
@@ -107,16 +122,15 @@ public partial class MainToolbarStartingSceneDropdown : MainToolbarCommonBase {
         SceneManager.activeSceneChanged += SceneSwitched;
         EditorSceneManager.activeSceneChangedInEditMode += SceneSwitched;
         EditorApplication.playModeStateChanged += EditorApplication_playModeStateChanged;
-
     }
 #if UNITY_5_3_OR_NEWER
-    [RuntimeInitializeOnLoadMethod]
-#else
     [OnCodeInitializing]
+#else
+    [RuntimeInitializeOnLoadMethod]
 #endif
-	static void OnCodeLoaded() {
-        if (EditorPrefs.HasKey(EditorPrefBootSceneKey)) {
-            SetPlaymodeScene(EditorPrefs.GetString(EditorPrefBootSceneKey), false);
+    static void OnCodeLoaded() {
+        if (TryGetUserSettingStartingScene(out string scenePath)) {
+            SetPlaymodeScene(scenePath, false);
         }
     }
 
