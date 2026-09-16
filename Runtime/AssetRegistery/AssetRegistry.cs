@@ -18,7 +18,8 @@ namespace Files
     {
         static public JsonConverter Converter => new UnityObjectJsonConverter<T>();
         public bool IsRegistryOfType(Type type) => typeof(T).IsAssignableFrom(type);
-        [OdinSerialize, ReadOnly] Dictionary<string, T> _assets = new();
+        [Serializable] class TDictionary : Dictionary<string, T> { }
+        [SerializeField, ReadOnly] TDictionary _assets = new();
         public IReadOnlyDictionary<string, T> Assets => _assets;
         public virtual string GetKeyAddress(T asset) => asset ? asset.name : null;
         public bool TryGetAsset(string address, out T asset) {

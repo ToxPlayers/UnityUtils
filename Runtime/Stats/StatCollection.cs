@@ -24,9 +24,10 @@ public class StatCollection<TEnum> : IEnumerable<(TEnum statName, StatValue stat
         Array.Copy(arr, values, arr.Length);
         EnumValues = new ReadOnlyCollection<TEnum>(values);
     }
-
+    [Serializable]
+    public class EnumDictionary : Dictionary<TEnum, StatValue> { }
     [SerializeField, ReadOnly]
-    Dictionary<TEnum, StatValue> _stats;
+    EnumDictionary _stats;
     [ShowInInspector]
     public IReadOnlyDictionary<TEnum, StatValue> Stats => _stats;
     public StatCollection()

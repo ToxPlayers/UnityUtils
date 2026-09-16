@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[System.Serializable]
 public class TwoWayDictionary<T1, T2> : IDictionary<T1, T2> 
 {
-    IDictionary<T1, T2> _a = new Dictionary<T1,T2>();
-    IDictionary<T2, T1> _b = new Dictionary<T2, T1>();
+    readonly IDictionary<T1, T2> _a = new Dictionary<T1,T2>();
+    readonly IDictionary<T2, T1> _b = new Dictionary<T2, T1>();
 
     public Dictionary<T1,T2> CopyDictionary() => new Dictionary<T1, T2>(_a); 
     public Dictionary<T2, T1> CopyReverseDictionary() => new Dictionary<T2, T1>(_b); 
