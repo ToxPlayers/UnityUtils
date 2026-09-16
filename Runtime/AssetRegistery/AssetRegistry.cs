@@ -21,6 +21,13 @@ namespace Files
         [OdinSerialize, ReadOnly] Dictionary<string, T> _assets = new();
         public IReadOnlyDictionary<string, T> Assets => _assets;
         public virtual string GetKeyAddress(T asset) => asset ? asset.name : null;
+        public bool TryGetAsset(string address, out T asset) {
+			if(string.IsNullOrEmpty(address)) {
+				asset = null;
+				return false;
+			}
+			return _assets.TryGetValue(address, out asset);
+		} 
         bool IsComponentType => typeof(Component).IsAssignableFrom(typeof(T));
         bool IsPrefab => typeof(GameObject).IsAssignableFrom(typeof(T));
         public virtual string SearchString
