@@ -150,7 +150,10 @@ static public class CExtensions
 
 		if (lst.GetType().IsArray)
 			throw new ArgumentException("Cannot use the SetLength extension method on an array. Use Array.Resize or the ListUtilities.SetLength(ref IList<T> list, int length) overload.");
-
+		
+		if (lst.Count == length)
+			return;
+		
 		while (lst.Count < length)
 			lst.Add(default);
 
