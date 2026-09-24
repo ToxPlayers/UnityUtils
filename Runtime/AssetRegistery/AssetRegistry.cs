@@ -52,7 +52,11 @@ namespace Files
         }
 
         public override void OnSingletonEnable() { }
-
+		protected virtual void OnDisable() {
+#if UNITY_EDITOR
+			EditorApplication.projectChanged -= ReregisterAllAssets;
+#endif
+		}
 #if UNITY_EDITOR
 
         [NonSerialized] bool _isHooked = false;
@@ -66,11 +70,8 @@ namespace Files
 		        EditorApplication.projectChanged += ReregisterAllAssets;
 		        ReregisterAllAssets();
 		    }
-		}
-
-		protected virtual void OnDisable() {
-		    EditorApplication.projectChanged -= ReregisterAllAssets;
-		}
+		} 
+		
         public virtual void OnValidate()
         {
             if (_assets == null || _assets.Count == 0)
