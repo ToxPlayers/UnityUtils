@@ -56,17 +56,21 @@ namespace Files
 #if UNITY_EDITOR
 
         [NonSerialized] bool _isHooked = false;
-        protected override void OnEditorPreloaded()
-        {
-            base.OnEditorPreloaded();
-            if (!_isHooked)
-            {
-                _isHooked = true;
-                EditorApplication.projectChanged += ReregisterAllAssets;
-                ReregisterAllAssets();
-            }
-        } 
+		protected override void OnEditorPreloaded()
+		{
+		    base.OnEditorPreloaded();
+		    if (!_isHooked)
+		    {
+		        _isHooked = true;
+		        EditorApplication.projectChanged -= ReregisterAllAssets;
+		        EditorApplication.projectChanged += ReregisterAllAssets;
+		        ReregisterAllAssets();
+		    }
+		}
 
+		protected virtual void OnDisable() {
+		    EditorApplication.projectChanged -= ReregisterAllAssets;
+		}
         public virtual void OnValidate()
         {
             if (_assets == null || _assets.Count == 0)
