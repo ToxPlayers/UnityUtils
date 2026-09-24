@@ -14,10 +14,11 @@ public abstract class ScriptableSingleton : SerializedScriptableObject
     static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
     bool _isSingletonStart;
 #if UNITY_EDITOR
-    static ScriptableSingleton()
-    {
-        EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
-    } 
+#if UNITY_6000_5_OR_NEWER
+    [OnCodeLoaded]
+#else
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+#endif 
     private static void SetAllSingletonsAsPreloaded()
     {
         var allSingletons = Resources.LoadAll(SingletonsResFolder).ToList();
