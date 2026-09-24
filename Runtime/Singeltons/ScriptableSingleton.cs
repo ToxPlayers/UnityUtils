@@ -16,7 +16,7 @@ public abstract partial class ScriptableSingleton : SerializedScriptableObject
     bool _isSingletonStart;
 #if UNITY_EDITOR
 #if UNITY_6000_5_OR_NEWER
-    [OnCodeLoaded]
+    [OnCodeInitializing]
 #else
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 #endif 
