@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 #if UNITY_EDITOR
