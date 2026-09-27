@@ -8,7 +8,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
-public abstract class ScriptableSingleton : SerializedScriptableObject
+public abstract class ScriptableSingleton : ScriptableObject
 {
     static public readonly string SingletonsResFolder = "Singletons";
     static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;

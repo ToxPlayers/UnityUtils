@@ -11,42 +11,47 @@ using UnityEditor;
 using UnityEngine;
 namespace Files
 {
-#if UNITY_EDITOR
-    [InitializeOnLoad]
-#endif
-    public abstract class AssetRegistry<T> : ScriptableSingleton<AssetRegistry<T>> where T : UnityEngine.Object
-    {
-        static public JsonConverter Converter => new UnityObjectJsonConverter<T>();
-        public bool IsRegistryOfType(Type type) => typeof(T).IsAssignableFrom(type);
-        [Serializable] class TDictionary : Dictionary<string, T> { }
-        [SerializeField, ReadOnly] TDictionary _assets = new();
-        public IReadOnlyDictionary<string, T> Assets => _assets;
-        public virtual string GetKeyAddress(T asset) => asset ? asset.name : null;
-        public bool TryGetAsset(string address, out T asset) {
-			if(string.IsNullOrEmpty(address)) {
+    public abstract class AssetRegistryNameBased<TAsset> : AssetRegistryBase<string, TAsset> where TAsset : UnityEngine.Object {
+        public override string GetKeyAddress(TAsset asset) => asset ? asset.name : null;
+    }
+    public abstract class AssetRegistryCustomKeyBased<TKey, TAsset>  : AssetRegistryBase<TKey, TAsset> where TAsset : UnityEngine.Object, IAssetRegister<TKey> {
+        public override TKey GetKeyAddress(TAsset asset) => asset ? asset.GetRegistryAddress() : default;
+    }
+    public interface IAssetRegister<TKey> : IEquatable<TKey> { 
+        public TKey GetRegistryAddress(); 
+    }
+    public abstract class AssetRegistryBase<TKey, TAsset> : ScriptableSingleton<AssetRegistryBase<TKey, TAsset>> where TAsset : UnityEngine.Object{
+        static public JsonConverter Converter => new AssetRegisteryJsonConverter<TKey, TAsset>();
+        public bool IsRegistryOfType(Type type) => typeof(TAsset).IsAssignableFrom(type);
+        [ShowInInspector, ReadOnly, InlineProperty]
+        protected abstract Dictionary<TKey, TAsset> _internalDictionary { get; set; }
+        public IReadOnlyDictionary<TKey, TAsset> Assets => _internalDictionary;
+        public abstract TKey GetKeyAddress(TAsset asset);
+        public bool TryGetAsset(TKey address, out TAsset asset) {
+			if(address == null || address.Equals(default(TKey))) {
 				asset = null;
 				return false;
 			}
-			return _assets.TryGetValue(address, out asset);
+			return _internalDictionary.TryGetValue(address, out asset);
 		} 
-        bool IsComponentType => typeof(Component).IsAssignableFrom(typeof(T));
-        bool IsPrefab => typeof(GameObject).IsAssignableFrom(typeof(T));
+        bool IsComponentType => typeof(Component).IsAssignableFrom(typeof(TAsset));
+        bool IsPrefab => typeof(GameObject).IsAssignableFrom(typeof(TAsset));
         public virtual string SearchString
         {
             get
             {
-                var t = typeof(T);
+                var t = typeof(TAsset);
                 var name = IsComponentType || IsPrefab ? "prefab" : t.FullName;
                 return "t:" + name;
             }
         } 
 
-        public virtual T Register(T asset)
+        public virtual TAsset Register(TAsset asset)
         {
             if (!asset)
                 return null;
             if (IsComponentType)
-                if (asset is GameObject prefab && prefab.TryGetComponent(out T comp))
+                if (asset is GameObject prefab && prefab.TryGetComponent(out TAsset comp))
                     return comp;
             return asset;
         }
@@ -54,7 +59,6 @@ namespace Files
         public override void OnSingletonEnable() { }
 
 #if UNITY_EDITOR
-
         [NonSerialized] bool _isHooked = false;
         protected override void OnEditorPreloaded()
         {
@@ -69,73 +73,82 @@ namespace Files
 
         public virtual void OnValidate()
         {
-            if (_assets == null || _assets.Count == 0)
+            if (_internalDictionary == null || _internalDictionary.Count == 0)
                 ReregisterAllAssets();
         } 
 
         public void ClearNulls()
         {
-            var toRemove = new List<string>();
-            foreach (var keyValue in _assets)
+            var toRemove = new List<TKey>();
+            foreach (var keyValue in _internalDictionary)
                 if (!keyValue.Value)
                     toRemove.Add(keyValue.Key);
             foreach (var key in toRemove)
-                _assets.Remove(key);
+                _internalDictionary.Remove(key);
         }
 
          [Button,PropertyOrder(-100)]
 		 public void ReregisterAllAssets()
-		 {
-			 _assets ??= new();
+		 { 
+			 _internalDictionary ??= new();
 			 ClearNulls();
 			 var guids = AssetDatabase.FindAssets(SearchString, new string[] { "Assets" });
-			 var values = new HashSet<T>(_assets.Values);
+			 var values = new HashSet<TAsset>(_internalDictionary.Values);
 			 foreach (var guid in guids)
 			 {
 				 var path = AssetDatabase.GUIDToAssetPath(guid);
-				 var asset = AssetDatabase.LoadAssetAtPath<T>(path);
-				 if (!asset)
+				 var enterAsset = AssetDatabase.LoadAssetAtPath<TAsset>(path);
+				 if (!enterAsset)
 					 continue;
-				 var keyAddress = GetKeyAddress(asset);
-				 if (values.Contains(asset))
+				 var keyAddress = GetKeyAddress(enterAsset);
+
+                 if(TryGetAsset(keyAddress, out TAsset existingAsset))
+                 {
+                     if (existingAsset.Equals(enterAsset))
+                         continue;  
+                 }
+
+				 if (values.Contains(enterAsset))
 				 {
-					 foreach (var k in _assets.Where(kv => kv.Value == asset && kv.Key != keyAddress).ToArray())
+					 foreach (var k in _internalDictionary.Where(kv => kv.Value.Equals(enterAsset) && kv.Key.Equals(keyAddress)).ToArray())
 					 {
-						 Debug.Log(name + ": Removed asset " + k.Value + " asset added under new key (" + GetKeyAddress(asset) + ")");
-						 _assets.Remove(k.Key);
+						 Debug.Log(name + ": Removed asset " + k.Value + " asset added under new key (" + keyAddress + ")");
+						 _internalDictionary.Remove(k.Key);
 					 }
 				 }
-				 TryRegister(asset, keyAddress); 
+
+				 if( ! TryRegister(keyAddress, enterAsset))
+					 Debug.LogError(name + $": Failed to register {enterAsset.name} to {GetType().Name}", enterAsset);
 			 }
 
 			 EditorUtility.SetDirty(this);
 		 }
-
-		 
-		 public void TryRegister(T asset)
+		 public bool TryRegister(TAsset asset)
 		 { 
 			 var address = GetKeyAddress(asset);
-			 TryRegister(asset, address);
+			 return TryRegister(address, asset);
 		 }
-		 public void TryRegister(T asset, string address)
+		 public bool TryRegister(TKey address, TAsset asset)
 		 {
-			 if (_assets.TryGetValue(address, out T containAsset))
+			 if (_internalDictionary.TryGetValue(address, out TAsset containAsset))
 			 {
 				 var containedAddress = GetKeyAddress(containAsset);
-				 if (containedAddress == address && containAsset == asset)
-					 return;
+				 if (containedAddress.Equals(address) && containAsset.Equals(asset))
+					 return false;
 				 var containedPath = AssetDatabase.GetAssetPath(containAsset);
-				 Debug.LogError(name + $": Cant register same asset name:\n{AssetDatabase.GetAssetPath(asset)}\nAlready Registered: {containedPath}\n", asset);
-			 }
-			 else
+				 Debug.LogError(name + $": Cant register same asset name:\n{AssetDatabase.GetAssetPath(asset)}\nAlready Registered:\n{containedPath}\n", asset);
+                return false;
+            } else
 			 {
 				 Debug.Log(name + $": {asset.name} Added to {GetType().Name}");
-				 _assets.TryAdd(address, asset);
-			 }
-		 }
-
-#endif
- 
+				 if(!_internalDictionary.TryAdd(address, asset)) {
+                    Debug.LogError(name + $": Failed to add {asset.name} to {GetType().Name}", asset);
+                    return false;
+                }
+                return true;
+            }
+		 } 
+#endif 
     }
 
 }
