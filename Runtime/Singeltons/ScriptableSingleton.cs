@@ -3,21 +3,25 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+#if UNITY_6000_5_OR_NEWER
+using Unity.Scripting.LifecycleManagement;
+#endif 
 using UnityEngine;
 
 #if UNITY_EDITOR
 [InitializeOnLoad]
-#endif
-public abstract class ScriptableSingleton : ScriptableObject
+#endif 
+public abstract class ScriptableSingleton : ScriptableObject 
 {
     static public readonly string SingletonsResFolder = "Singletons";
     static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
     bool _isSingletonStart;
 #if UNITY_EDITOR
-    static ScriptableSingleton()
-    {
-        EditorApplication.delayCall += SetAllSingletonsAsPreloaded;
-    } 
+#if UNITY_6000_5_OR_NEWER
+    [OnCodeInitializing]
+#else
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+#endif 
     private static void SetAllSingletonsAsPreloaded()
     {
         var allSingletons = Resources.LoadAll(SingletonsResFolder).ToList();

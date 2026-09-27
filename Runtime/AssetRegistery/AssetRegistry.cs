@@ -57,20 +57,25 @@ namespace Files
         }
 
         public override void OnSingletonEnable() { }
-
+		protected virtual void OnDisable() {
+#if UNITY_EDITOR
+			EditorApplication.projectChanged -= ReregisterAllAssets;
+#endif
+		}
 #if UNITY_EDITOR
         [NonSerialized] bool _isHooked = false;
-        protected override void OnEditorPreloaded()
-        {
-            base.OnEditorPreloaded();
-            if (!_isHooked)
-            {
-                _isHooked = true;
-                EditorApplication.projectChanged += ReregisterAllAssets;
-                ReregisterAllAssets();
-            }
-        } 
-
+		protected override void OnEditorPreloaded()
+		{
+		    base.OnEditorPreloaded();
+		    if (!_isHooked)
+		    {
+		        _isHooked = true;
+		        EditorApplication.projectChanged -= ReregisterAllAssets;
+		        EditorApplication.projectChanged += ReregisterAllAssets;
+		        ReregisterAllAssets();
+		    }
+		} 
+		
         public virtual void OnValidate()
         {
             if (_internalDictionary == null || _internalDictionary.Count == 0)
