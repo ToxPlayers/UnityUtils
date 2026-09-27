@@ -11,7 +11,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif 
-public abstract class ScriptableSingleton : ScriptableObject 
+public abstract partial class ScriptableSingleton : ScriptableObject 
 {
     static public readonly string SingletonsResFolder = "Singletons";
     static public readonly string AssetsSingletonsResFolder = "Assets/Resources/" + SingletonsResFolder;
