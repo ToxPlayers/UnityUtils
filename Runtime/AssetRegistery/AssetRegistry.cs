@@ -144,14 +144,14 @@ namespace Files
 				 Debug.LogError(name + $": Cant register same asset name:\n{AssetDatabase.GetAssetPath(asset)}\nAlready Registered:\n{containedPath}\n", asset);
                 return false;
             } else
-			 {
-				 Debug.Log(name + $": {asset.name} Added to {GetType().Name}");
-				 if(!_internalDictionary.TryAdd(address, asset)) {
-                    Debug.LogError(name + $": Failed to add {asset.name} to {GetType().Name}", asset);
-                    return false;
-                }
-                return true;
-            }
+			  {
+				 if(_internalDictionary.TryAdd(address, asset)) {
+			        Debug.Log(name + $": {asset.name} Added to {GetType().Name}");
+			        return false;
+			    }
+			    Debug.LogError(name + $": Failed to add {asset.name} to {GetType().Name}", asset);
+			    return true;
+			 }
 		 } 
 #endif 
     }
