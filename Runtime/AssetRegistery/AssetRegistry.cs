@@ -147,10 +147,10 @@ namespace Files
 			  {
 				 if(_internalDictionary.TryAdd(address, asset)) {
 			        Debug.Log(name + $": {asset.name} Added to {GetType().Name}");
-			        return false;
+			        return true;
 			    }
 			    Debug.LogError(name + $": Failed to add {asset.name} to {GetType().Name}", asset);
-			    return true;
+			    return false;
 			 }
 		 } 
 #endif 
