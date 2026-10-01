@@ -102,7 +102,6 @@ namespace Files {
             HashSet<TKey> checkedKeys = new(_internalDictionary.Count);
             var isCompType = IsComponentType;
             var typeName = typeof(TAsset).Name;
-            var componentGuid = isCompType ? AssetDatabase.FindAssets("t:MonoScript " + typeName).FirstOrDefault() : null; 
             foreach (var guid in guids) {
                 var enterAsset = AssetDatabase.LoadAssetByGUID<TAsset>(new GUID(guid));
                 if (!enterAsset)
