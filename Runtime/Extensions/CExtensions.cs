@@ -10,7 +10,10 @@ static public class CExtensions
 	const int INLINE = (int)MethodImplOptions.AggressiveInlining;
 
 	#region BitFlags
-
+    [MethodImpl(INLINE)]
+    static public bool HasSingleBitFlagSet(this int n) => !HasMultipleBitFlagSet(n) && n != 0; 
+    [MethodImpl(INLINE)]
+    static public bool HasMultipleBitFlagSet(this int n) => (n & (n - 1)) != 0; 
 	[MethodImpl(INLINE)]
 	static public uint UncheckedUINT(this int v) => unchecked((uint)v); 
     [MethodImpl(INLINE)]
