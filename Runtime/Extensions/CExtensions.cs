@@ -226,7 +226,7 @@ static public class CExtensions
         return str;
 	}  
 	[MethodImpl(INLINE)]
-	static public bool ValidIdx(this IList<T> lst, int index) {
+	static public bool ValidIdx<T>(this IList<T> lst, int index) {
 		return index >= 0 && index < lst.Count;
 	}
 	[MethodImpl(INLINE)]
