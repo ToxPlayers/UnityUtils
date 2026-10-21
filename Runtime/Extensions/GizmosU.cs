@@ -19,7 +19,7 @@ static public class GizmosU
     public static void DebugArrow(in Vector3 pos, in Vector3 direction, in Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
         Debug.DrawRay(pos, direction, color);
-        Arrow(false, pos, direction, color, arrowHeadLength, arrowHeadAngle);
+        Arrow(true, pos, direction, color, arrowHeadLength, arrowHeadAngle);
     } 
     static void Arrow(bool isDebug, Vector3 pos, Vector3 direction, in Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f)
     {
