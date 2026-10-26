@@ -24,6 +24,7 @@ namespace SingletonBehaviors
         private static T _instance = null;
         public static bool HasInstance => _instance; 
         public static Transform TF => Instance ? Instance.transform : null; 
+		public static bool TryGetInstanceRaw(out T instance) => instance = _instance; 
         public static T Instance
         { 
             private set
