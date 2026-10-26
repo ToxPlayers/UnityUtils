@@ -75,6 +75,7 @@ public abstract class ScriptableSingleton<T> : ScriptableSingleton where T : Scr
     static T _instance;
     public bool IsInstance => _instance == this;
     public bool HasInstance => _instance;
+    public static bool TryGetInstanceRaw(out T instance) => instance = _instance; 
     public static T Instance
     {
         get
