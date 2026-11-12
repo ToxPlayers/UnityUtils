@@ -21,7 +21,6 @@ using HideInEdit = TriInspector.HideInEditModeAttribute;
 [Serializable]
 public struct RealTimer
 { 
-    public bool UseInconsistentFrameTime;
     public float MaxTime;
     public float TimeStarted { get; private set; }
     public bool TimerOver => IsTimerOver(MaxTime);
@@ -35,17 +34,15 @@ public struct RealTimer
             return Mathf.FloorToInt(TimeRunning / MaxTime);
         }
     }
-    public float TimeSinceStartup => GetTimeSinceStartup(UseInconsistentFrameTime);
-    static public float GetTimeSinceStartup(bool useInconsistentFrameTime)
-    {
-        if (!UnityExtensions.IsOnUnityThread)
-            return 0f;
-        if (useInconsistentFrameTime)
+    public readonly float TimeSinceStartup {
+        get {
+            if (!UnityExtensions.IsOnUnityThread)
+                return 0f;
             return Time.realtimeSinceStartup;
-        return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
+        }
     } 
 
-    [ShowInInspector, HideInEdit] public float TimeRunning => TimeSinceStartup - TimeStarted;
+    [ShowInInspector, HideInEdit] public readonly float TimeRunning => TimeSinceStartup - TimeStarted;
     public float TimeLeft => TimeRunning - MaxTime;
     [ShowInInspector, HideInEdit] public float NormalizedTime
     {
@@ -81,12 +78,9 @@ public struct RealTimer
     /// Set <paramref name="setTimeOver"/> true in constructor
     /// </summary>
     /// <param name="maxTime"></param>
-    /// <param name="setTimeOver"></param>
-    /// <param name="useInconsistentFrameTime"></param>
-    public RealTimer(float maxTime, bool useInconsistentFrameTime = false)
+    public RealTimer(float maxTime)
     { 
-        MaxTime = maxTime;
-        UseInconsistentFrameTime = useInconsistentFrameTime;
+        MaxTime = maxTime; 
         TimeStarted = -maxTime*2; 
     } 
 }
