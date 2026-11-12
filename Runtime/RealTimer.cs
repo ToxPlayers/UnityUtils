@@ -40,7 +40,7 @@ public struct RealTimer
     {
         if (!UnityExtensions.IsOnUnityThread)
             return 0f;
-        if (useInconsistentFrameTime || UnityExtensions.IsOnUnityThread)
+        if (useInconsistentFrameTime)
             return Time.realtimeSinceStartup;
         return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
     } 
