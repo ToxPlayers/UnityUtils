@@ -36,13 +36,13 @@ public struct RealTimer
         }
     }
     public float TimeSinceStartup => GetTimeSinceStartup(UseInconsistentFrameTime);
-    static public float GetTimeSinceStartup(bool UseFrameTime)
+    static public float GetTimeSinceStartup(bool useInconsistentFrameTime)
     {
-        if (UseFrameTime)
-            return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
-        if(UnityExtensions.IsOnUnityThread)
+        if (!UnityExtensions.IsOnUnityThread)
+            return 0f;
+        if (useInconsistentFrameTime || UnityExtensions.IsOnUnityThread)
             return Time.realtimeSinceStartup;
-        return 0;
+        return Time.inFixedTimeStep ? Time.fixedUnscaledTime : Time.unscaledTime;
     } 
 
     [ShowInInspector, HideInEdit] public float TimeRunning => TimeSinceStartup - TimeStarted;
