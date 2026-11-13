@@ -458,6 +458,23 @@ static public class MathU
                 v3[i] = 0;
         return v3;
     }
+	static public void CriticalDamping(float mass,  out float spring, out float damper) {
+	    CriticalDamping(mass, 1f, 1f, out spring, out damper);
+	}
+	/// <summary>Computes spring stiffness and damper coefficient for a mass-spring-damper.</summary>
+	/// <param name="mass">Mass of the body.</param>
+	/// <param name="frequency">Natural frequency in Hz / cycles per second (0, 1, 2...; higher = stiffer/faster).</param>
+	/// <param name="dampingRatio">1 = critical, <1 underdamped (oscillates), >1 overdamped.</param>
+	static public void CriticalDamping(float mass, float frequency, float dampingRatio, out float spring, out float damper) {
+	    float omega = 2f * Mathf.PI * frequency;
+	    spring = mass * omega * omega;
+	    damper = 2f * dampingRatio * Mathf.Sqrt(mass * spring);
+	}
+	/// <summary>Same as the frequency overload, but derives frequency from an approximate settle time (seconds, ~2% criterion).</summary>
+	static public void CriticalDampingFromSettleTime(float mass, float settleTime, float dampingRatio, out float spring, out float damper) {
+	    float frequency = 4f / Mathf.Max(settleTime * Mathf.Max(dampingRatio, 0.0001f), 0.0001f) / (2f * Mathf.PI);
+	    CriticalDamping(mass, frequency, dampingRatio, out spring, out damper);
+	}
     static public JointDrive Multiplied(this JointDrive joint, float mult)
     {
         joint.positionDamper *= mult;
