@@ -470,6 +470,20 @@ static public class MathU
 	    spring = mass * omega * omega;
 	    damper = 2f * dampingRatio * Mathf.Sqrt(mass * spring);
 	}
+	/// <summary>Acceleration from position error and velocity: kp = force^2, kd = 2 * damping * force, clamped to +-maxAccel.</summary>
+	static public float CriticalDampingAcceleration(float error, float velocity, float force, float damping, float maxAccel = float.PositiveInfinity) {
+	    float kp = force * force;
+	    float kd = 2f * damping * force;
+	    float accel = kp * error - kd * velocity;
+	    return Mathf.Clamp(accel, -maxAccel, maxAccel);
+	}
+	
+	/// <summary>Vector version; the resulting acceleration magnitude is clamped to maxAccel.</summary>
+	static public Vector3 CriticalDampingAcceleration(Vector3 error, Vector3 velocity, float force, float damping, float maxAccel = float.PositiveInfinity) {
+	    float kp = force * force;
+	    float kd = 2f * damping * force;
+	    return Vector3.ClampMagnitude(kp * error - kd * velocity, maxAccel);
+	}
 	/// <summary>Same as the frequency overload, but derives frequency from an approximate settle time (seconds, ~2% criterion).</summary>
 	static public void CriticalDampingFromSettleTime(float mass, float settleTime, float dampingRatio, out float spring, out float damper) {
 	    float frequency = 4f / Mathf.Max(settleTime * Mathf.Max(dampingRatio, 0.0001f), 0.0001f) / (2f * Mathf.PI);
